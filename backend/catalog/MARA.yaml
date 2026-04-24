@@ -1,0 +1,26 @@
+name: MARA
+description: Dados gerais de materiais. Contém informações básicas de cada material cadastrado no SAP, independente de planta.
+module: MM
+fields:
+  - name: MATNR
+    type: CHAR(18)
+    description: Número do material (chave primária)
+  - name: MATKL
+    type: CHAR(9)
+    description: Grupo de materiais
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida base
+  - name: MTART
+    type: CHAR(4)
+    description: Tipo de material (ex ROH matéria prima, FERT produto acabado)
+  - name: ERSDA
+    type: DATE
+    description: Data de criação do registro
+relationships:
+  - table: MARC
+    join: MARA.MATNR = MARC.MATNR
+    description: Dados de material por planta
+  - table: MAKT
+    join: MARA.MATNR = MAKT.MATNR
+    description: Descrição do material por idioma
