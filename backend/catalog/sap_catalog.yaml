@@ -1,0 +1,1140 @@
+tables:
+- name: MARA
+  module: MM
+  category: master_data
+  description: 'Tabela mestre de materiais no SAP. Contém os dados gerais de cada
+    material cadastrado no sistema, independentemente de planta ou depósito.
+
+    '
+  business_context: 'Use quando a pergunta envolve cadastro de produto, tipo de material,
+    unidade de medida base, grupo de mercadorias ou peso do material. MARA tem um
+    registro por material — não registra quantidades nem movimentações.
+
+    '
+  grain: one row per material
+  primary_key: MATNR
+  fields:
+  - name: MATNR
+    type: CHAR(18)
+    description: Número do material. Chave primária.
+    business_label: Código do material / SKU
+  - name: MTART
+    type: CHAR(4)
+    description: 'Tipo de material: FERT=produto acabado, HALB=semiacabado, ROH=matéria-prima,
+      HAWA=mercadoria.'
+    business_label: Tipo de material
+    common_values:
+      FERT: Produto acabado
+      HALB: Produto semiacabado
+      ROH: Matéria-prima
+      HAWA: Mercadoria
+  - name: MATKL
+    type: CHAR(9)
+    description: Grupo de mercadorias. Classificação do material para fins fiscais.
+    business_label: Grupo de mercadorias
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida base do material.
+    business_label: Unidade de medida
+  example_questions:
+  - Quais materiais do tipo matéria-prima estão cadastrados?
+  - Quantos produtos acabados existem no sistema?
+  - Qual a unidade de medida do material X?
+  example_sql: 'SELECT MATNR, MTART, MATKL, MEINS
+
+    FROM MARA
+
+    WHERE MTART = ''FERT''
+
+    ORDER BY MATNR;
+
+    '
+- name: MSEG
+  module: MM
+  category: transaction_data
+  description: 'Tabela de movimentações de material. Cada linha representa um item
+    de um documento de movimentação — entrada, saída, transferência. O cabeçalho fica
+    em MKPF.
+
+    '
+  business_context: 'Use quando a pergunta envolve entradas de mercadoria, saídas
+    de estoque, transferências, consumos de produção, devoluções, ou rastreabilidade
+    de movimentos de um material específico.
+
+    '
+  grain: one row per item per material document
+  primary_key:
+  - MBLNR
+  - MJAHR
+  - ZEILE
+  fields:
+  - name: MBLNR
+    type: CHAR(10)
+    description: Número do documento de material.
+    business_label: Número do documento
+  - name: MJAHR
+    type: NUMC(4)
+    description: Ano do documento.
+    business_label: Ano do documento
+  - name: ZEILE
+    type: NUMC(4)
+    description: Linha dentro do documento.
+    business_label: Linha do documento
+  - name: BWART
+    type: CHAR(3)
+    description: 'Tipo de movimento: 101=entrada para pedido de compra, 201=consumo
+      centro de custo, 261=consumo produção, 601=saída para cliente.'
+    business_label: Tipo de movimento
+    common_values:
+      '101': Entrada de mercadoria para pedido de compra
+      '201': Consumo para centro de custo
+      '261': Consumo para ordem de produção
+      '601': Saída de mercadoria para entrega ao cliente
+  - name: MATNR
+    type: CHAR(18)
+    description: Material movimentado.
+    business_label: Código do material
+  - name: WERKS
+    type: CHAR(4)
+    description: Planta onde ocorreu a movimentação.
+    business_label: Planta
+  - name: MENGE
+    type: DEC(13,3)
+    description: Quantidade movimentada.
+    business_label: Quantidade movimentada
+  - name: DMBTR
+    type: DEC(13,2)
+    description: Valor total da movimentação em moeda local.
+    business_label: Valor do movimento
+  example_questions:
+  - Qual o volume total de entradas de material no último mês?
+  - Quais materiais tiveram saída para produção na semana passada?
+  - Qual o valor total de mercadorias recebidas por planta em 2026?
+  example_sql: "SELECT s.MATNR, SUM(s.MENGE) AS quantidade_total, SUM(s.DMBTR) AS\
+    \ valor_total\nFROM MSEG s\nJOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR\n\
+    WHERE s.BWART = '101'\n  AND h.BUDAT BETWEEN '20260301' AND '20260331'\nGROUP\
+    \ BY s.MATNR\nORDER BY valor_total DESC;\n"
+- name: VBRK
+  module: SD
+  category: transaction_data
+  description: 'Cabeçalho dos documentos de faturamento — notas fiscais de saída,
+    faturas, créditos e débitos. Cada linha é uma nota fiscal completa. Os itens ficam
+    em VBRP.
+
+    '
+  business_context: 'Use quando a pergunta envolve faturamento por período, notas
+    fiscais emitidas, receita bruta, valor de vendas por cliente, ou volume de documentos
+    emitidos. Para detalhes por produto, fazer JOIN com VBRP.
+
+    '
+  grain: one row per billing document
+  primary_key: VBELN
+  fields:
+  - name: VBELN
+    type: CHAR(10)
+    description: Número do documento de faturamento. Chave primária.
+    business_label: Número da nota fiscal
+  - name: FKART
+    type: CHAR(4)
+    description: 'Tipo do documento: F2=fatura padrão, G2=nota de crédito, RE=devolução.'
+    business_label: Tipo de faturamento
+    common_values:
+      F2: Fatura de cliente
+      G2: Nota de crédito
+      RE: Devolução
+  - name: FKDAT
+    type: DATS(8)
+    description: Data de emissão da nota fiscal. Formato YYYYMMDD.
+    business_label: Data de emissão
+  - name: KUNAG
+    type: CHAR(10)
+    description: Código do cliente pagador. Chave estrangeira para KNA1.
+    business_label: Código do cliente
+  - name: NETWR
+    type: DEC(15,2)
+    description: Valor líquido total da nota fiscal. Principal campo de receita.
+    business_label: Valor líquido
+  - name: WAERK
+    type: CUKY(5)
+    description: Moeda do documento.
+    business_label: Moeda
+  - name: VKORG
+    type: CHAR(4)
+    description: Organização de vendas.
+    business_label: Organização de vendas
+  - name: FKSTO
+    type: CHAR(1)
+    description: Indicador de cancelamento. X = cancelado.
+    business_label: Cancelado
+  example_questions:
+  - Quais notas fiscais foram emitidas em março de 2026?
+  - Qual o faturamento total por cliente no primeiro trimestre?
+  - Qual o faturamento mensal da organização de vendas 1000?
+  - Quantas notas fiscais foram canceladas no último mês?
+  example_sql: "SELECT VKORG, SUBSTR(FKDAT, 1, 6) AS ano_mes,\n       COUNT(VBELN)\
+    \ AS qtd_notas, SUM(NETWR) AS faturamento_total\nFROM VBRK\nWHERE FKDAT BETWEEN\
+    \ '20260101' AND '20261231'\n  AND FKART = 'F2'\n  AND (FKSTO IS NULL OR FKSTO\
+    \ <> 'X')\nGROUP BY VKORG, SUBSTR(FKDAT, 1, 6)\nORDER BY ano_mes;\n"
+- name: MARC
+  module: MM
+  category: master_data
+  description: 'Extensão da tabela MARA para o nível de planta. Cada linha representa
+    a configuração de um material em uma planta específica — parâmetros de planejamento,
+    tipo de abastecimento e dados de MRP (Material Requirements Planning). Um material
+    pode ter registros em múltiplas plantas.
+
+    '
+  business_context: 'Use esta tabela quando a pergunta envolve: estoque mínimo por
+    planta, tipo de abastecimento (produção própria vs compra), parâmetros de reposição,
+    ou dados de planejamento de materiais por planta.
+
+    '
+  grain: one row per material per plant
+  primary_key:
+  - MATNR
+  - WERKS
+  relationships:
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA contém os dados gerais do material
+  - table: MARD
+    type: one_to_many
+    join_key:
+    - MATNR
+    - WERKS
+    description: MARD detalha o estoque por depósito dentro desta planta
+  fields:
+  - name: MATNR
+    type: CHAR(18)
+    description: Número do material. Parte da chave primária.
+    business_label: Código do material
+    example: MAT-001
+  - name: WERKS
+    type: CHAR(4)
+    description: Planta. Parte da chave primária.
+    business_label: Planta
+    example: '1000'
+  - name: DISMM
+    type: CHAR(2)
+    description: Tipo de MRP. Define como o material é planejado.
+    business_label: Tipo de MRP
+    example: PD
+    common_values:
+      PD: MRP (planejamento por necessidades)
+      VB: Ponto de reposição manual
+      ND: Sem planejamento
+  - name: MINBE
+    type: DEC(13,3)
+    description: Estoque mínimo (ponto de reposição). Quando o estoque cai abaixo
+      deste valor, gera necessidade.
+    business_label: Estoque mínimo
+    example: '100.000'
+  - name: EISBE
+    type: DEC(13,3)
+    description: Estoque de segurança. Reserva que não deve ser consumida em condições
+      normais.
+    business_label: Estoque de segurança
+    example: '50.000'
+  - name: BESKZ
+    type: CHAR(1)
+    description: Tipo de abastecimento. E=produção própria, F=compra externa, X=ambos.
+    business_label: Tipo de abastecimento
+    example: F
+    common_values:
+      E: Produção própria
+      F: Compra externa
+      X: Produção própria e compra
+  - name: LGPRO
+    type: CHAR(4)
+    description: Depósito de fornecimento padrão para produção.
+    business_label: Depósito de produção
+    example: '0001'
+  example_questions:
+  - Quais materiais têm estoque abaixo do mínimo na planta 1000?
+  - Quais materiais são produzidos internamente na planta 2000?
+  - Qual o estoque de segurança do material X na planta Y?
+  example_sql: "-- Materiais com estoque abaixo do mínimo (requer join com MARD)\n\
+    SELECT\n    c.MATNR, c.WERKS, c.MINBE AS estoque_minimo,\n    SUM(d.LABST) AS\
+    \ estoque_atual\nFROM MARC c\nJOIN MARD d ON c.MATNR = d.MATNR AND c.WERKS = d.WERKS\n\
+    WHERE c.MINBE > 0\nGROUP BY c.MATNR, c.WERKS, c.MINBE\nHAVING SUM(d.LABST) < c.MINBE;\n"
+- name: MARD
+  module: MM
+  category: master_data
+  description: 'Tabela de posições de estoque por depósito. Armazena as quantidades
+    atuais de cada material em cada combinação planta/depósito. É a tabela de consulta
+    direta para saber "quanto tenho em estoque agora".
+
+    '
+  business_context: 'Use esta tabela para perguntas sobre quantidade em estoque atual
+    por depósito ou planta. Não registra histórico de movimentações — para isso use
+    MSEG. LABST é o campo principal: estoque disponível para uso livre.
+
+    '
+  grain: one row per material per plant per storage location
+  primary_key:
+  - MATNR
+  - WERKS
+  - LGORT
+  relationships:
+  - table: MARC
+    type: many_to_one
+    join_key:
+    - MATNR
+    - WERKS
+    description: MARC contém parâmetros de planejamento para este material/planta
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA contém a descrição e dados gerais do material
+  fields:
+  - name: MATNR
+    type: CHAR(18)
+    description: Número do material.
+    business_label: Código do material
+    example: MAT-001
+  - name: WERKS
+    type: CHAR(4)
+    description: Planta onde o estoque está localizado.
+    business_label: Planta
+    example: '1000'
+  - name: LGORT
+    type: CHAR(4)
+    description: Depósito (local de armazenagem) dentro da planta.
+    business_label: Depósito
+    example: '0001'
+  - name: LABST
+    type: DEC(13,3)
+    description: 'Estoque de livre utilização. Principal campo de estoque disponível
+      — quantidade que pode ser usada livremente para produção, vendas ou transferências.
+
+      '
+    business_label: Estoque disponível
+    example: '1250.000'
+  - name: EINME
+    type: UNIT(3)
+    description: Unidade de medida do estoque.
+    business_label: Unidade de medida
+    example: KG
+  - name: SPEME
+    type: DEC(13,3)
+    description: Estoque bloqueado (em inspeção de qualidade ou bloqueado administrativamente).
+    business_label: Estoque bloqueado
+    example: '50.000'
+  - name: UMLME
+    type: DEC(13,3)
+    description: Estoque em transferência (entre plantas ou depósitos, ainda em trânsito).
+    business_label: Estoque em transferência
+    example: '0.000'
+  example_questions:
+  - Qual o estoque atual do material X no depósito 0001?
+  - Quais materiais têm estoque zerado na planta 1000?
+  - Qual o estoque total de todos os produtos acabados?
+  example_sql: "-- Estoque atual por material com descrição\nSELECT\n    d.MATNR,\
+    \ k.MAKTX AS descricao,\n    d.WERKS, d.LGORT,\n    d.LABST AS estoque_livre,\n\
+    \    d.EINME AS unidade\nFROM MARD d\nJOIN MAKT k ON d.MATNR = k.MATNR AND k.SPRAS\
+    \ = 'PT'\nWHERE d.LABST > 0\nORDER BY d.MATNR, d.WERKS;\n"
+- name: MKPF
+  module: MM
+  category: transaction_data
+  description: 'Cabeçalho do documento de material. Cada linha representa um documento
+    de movimentação de estoque completo — com data, usuário e empresa. Os itens individuais
+    da movimentação ficam em MSEG. Toda query em MSEG que precisar de data ou usuário
+    requer JOIN com MKPF.
+
+    '
+  business_context: 'Use esta tabela principalmente em JOIN com MSEG para filtrar
+    movimentações por data de lançamento (BUDAT) ou data de documento (BLDAT). Raramente
+    é consultada sozinha — seu papel é fornecer o contexto temporal e organizacional
+    das movimentações registradas em MSEG.
+
+    '
+  grain: one row per material document
+  primary_key:
+  - MBLNR
+  - MJAHR
+  relationships:
+  - table: MSEG
+    type: one_to_many
+    join_key:
+    - MBLNR
+    - MJAHR
+    description: MSEG contém todos os itens deste documento de material
+  fields:
+  - name: MBLNR
+    type: CHAR(10)
+    description: Número do documento de material. Parte da chave primária.
+    business_label: Número do documento
+    example: '4900012345'
+  - name: MJAHR
+    type: NUMC(4)
+    description: Ano do documento. Parte da chave primária.
+    business_label: Ano
+    example: '2026'
+  - name: BUDAT
+    type: DATS(8)
+    description: Data de lançamento contábil. Data efetiva do impacto no estoque.
+      Formato YYYYMMDD.
+    business_label: Data de lançamento
+    example: '20260315'
+  - name: BLDAT
+    type: DATS(8)
+    description: 'Data do documento original (ex: data da nota fiscal do fornecedor).'
+    business_label: Data do documento
+    example: '20260314'
+  - name: USNAM
+    type: CHAR(12)
+    description: Nome do usuário SAP que criou o documento.
+    business_label: Usuário
+    example: JSILVA
+  - name: MANDT
+    type: CLNT(3)
+    description: Mandante SAP. Sempre filtrar pelo mandante correto em ambientes multi-mandante.
+    business_label: Mandante
+    example: '100'
+  example_questions:
+  - Quais documentos de movimentação foram lançados ontem?
+  - Qual usuário lançou mais documentos de estoque no mês?
+  example_sql: "-- Documentos de entrada de mercadoria por data\nSELECT h.MBLNR, h.BUDAT,\
+    \ h.USNAM, COUNT(s.ZEILE) AS qtd_itens\nFROM MKPF h\nJOIN MSEG s ON h.MBLNR =\
+    \ s.MBLNR AND h.MJAHR = s.MJAHR\nWHERE s.BWART = '101'\n  AND h.BUDAT BETWEEN\
+    \ '20260301' AND '20260331'\nGROUP BY h.MBLNR, h.BUDAT, h.USNAM\nORDER BY h.BUDAT\
+    \ DESC;\n"
+- name: EKKO
+  module: MM
+  category: transaction_data
+  description: 'Cabeçalho do pedido de compra (Purchase Order). Cada linha representa
+    um pedido de compra completo — com fornecedor, organização de compras, data e
+    valor total. Os itens individuais ficam em EKPO.
+
+    '
+  business_context: 'Use esta tabela para perguntas sobre: volume de pedidos de compra
+    por fornecedor ou período, status de pedidos, organização de compras responsável,
+    ou valor total comprometido. Para saber o que foi comprado (materiais), fazer
+    JOIN com EKPO.
+
+    '
+  grain: one row per purchase order
+  primary_key: EBELN
+  relationships:
+  - table: EKPO
+    type: one_to_many
+    join_key: EBELN
+    description: EKPO contém os itens (materiais) do pedido
+  - table: LFA1
+    type: many_to_one
+    join_key: LIFNR
+    description: LFA1 contém os dados cadastrais do fornecedor
+  fields:
+  - name: EBELN
+    type: CHAR(10)
+    description: Número do pedido de compra. Chave primária.
+    business_label: Número do pedido de compra
+    example: '4500012345'
+  - name: BSART
+    type: CHAR(4)
+    description: Tipo do pedido de compra.
+    business_label: Tipo do pedido
+    example: NB
+    common_values:
+      NB: Pedido de compra padrão
+      FO: Pedido de contrato
+      UB: Transferência entre plantas
+  - name: LIFNR
+    type: CHAR(10)
+    description: Número do fornecedor. Chave estrangeira para LFA1.
+    business_label: Código do fornecedor
+    example: '0000001234'
+  - name: EKORG
+    type: CHAR(4)
+    description: Organização de compras responsável pelo pedido.
+    business_label: Organização de compras
+    example: '1000'
+  - name: BEDAT
+    type: DATS(8)
+    description: Data de criação do pedido de compra. Formato YYYYMMDD.
+    business_label: Data do pedido
+    example: '20260310'
+  - name: WAERS
+    type: CUKY(5)
+    description: Moeda do pedido de compra.
+    business_label: Moeda
+    example: BRL
+  - name: KDATB
+    type: DATS(8)
+    description: Data de início de validade do pedido (para contratos).
+    business_label: Válido de
+    example: '20260101'
+  - name: KDATE
+    type: DATS(8)
+    description: Data de fim de validade do pedido (para contratos).
+    business_label: Válido até
+    example: '20261231'
+  example_questions:
+  - Quantos pedidos de compra foram criados este mês?
+  - Quais fornecedores têm mais pedidos de compra abertos?
+  - Qual o volume de compras por organização de compras em 2026?
+  example_sql: "-- Pedidos de compra por fornecedor em 2026\nSELECT\n    e.LIFNR,\
+    \ f.NAME1 AS fornecedor,\n    COUNT(e.EBELN) AS qtd_pedidos,\n    e.WAERS AS moeda\n\
+    FROM EKKO e\nJOIN LFA1 f ON e.LIFNR = f.LIFNR\nWHERE e.BEDAT BETWEEN '20260101'\
+    \ AND '20261231'\n  AND e.BSART = 'NB'\nGROUP BY e.LIFNR, f.NAME1, e.WAERS\nORDER\
+    \ BY qtd_pedidos DESC;\n"
+- name: EKPO
+  module: MM
+  category: transaction_data
+  description: 'Itens do pedido de compra. Cada linha representa um material (ou serviço)
+    dentro de um pedido de compra. Contém quantidade, preço unitário, data de entrega
+    prevista e status de recebimento. O cabeçalho do pedido fica em EKKO.
+
+    '
+  business_context: 'Use esta tabela quando a pergunta envolve: o que foi pedido (materiais
+    específicos), quantidades compradas, preços negociados, datas de entrega previstas,
+    ou status de recebimento de itens. Para saber se o material já chegou, cruzar
+    EKPO com MSEG pelo campo EBELN+EBELP.
+
+    '
+  grain: one row per item per purchase order
+  primary_key:
+  - EBELN
+  - EBELP
+  relationships:
+  - table: EKKO
+    type: many_to_one
+    join_key: EBELN
+    description: EKKO contém o cabeçalho do pedido (fornecedor, data, org. de compras)
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA contém a descrição e dados do material comprado
+  - table: MSEG
+    type: one_to_many
+    join_key:
+    - EBELN
+    - EBELP
+    description: MSEG registra as entradas de mercadoria que liquidam este item
+  fields:
+  - name: EBELN
+    type: CHAR(10)
+    description: Número do pedido de compra. Parte da chave primária.
+    business_label: Pedido de compra
+    example: '4500012345'
+  - name: EBELP
+    type: NUMC(5)
+    description: Número do item dentro do pedido. Parte da chave primária.
+    business_label: Item do pedido
+    example: '00010'
+  - name: MATNR
+    type: CHAR(18)
+    description: Material comprado neste item. Chave estrangeira para MARA.
+    business_label: Código do material
+    example: MAT-001
+  - name: WERKS
+    type: CHAR(4)
+    description: Planta destinatária do material.
+    business_label: Planta
+    example: '1000'
+  - name: MENGE
+    type: DEC(13,3)
+    description: Quantidade pedida neste item.
+    business_label: Quantidade pedida
+    example: '500.000'
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida da quantidade pedida.
+    business_label: Unidade de medida
+    example: KG
+  - name: NETPR
+    type: DEC(11,2)
+    description: Preço líquido unitário negociado para este item.
+    business_label: Preço unitário
+    example: '25.50'
+  - name: PEINH
+    type: DEC(5,0)
+    description: 'Unidade de preço (base para o preço — ex: preço por 100 unidades).'
+    business_label: Unidade de preço
+    example: '1'
+  - name: NETWR
+    type: DEC(13,2)
+    description: Valor líquido total do item (quantidade × preço).
+    business_label: Valor total do item
+    example: '12750.00'
+  - name: EINDT
+    type: DATS(8)
+    description: Data de entrega prevista para este item. Formato YYYYMMDD.
+    business_label: Data de entrega prevista
+    example: '20260320'
+  - name: ELIKZ
+    type: CHAR(1)
+    description: Indicador de entrega completa. X = entrega encerrada.
+    business_label: Entrega encerrada
+    example: X ou espaço
+  example_questions:
+  - Quais itens de pedido têm entrega prevista para esta semana?
+  - Qual o valor total comprado do material X em 2026?
+  - Quais pedidos ainda têm itens em aberto (não entregues)?
+  example_sql: "-- Itens de pedido com entrega pendente\nSELECT\n    p.EBELN, p.EBELP,\
+    \ p.MATNR, k.MAKTX AS descricao,\n    p.MENGE AS qtd_pedida, p.EINDT AS entrega_prevista,\n\
+    \    p.NETWR AS valor_total\nFROM EKPO p\nJOIN MAKT k ON p.MATNR = k.MATNR AND\
+    \ k.SPRAS = 'PT'\nWHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')\n  AND p.EINDT <=\
+    \ DATE('now', '+7 days')\nORDER BY p.EINDT;\n"
+- name: VBAK
+  module: SD
+  category: transaction_data
+  description: 'Cabeçalho do pedido de venda (Sales Order). Cada linha representa
+    um pedido de venda completo — com cliente, data, organização de vendas e valor
+    total. Os itens com os materiais vendidos ficam em VBAP.
+
+    '
+  business_context: 'Use esta tabela para perguntas sobre: volume de pedidos de venda
+    por cliente ou período, status de pedidos, canal de distribuição, ou valor total
+    em carteira. Para saber quais produtos foram pedidos, fazer JOIN com VBAP.
+
+    '
+  grain: one row per sales order
+  primary_key: VBELN
+  relationships:
+  - table: VBAP
+    type: one_to_many
+    join_key: VBELN
+    description: VBAP contém os itens (materiais) do pedido de venda
+  - table: KNA1
+    type: many_to_one
+    join_key: KUNNR
+    description: KNA1 contém os dados cadastrais do cliente
+  fields:
+  - name: VBELN
+    type: CHAR(10)
+    description: Número do pedido de venda. Chave primária.
+    business_label: Número do pedido de venda
+    example: '0000012345'
+  - name: AUART
+    type: CHAR(4)
+    description: Tipo do pedido de venda.
+    business_label: Tipo do pedido
+    example: ZOR
+    common_values:
+      ZOR: Pedido padrão
+      RE: Devolução
+      KR: Pedido de crédito
+  - name: KUNNR
+    type: CHAR(10)
+    description: Número do cliente solicitante. Chave estrangeira para KNA1.
+    business_label: Código do cliente
+    example: '0000012345'
+  - name: VKORG
+    type: CHAR(4)
+    description: Organização de vendas.
+    business_label: Organização de vendas
+    example: '1000'
+  - name: VTWEG
+    type: CHAR(2)
+    description: Canal de distribuição.
+    business_label: Canal de distribuição
+    example: '10'
+  - name: AUDAT
+    type: DATS(8)
+    description: Data de criação do pedido de venda. Formato YYYYMMDD.
+    business_label: Data do pedido
+    example: '20260310'
+  - name: NETWR
+    type: DEC(15,2)
+    description: Valor líquido total do pedido.
+    business_label: Valor do pedido
+    example: '85000.00'
+  - name: WAERK
+    type: CUKY(5)
+    description: Moeda do pedido de venda.
+    business_label: Moeda
+    example: BRL
+  example_questions:
+  - Quais clientes fizeram mais pedidos este mês?
+  - Qual o valor total em carteira de pedidos abertos?
+  - Quantos pedidos de venda foram criados por organização de vendas em 2026?
+  example_sql: "-- Pedidos de venda por cliente com valor total\nSELECT\n    v.KUNNR,\
+    \ c.NAME1 AS cliente,\n    COUNT(v.VBELN) AS qtd_pedidos,\n    SUM(v.NETWR) AS\
+    \ valor_total, v.WAERK\nFROM VBAK v\nJOIN KNA1 c ON v.KUNNR = c.KUNNR\nWHERE v.AUDAT\
+    \ BETWEEN '20260101' AND '20261231'\n  AND v.AUART = 'ZOR'\nGROUP BY v.KUNNR,\
+    \ c.NAME1, v.WAERK\nORDER BY valor_total DESC;\n"
+- name: VBAP
+  module: SD
+  category: transaction_data
+  description: 'Itens do pedido de venda. Cada linha representa um material vendido
+    dentro de um pedido de venda — com quantidade, preço, data de entrega e status.
+    O cabeçalho do pedido fica em VBAK.
+
+    '
+  business_context: 'Use esta tabela quando a pergunta envolve: quais produtos foram
+    vendidos, quantidade vendida por material, preço negociado por item, data de entrega
+    comprometida, ou status de faturamento do item. Para receita faturada, prefira
+    VBRK/VBRP — VBAP mostra o pedido, não necessariamente o que foi efetivamente faturado.
+
+    '
+  grain: one row per item per sales order
+  primary_key:
+  - VBELN
+  - POSNR
+  relationships:
+  - table: VBAK
+    type: many_to_one
+    join_key: VBELN
+    description: VBAK contém o cabeçalho do pedido (cliente, data, org. vendas)
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA contém descrição e dados do material vendido
+  - table: VBRP
+    type: one_to_many
+    join_key:
+    - VBELN
+    - POSNR
+    description: VBRP referencia este item nas notas fiscais emitidas
+  fields:
+  - name: VBELN
+    type: CHAR(10)
+    description: Número do pedido de venda. Parte da chave primária.
+    business_label: Pedido de venda
+    example: '0000012345'
+  - name: POSNR
+    type: NUMC(6)
+    description: Número do item dentro do pedido. Parte da chave primária.
+    business_label: Item do pedido
+    example: '000010'
+  - name: MATNR
+    type: CHAR(18)
+    description: Material vendido neste item. Chave estrangeira para MARA.
+    business_label: Código do material
+    example: MAT-001
+  - name: KWMENG
+    type: DEC(13,3)
+    description: Quantidade pedida pelo cliente.
+    business_label: Quantidade pedida
+    example: '100.000'
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida da quantidade.
+    business_label: Unidade de medida
+    example: UN
+  - name: NETPR
+    type: DEC(11,2)
+    description: Preço líquido unitário do item.
+    business_label: Preço unitário
+    example: '850.00'
+  - name: NETWR
+    type: DEC(15,2)
+    description: Valor líquido total do item.
+    business_label: Valor do item
+    example: '85000.00'
+  - name: EDATU
+    type: DATS(8)
+    description: Data de entrega confirmada para este item.
+    business_label: Data de entrega
+    example: '20260325'
+  - name: FKSTA
+    type: CHAR(1)
+    description: Status de faturamento do item. C = totalmente faturado.
+    business_label: Status de faturamento
+    example: C
+    common_values:
+      ' ': Não faturado
+      A: Parcialmente faturado
+      C: Totalmente faturado
+  example_questions:
+  - Quais os produtos mais vendidos (por quantidade) em março/2026?
+  - Quais itens de pedido ainda não foram faturados?
+  - Qual o valor total vendido do material X no trimestre?
+  example_sql: "-- Top 10 materiais mais vendidos por valor\nSELECT\n    p.MATNR,\
+    \ k.MAKTX AS descricao,\n    SUM(p.KWMENG) AS qtd_total,\n    SUM(p.NETWR) AS\
+    \ valor_total\nFROM VBAP p\nJOIN VBAK v ON p.VBELN = v.VBELN\nJOIN MAKT k ON p.MATNR\
+    \ = k.MATNR AND k.SPRAS = 'PT'\nWHERE v.AUDAT BETWEEN '20260101' AND '20260331'\n\
+    GROUP BY p.MATNR, k.MAKTX\nORDER BY valor_total DESC\nLIMIT 10;\n"
+- name: VBRP
+  module: SD
+  category: transaction_data
+  description: 'Itens do documento de faturamento (nota fiscal). Cada linha representa
+    um material faturado numa nota fiscal específica — com quantidade, valor e referência
+    ao pedido de venda de origem. O cabeçalho da nota fiscal fica em VBRK.
+
+    '
+  business_context: 'Use esta tabela quando a pergunta envolve: quais materiais foram
+    faturados, receita por produto, quantidade faturada por SKU, ou rastreabilidade
+    entre pedido de venda e nota fiscal. Para receita total (sem detalhamento por
+    produto), basta usar VBRK.
+
+    '
+  grain: one row per item per billing document
+  primary_key:
+  - VBELN
+  - POSNR
+  relationships:
+  - table: VBRK
+    type: many_to_one
+    join_key: VBELN
+    description: VBRK contém o cabeçalho da nota fiscal
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA contém descrição do material faturado
+  - table: VBAP
+    type: many_to_one
+    join_key:
+    - AUBEL
+    - AUPOS
+    description: VBAP é o item do pedido de venda que originou este faturamento
+  fields:
+  - name: VBELN
+    type: CHAR(10)
+    description: Número da nota fiscal. Parte da chave primária. Referencia VBRK.
+    business_label: Número da nota fiscal
+    example: '9000001234'
+  - name: POSNR
+    type: NUMC(6)
+    description: Número do item na nota fiscal.
+    business_label: Item da nota fiscal
+    example: '000010'
+  - name: MATNR
+    type: CHAR(18)
+    description: Material faturado. Chave estrangeira para MARA.
+    business_label: Código do material
+    example: MAT-001
+  - name: FKIMG
+    type: DEC(13,3)
+    description: Quantidade faturada neste item.
+    business_label: Quantidade faturada
+    example: '100.000'
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida da quantidade faturada.
+    business_label: Unidade de medida
+    example: UN
+  - name: NETWR
+    type: DEC(15,2)
+    description: Valor líquido do item faturado.
+    business_label: Valor do item
+    example: '85000.00'
+  - name: AUBEL
+    type: CHAR(10)
+    description: Número do pedido de venda de referência.
+    business_label: Pedido de venda de origem
+    example: '0000012345'
+  - name: AUPOS
+    type: NUMC(6)
+    description: Item do pedido de venda de referência.
+    business_label: Item do pedido de origem
+    example: '000010'
+  example_questions:
+  - Qual o faturamento por produto em março/2026?
+  - Quantas unidades do material X foram faturadas no trimestre?
+  - Quais materiais geraram mais receita no ano?
+  example_sql: "-- Faturamento por material no primeiro trimestre\nSELECT\n    p.MATNR,\
+    \ k.MAKTX AS descricao,\n    SUM(p.FKIMG) AS qtd_faturada,\n    SUM(p.NETWR) AS\
+    \ receita_total\nFROM VBRP p\nJOIN VBRK h ON p.VBELN = h.VBELN\nJOIN MAKT k ON\
+    \ p.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE h.FKDAT BETWEEN '20260101' AND '20260331'\n\
+    \  AND h.FKART = 'F2'\n  AND (h.FKSTO IS NULL OR h.FKSTO <> 'X')\nGROUP BY p.MATNR,\
+    \ k.MAKTX\nORDER BY receita_total DESC;\n"
+- name: KNA1
+  module: SD
+  category: master_data
+  description: 'Tabela mestre de clientes. Contém os dados gerais de cada cliente
+    cadastrado no SAP — nome, endereço, país e grupo de clientes. É a tabela de referência
+    para identificar clientes em pedidos de venda (VBAK) e notas fiscais (VBRK).
+
+    '
+  business_context: 'Use esta tabela para enriquecer queries de vendas e faturamento
+    com o nome do cliente. Raramente consultada sozinha — seu papel é fornecer NAME1
+    (nome do cliente) em JOINs com VBAK (pelo campo KUNNR) ou VBRK (pelo campo KUNAG).
+
+    '
+  grain: one row per customer
+  primary_key: KUNNR
+  relationships:
+  - table: VBAK
+    type: one_to_many
+    join_key: KUNNR
+    description: VBAK lista os pedidos de venda deste cliente
+  - table: VBRK
+    type: one_to_many
+    join_key: KUNAG
+    description: VBRK lista as notas fiscais emitidas para este cliente
+  fields:
+  - name: KUNNR
+    type: CHAR(10)
+    description: Número do cliente. Chave primária.
+    business_label: Código do cliente
+    example: '0000012345'
+  - name: NAME1
+    type: CHAR(35)
+    description: Nome principal do cliente.
+    business_label: Nome do cliente
+    example: Acme Distribuidora Ltda
+  - name: NAME2
+    type: CHAR(35)
+    description: Complemento do nome do cliente (quando necessário).
+    business_label: Nome complementar
+    example: Filial São Paulo
+  - name: LAND1
+    type: CHAR(3)
+    description: País do cliente. Código ISO.
+    business_label: País
+    example: BR
+  - name: ORT01
+    type: CHAR(35)
+    description: Cidade do cliente.
+    business_label: Cidade
+    example: São Paulo
+  - name: KTOKD
+    type: CHAR(4)
+    description: Grupo de contas do cliente. Define o tipo de cliente.
+    business_label: Grupo de contas
+    example: '0001'
+    common_values:
+      '0001': Cliente padrão
+      '0002': Consumidor final
+      CPD: Cliente único (sem cadastro fixo)
+  example_questions:
+  - Quais os 10 clientes com maior faturamento no ano?
+  - Quantos clientes ativos existem por estado?
+  example_sql: "-- Top clientes por faturamento\nSELECT\n    c.KUNNR, c.NAME1 AS cliente,\
+    \ c.ORT01 AS cidade,\n    SUM(v.NETWR) AS faturamento_total\nFROM KNA1 c\nJOIN\
+    \ VBRK v ON c.KUNNR = v.KUNAG\nWHERE v.FKDAT BETWEEN '20260101' AND '20261231'\n\
+    \  AND v.FKART = 'F2'\nGROUP BY c.KUNNR, c.NAME1, c.ORT01\nORDER BY faturamento_total\
+    \ DESC\nLIMIT 10;\n"
+- name: LFA1
+  module: MM
+  category: master_data
+  description: 'Tabela mestre de fornecedores. Contém os dados gerais de cada fornecedor
+    cadastrado — nome, país, cidade e grupo de contas. É a tabela de referência para
+    identificar fornecedores em pedidos de compra (EKKO).
+
+    '
+  business_context: 'Use esta tabela para enriquecer queries de compras com o nome
+    do fornecedor. Papel análogo a KNA1 para o lado das compras. JOIN principal: EKKO.LIFNR
+    = LFA1.LIFNR.
+
+    '
+  grain: one row per vendor
+  primary_key: LIFNR
+  relationships:
+  - table: EKKO
+    type: one_to_many
+    join_key: LIFNR
+    description: EKKO lista os pedidos de compra deste fornecedor
+  fields:
+  - name: LIFNR
+    type: CHAR(10)
+    description: Número do fornecedor. Chave primária.
+    business_label: Código do fornecedor
+    example: '0000001234'
+  - name: NAME1
+    type: CHAR(35)
+    description: Nome principal do fornecedor.
+    business_label: Nome do fornecedor
+    example: Aço Brasil S.A.
+  - name: LAND1
+    type: CHAR(3)
+    description: País do fornecedor. Código ISO.
+    business_label: País
+    example: BR
+  - name: ORT01
+    type: CHAR(35)
+    description: Cidade do fornecedor.
+    business_label: Cidade
+    example: Belo Horizonte
+  - name: KTOKK
+    type: CHAR(4)
+    description: Grupo de contas do fornecedor.
+    business_label: Grupo de contas
+    example: '0001'
+  example_questions:
+  - Quais fornecedores receberam mais pedidos de compra este ano?
+  - Qual o valor total comprado por fornecedor em 2026?
+  example_sql: "-- Volume de compras por fornecedor\nSELECT\n    f.LIFNR, f.NAME1\
+    \ AS fornecedor,\n    COUNT(e.EBELN) AS qtd_pedidos,\n    SUM(p.NETWR) AS valor_total_comprado\n\
+    FROM LFA1 f\nJOIN EKKO e ON f.LIFNR = e.LIFNR\nJOIN EKPO p ON e.EBELN = p.EBELN\n\
+    WHERE e.BEDAT BETWEEN '20260101' AND '20261231'\nGROUP BY f.LIFNR, f.NAME1\nORDER\
+    \ BY valor_total_comprado DESC;\n"
+- name: AFKO
+  module: PP
+  category: transaction_data
+  description: 'Cabeçalho da ordem de produção. Cada linha representa uma ordem de
+    produção — com material a produzir, quantidade, datas programadas e status. Os
+    itens (componentes a consumir) ficam em AFPO. É a tabela central do módulo PP
+    para rastreabilidade da produção.
+
+    '
+  business_context: 'Use esta tabela quando a pergunta envolve: ordens de produção
+    abertas ou encerradas, volume de produção planejado ou confirmado, datas de início/fim
+    de produção, ou status das ordens. Para saber os componentes consumidos na produção,
+    cruzar com MSEG pelo campo AUFNR.
+
+    '
+  grain: one row per production order
+  primary_key: AUFNR
+  relationships:
+  - table: AFPO
+    type: one_to_many
+    join_key: AUFNR
+    description: AFPO contém os itens (produtos a entregar) da ordem
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA descreve o material sendo produzido
+  - table: MSEG
+    type: one_to_many
+    join_key: AUFNR
+    description: MSEG registra os consumos de componentes e as entradas de produto
+      acabado
+  fields:
+  - name: AUFNR
+    type: CHAR(12)
+    description: Número da ordem de produção. Chave primária.
+    business_label: Número da ordem de produção
+    example: '000001234567'
+  - name: MATNR
+    type: CHAR(18)
+    description: Material a ser produzido nesta ordem.
+    business_label: Material produzido
+    example: PROD-001
+  - name: WERKS
+    type: CHAR(4)
+    description: Planta onde a produção ocorre.
+    business_label: Planta
+    example: '1000'
+  - name: GAMNG
+    type: DEC(13,3)
+    description: Quantidade total planejada para produção nesta ordem.
+    business_label: Quantidade planejada
+    example: '500.000'
+  - name: GMEIN
+    type: UNIT(3)
+    description: Unidade de medida da quantidade de produção.
+    business_label: Unidade de medida
+    example: UN
+  - name: GSTRS
+    type: DATS(8)
+    description: Data de início programada da ordem. Formato YYYYMMDD.
+    business_label: Início programado
+    example: '20260310'
+  - name: GLTRS
+    type: DATS(8)
+    description: Data de fim programada da ordem. Formato YYYYMMDD.
+    business_label: Fim programado
+    example: '20260320'
+  - name: GSTRI
+    type: DATS(8)
+    description: Data de início real da produção.
+    business_label: Início real
+    example: '20260311'
+  - name: GETRI
+    type: DATS(8)
+    description: Data de fim real da produção.
+    business_label: Fim real
+    example: '20260321'
+  - name: FTRMI
+    type: DATS(8)
+    description: Data de conclusão confirmada (quando a quantidade foi totalmente
+      confirmada).
+    business_label: Data de conclusão
+    example: '20260321'
+  - name: IGMNG
+    type: DEC(13,3)
+    description: Quantidade total confirmada (efetivamente produzida e lançada).
+    business_label: Quantidade produzida
+    example: '490.000'
+  - name: STSTPS
+    type: CHAR(8)
+    description: 'Status do sistema da ordem. Campo codificado com múltiplos status.
+      Verificar com função SAP STATUS_READ para leitura correta.
+
+      '
+    business_label: Status da ordem
+    note: Para filtrar por status use tabela JEST (status de objetos)
+  example_questions:
+  - Quantas ordens de produção estão abertas na planta 1000?
+  - Qual o volume planejado de produção para o próximo mês?
+  - Quais ordens de produção estão atrasadas (fim programado < hoje)?
+  - Qual a quantidade produzida do material X em 2026?
+  example_sql: "-- Ordens de produção com atraso\nSELECT\n    o.AUFNR, o.MATNR, k.MAKTX\
+    \ AS descricao,\n    o.GAMNG AS qtd_planejada, o.IGMNG AS qtd_produzida,\n   \
+    \ o.GSTRS AS inicio_programado, o.GLTRS AS fim_programado\nFROM AFKO o\nJOIN MAKT\
+    \ k ON o.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE o.GLTRS < DATE('now')\n  AND\
+    \ (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)\nORDER BY o.GLTRS;\n"
+- name: AFPO
+  module: PP
+  category: transaction_data
+  description: 'Itens da ordem de produção. Cada linha representa um item de entrega
+    de uma ordem — normalmente um produto acabado ou semiacabado a ser produzido e
+    entregue a um depósito. O cabeçalho da ordem fica em AFKO.
+
+    '
+  business_context: 'Use esta tabela em conjunto com AFKO quando precisar do depósito
+    de recebimento do produto acabado, da quantidade confirmada por item, ou do pedido
+    de venda que originou a ordem (campo KDAUF). A maioria das perguntas de produção
+    pode ser respondida apenas com AFKO — use AFPO quando precisar do nível de detalhe
+    por item de entrega.
+
+    '
+  grain: one row per item per production order
+  primary_key:
+  - AUFNR
+  - POSNR
+  relationships:
+  - table: AFKO
+    type: many_to_one
+    join_key: AUFNR
+    description: AFKO contém o cabeçalho da ordem de produção
+  - table: MARA
+    type: many_to_one
+    join_key: MATNR
+    description: MARA descreve o material produzido neste item
+  fields:
+  - name: AUFNR
+    type: CHAR(12)
+    description: Número da ordem de produção. Parte da chave primária.
+    business_label: Ordem de produção
+    example: '000001234567'
+  - name: POSNR
+    type: NUMC(4)
+    description: Número do item dentro da ordem.
+    business_label: Item da ordem
+    example: '0001'
+  - name: MATNR
+    type: CHAR(18)
+    description: Material produzido neste item.
+    business_label: Código do material
+    example: PROD-001
+  - name: LGORT
+    type: CHAR(4)
+    description: Depósito de recebimento do produto acabado.
+    business_label: Depósito de recebimento
+    example: '0001'
+  - name: PSMNG
+    type: DEC(13,3)
+    description: Quantidade planejada para este item de entrega.
+    business_label: Quantidade planejada
+    example: '500.000'
+  - name: WEMNG
+    type: DEC(13,3)
+    description: Quantidade efetivamente confirmada (entrada de produto acabado no
+      estoque).
+    business_label: Quantidade confirmada
+    example: '490.000'
+  - name: MEINS
+    type: UNIT(3)
+    description: Unidade de medida da quantidade.
+    business_label: Unidade de medida
+    example: UN
+  - name: KDAUF
+    type: CHAR(10)
+    description: Pedido de venda que originou esta ordem de produção (produção sob
+      encomenda).
+    business_label: Pedido de venda de origem
+    example: '0000012345'
+  example_questions:
+  - Qual a quantidade confirmada de produto acabado por ordem de produção?
+  - Quais ordens foram produzidas para o pedido de venda X?
+  example_sql: "-- Quantidade produzida vs planejada por material\nSELECT\n    p.MATNR,\
+    \ k.MAKTX AS descricao,\n    SUM(p.PSMNG) AS qtd_planejada,\n    SUM(p.WEMNG)\
+    \ AS qtd_confirmada,\n    p.MEINS AS unidade\nFROM AFPO p\nJOIN AFKO o ON p.AUFNR\
+    \ = o.AUFNR\nJOIN MAKT k ON p.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE o.GSTRS\
+    \ BETWEEN '20260101' AND '20260331'\nGROUP BY p.MATNR, k.MAKTX, p.MEINS\nORDER\
+    \ BY qtd_confirmada DESC;"
