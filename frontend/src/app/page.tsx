@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { QueryInput } from "@/components/dashboard/QueryInput";
 import { AnalysisPanel } from "@/components/analysis/AnalysisPanel";
@@ -10,9 +11,16 @@ import { Leaf } from "lucide-react";
 import type { QueryHistoryItem } from "@/types";
 
 export default function HomePage() {
-  const { status, result, history, runAnalysis } = useAnalysis();
+  const { status, result, errorMessage, history, runAnalysis } = useAnalysis();
+  const [lastQuestion, setLastQuestion] = useState<string>("");
+
+  const handleSubmit = (q: string) => {
+    setLastQuestion(q);
+    runAnalysis(q);
+  };
 
   const handleHistorySelect = (item: QueryHistoryItem) => {
+    setLastQuestion(item.question);
     runAnalysis(item.question);
   };
 
@@ -54,14 +62,19 @@ export default function HomePage() {
           {/* Query input */}
           <div className={status !== "idle" ? "mb-8" : ""}>
             <QueryInput
-              onSubmit={runAnalysis}
+              onSubmit={handleSubmit}
               isLoading={status === "loading"}
               suggestions={suggestionPrompts}
             />
           </div>
 
           {/* Results panel */}
-          <AnalysisPanel status={status} result={result} />
+          <AnalysisPanel
+            status={status}
+            result={result}
+            errorMessage={errorMessage}
+            onRetry={() => lastQuestion && runAnalysis(lastQuestion)}
+          />
         </div>
       </main>
     </div>

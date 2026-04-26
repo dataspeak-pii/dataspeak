@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { GeneratedScript } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Copy, CheckCheck, Info, Rows } from "lucide-react";
 import { Button } from "@/components/ui/button";
