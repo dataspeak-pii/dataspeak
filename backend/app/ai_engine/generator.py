@@ -17,10 +17,6 @@ DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
 
 
 def build_system_prompt() -> str:
-    """
-    Instrução estática do sistema.
-    Define quem o LLM é e como ele deve se comportar.
-    """
     return """Você é um especialista em SAP e SQL, responsável por transformar
 perguntas de negócio em linguagem natural em queries SQL precisas.
 
@@ -30,6 +26,7 @@ Regras obrigatórias:
 3. Inclua comentários no SQL explicando cada cláusula principal.
 4. Se a pergunta for ambígua, escolha a interpretação mais conservadora.
 5. Após o SQL, forneça uma explicação em português simples do que a query faz.
+6. Retorne SOMENTE o objeto JSON puro. Não use blocos de código markdown (```), não escreva texto antes ou depois do JSON.
 
 Formato de resposta OBRIGATÓRIO (JSON):
 {
@@ -127,8 +124,10 @@ async def generate_sql(
 ) -> dict:
     """
     Função principal do motor de IA.
-    
-    Recebe a pergunta → recupera tabelas → monta prompt → chama LLM → retorna resultado.
+
+    Pipeline: pergunta → RAG → prompt → LLM → JSON estruturado.
+    Inclui fallback robusto para quando o LLM ignora o response_format
+    e retorna o JSON envolto em markdown ou com texto adicional.
 
     Args:
         question: Pergunta em linguagem natural
@@ -136,8 +135,11 @@ async def generate_sql(
         n_tables: Número de tabelas SAP a incluir no contexto
 
     Returns:
-        Dict com sql, explanation, tables_used, confidence, assumptions
+        Dict com sql, explanation, tables_used, confidence, assumptions,
+        model_used, question, retrieved_tables
     """
+    import re
+
     # 1. Recupera tabelas relevantes via RAG
     relevant_tables = retrieve_relevant_tables(question, n_results=n_tables)
 
@@ -148,8 +150,22 @@ async def generate_sql(
     # 3. Chama o OpenRouter
     raw_response = await call_openrouter(system_prompt, user_prompt, model)
 
-    # 4. Parseia o JSON da resposta
-    result = json.loads(raw_response)
+    # 4. Parseia o JSON com fallback em cascata
+    try:
+        result = json.loads(raw_response)
+    except json.JSONDecodeError:
+        # Fallback 1: extrai JSON de bloco markdown ```json ... ```
+        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw_response, re.DOTALL)
+        if match:
+            result = json.loads(match.group(1))
+        else:
+            # Fallback 2: pega tudo entre o primeiro { e o último }
+            start = raw_response.find("{")
+            end = raw_response.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                result = json.loads(raw_response[start:end + 1])
+            else:
+                raise
 
     # 5. Adiciona metadados úteis
     result["model_used"] = model
