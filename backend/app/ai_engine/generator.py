@@ -1,18 +1,17 @@
 """
 Monta o prompt com metadados SAP e chama o OpenRouter para gerar
-SQL + explicação em linguagem natural.
+SQL + explicação + interpretação analítica (intent, category, period).
 """
 
 import os
+import re
 import json
 import httpx
-from typing import Optional
 from .retriever import retrieve_relevant_tables
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Modelo padrão — pode ser trocado via parâmetro para comparação de LLMs
 DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
 
 
@@ -26,23 +25,21 @@ Regras obrigatórias:
 3. Inclua comentários no SQL explicando cada cláusula principal.
 4. Se a pergunta for ambígua, escolha a interpretação mais conservadora.
 5. Após o SQL, forneça uma explicação em português simples do que a query faz.
-6. Retorne SOMENTE o objeto JSON puro. Não use blocos de código markdown (```), não escreva texto antes ou depois do JSON.
 
-Formato de resposta OBRIGATÓRIO (JSON):
+Formato de resposta OBRIGATÓRIO (JSON puro, sem blocos markdown):
 {
+  "intent": "Frase curta descrevendo o objetivo analítico da pergunta. Ex: Analisar volume de entradas de estoque por material.",
+  "category": "Uma das opções: Produção | Vendas | Estoque | Financeiro | Compras | Cadastro",
+  "period": "Período extraído ou inferido da pergunta. Ex: Março 2026 | Últimos 90 dias | 1º trimestre 2026 | Não especificado",
   "sql": "SELECT ... FROM ... WHERE ...",
   "explanation": "Esta consulta busca...",
   "tables_used": ["TABELA1", "TABELA2"],
-  "confidence": "high|medium|low",
+  "confidence": "high | medium | low",
   "assumptions": ["lista de premissas feitas, se houver"]
 }"""
 
 
 def build_user_prompt(question: str, tables: list[dict]) -> str:
-    """
-    Monta o prompt dinâmico com o contexto das tabelas SAP
-    e a pergunta do usuário.
-    """
     context_parts = []
 
     for table in tables:
@@ -52,17 +49,17 @@ def build_user_prompt(question: str, tables: list[dict]) -> str:
         if table.get("business_context"):
             table_section.append(f"Contexto: {table['business_context']}")
 
-        # Campos da tabela
         if table.get("fields"):
             table_section.append("Campos disponíveis:")
             for field in table["fields"]:
                 field_line = f"  - {field['name']} ({field.get('type', '')}): {field.get('description', '')}"
                 if field.get("common_values"):
-                    vals = ", ".join([f"{k}={v}" for k, v in list(field["common_values"].items())[:4]])
+                    vals = ", ".join(
+                        [f"{k}={v}" for k, v in list(field["common_values"].items())[:4]]
+                    )
                     field_line += f"\n      Valores comuns: {vals}"
                 table_section.append(field_line)
 
-        # Exemplo de SQL se disponível
         if table.get("example_sql"):
             table_section.append(f"Exemplo de uso:\n```sql\n{table['example_sql']}\n```")
 
@@ -80,7 +77,28 @@ def build_user_prompt(question: str, tables: list[dict]) -> str:
 
 {question}
 
-Gere o SQL e a explicação conforme as regras e formato definidos."""
+Gere o JSON completo conforme as regras e formato definidos. Responda APENAS com o JSON, sem texto adicional."""
+
+
+def extract_json(raw: str) -> dict:
+    """
+    Extrai JSON da resposta do LLM com 3 estratégias em cascata:
+    1. Bloco markdown ```json ... ```
+    2. Primeiro { ao último }
+    3. Re-raise se nenhuma funcionar
+    """
+    # Estratégia 1: bloco markdown
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
+    if match:
+        return json.loads(match.group(1))
+
+    # Estratégia 2: primeiro { ao último }
+    start = raw.find("{")
+    end = raw.rfind("}") + 1
+    if start != -1 and end > start:
+        return json.loads(raw[start:end])
+
+    raise ValueError(f"Não foi possível extrair JSON da resposta: {raw[:200]}")
 
 
 async def call_openrouter(
@@ -88,14 +106,10 @@ async def call_openrouter(
     user_prompt: str,
     model: str = DEFAULT_MODEL,
 ) -> str:
-    """
-    Faz a chamada HTTP para o OpenRouter.
-    Retorna o conteúdo da resposta como string.
-    """
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://dataspeak.app",  # identificação para o OpenRouter
+        "HTTP-Referer": "https://dataspeak.app",
         "X-Title": "DataSpeak",
     }
 
@@ -105,8 +119,7 @@ async def call_openrouter(
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        "temperature": 0.1,  # baixo = mais determinístico = melhor para SQL
-        "response_format": {"type": "json_object"},  # força JSON na resposta
+        "temperature": 0.1,
     }
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -123,53 +136,31 @@ async def generate_sql(
     n_tables: int = 3,
 ) -> dict:
     """
-    Função principal do motor de IA.
-
-    Pipeline: pergunta → RAG → prompt → LLM → JSON estruturado.
-    Inclui fallback robusto para quando o LLM ignora o response_format
-    e retorna o JSON envolto em markdown ou com texto adicional.
-
-    Args:
-        question: Pergunta em linguagem natural
-        model: Modelo do OpenRouter a usar (permite comparação entre LLMs)
-        n_tables: Número de tabelas SAP a incluir no contexto
-
-    Returns:
-        Dict com sql, explanation, tables_used, confidence, assumptions,
-        model_used, question, retrieved_tables
+    Recebe pergunta → recupera tabelas → monta prompt → chama LLM → retorna resultado.
+    Retorna todos os campos do Bloco A (sql, explanation, tables_used, confidence, assumptions)
+    e Bloco B (intent, category, period).
     """
-    import re
-
-    # 1. Recupera tabelas relevantes via RAG
+    # 1. RAG — recupera tabelas relevantes
     relevant_tables = retrieve_relevant_tables(question, n_results=n_tables)
 
-    # 2. Monta os prompts
+    # 2. Monta prompts
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(question, relevant_tables)
 
-    # 3. Chama o OpenRouter
+    # 3. Chama OpenRouter
     raw_response = await call_openrouter(system_prompt, user_prompt, model)
 
-    # 4. Parseia o JSON com fallback em cascata
-    try:
-        result = json.loads(raw_response)
-    except json.JSONDecodeError:
-        # Fallback 1: extrai JSON de bloco markdown ```json ... ```
-        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw_response, re.DOTALL)
-        if match:
-            result = json.loads(match.group(1))
-        else:
-            # Fallback 2: pega tudo entre o primeiro { e o último }
-            start = raw_response.find("{")
-            end = raw_response.rfind("}")
-            if start != -1 and end != -1 and end > start:
-                result = json.loads(raw_response[start:end + 1])
-            else:
-                raise
+    # 4. Extrai JSON com fallback
+    result = extract_json(raw_response)
 
-    # 5. Adiciona metadados úteis
+    # 5. Metadados adicionais
     result["model_used"] = model
     result["question"] = question
     result["retrieved_tables"] = [t["name"] for t in relevant_tables]
+
+    # 6. Garante que os campos do Bloco B existem (defensivo)
+    result.setdefault("intent", None)
+    result.setdefault("category", None)
+    result.setdefault("period", None)
 
     return result

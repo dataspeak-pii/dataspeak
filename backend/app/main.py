@@ -3,7 +3,7 @@ load_dotenv()
 
 import time
 import json
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,8 +38,11 @@ class QueryResponse(BaseModel):
     retrieved_tables: list[str]
     confidence: str
     assumptions: list[str]
+    intent: Optional[str] = None
+    category: Optional[str] = None
+    period: Optional[str] = None
     model_used: str
-    results: list[dict[str, Any]]
+    results: list[dict[str, Any]]  # vazio no MVP atual; preenchido quando Chat 07 integrar SQLite
     duration_ms: int
 
 
@@ -93,6 +96,9 @@ async def query(req: QueryRequest):
         retrieved_tables=result.get("retrieved_tables", []),
         confidence=result.get("confidence", "medium"),
         assumptions=result.get("assumptions", []),
+        intent=result.get("intent"),
+        category=result.get("category"),
+        period=result.get("period"),
         model_used=result["model_used"],
         results=[],  # placeholder até Chat 07 (execução no SQLite)
         duration_ms=duration_ms,
