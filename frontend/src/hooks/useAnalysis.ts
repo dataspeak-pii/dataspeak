@@ -30,7 +30,7 @@ export function useAnalysis() {
           question,
           timestamp: new Date(),
           status: "done",
-          category: analysisResult.interpretation.category,
+          category: analysisResult.interpretation.category ?? "Análise",
         },
         ...prev,
       ]);

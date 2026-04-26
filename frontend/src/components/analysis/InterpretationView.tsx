@@ -45,26 +45,32 @@ export function InterpretationView({ data }: InterpretationViewProps) {
           </div>
 
           {/* Intent */}
-          <div>
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
-              Intenção identificada
-            </p>
-            <div className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-gray-700">{data.intent}</p>
+          {data.intent && (
+            <div>
+              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
+                Intenção identificada
+              </p>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">{data.intent}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Meta row */}
           <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-              <Target className="w-3.5 h-3.5 text-gray-400" />
-              <span className="font-medium">{data.category}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-              <Calendar className="w-3.5 h-3.5 text-gray-400" />
-              <span>{data.period}</span>
-            </div>
+            {data.category && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                <Target className="w-3.5 h-3.5 text-gray-400" />
+                <span className="font-medium">{data.category}</span>
+              </div>
+            )}
+            {data.period && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                <span>{data.period}</span>
+              </div>
+            )}
             <div className="ml-auto flex items-center gap-1.5">
               <span className="text-[11px] text-gray-400">Confiança</span>
               <div className="flex items-center gap-1">
@@ -102,48 +108,50 @@ export function InterpretationView({ data }: InterpretationViewProps) {
             ))}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo</th>
-                  <th className="text-left py-2 px-3 text-gray-400 font-medium">Tabela SAP</th>
-                  <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo SAP</th>
-                  <th className="text-left py-2 px-3 text-gray-400 font-medium">Tipo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.fields.map((f, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="py-2.5 px-3 text-gray-700 font-medium">{f.name}</td>
-                    <td className="py-2.5 px-3">
-                      <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                        {f.sapTable}
-                      </code>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                        {f.sapField}
-                      </code>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded-full text-[10px] font-medium border",
-                          fieldTypeStyle[f.type]
-                        )}
-                      >
-                        {fieldTypeLabel[f.type]}
-                      </span>
-                    </td>
+          {data.fields.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo</th>
+                    <th className="text-left py-2 px-3 text-gray-400 font-medium">Tabela SAP</th>
+                    <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo SAP</th>
+                    <th className="text-left py-2 px-3 text-gray-400 font-medium">Tipo</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {data.fields.map((f, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="py-2.5 px-3 text-gray-700 font-medium">{f.name}</td>
+                      <td className="py-2.5 px-3">
+                        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                          {f.sapTable}
+                        </code>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                          {f.sapField}
+                        </code>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span
+                          className={cn(
+                            "px-2 py-0.5 rounded-full text-[10px] font-medium border",
+                            fieldTypeStyle[f.type]
+                          )}
+                        >
+                          {fieldTypeLabel[f.type]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

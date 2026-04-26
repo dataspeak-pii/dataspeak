@@ -82,10 +82,10 @@ export function adaptQueryResponse(
 ): AnalysisResult {
   const interpretation: AnalysisInterpretation = {
     originalQuestion: question,
-    intent: res.intent ?? "Interpretação enriquecida ainda não disponível.",
+    intent: res.intent,
     confidence: confidenceToNumber(res.confidence),
-    category: res.category ?? "Análise",
-    period: res.period ?? "Não especificado",
+    category: res.category,
+    period: res.period,
     fields: (res.fields ?? []).map(mapApiFieldToInterpretedField),
     sapTables: res.tables_used,
   };
@@ -108,7 +108,7 @@ export function adaptQueryResponse(
       question,
       timestamp: new Date(),
       status: "done",
-      category: interpretation.category,
+      category: interpretation.category ?? "Análise",
     },
     interpretation,
     script,

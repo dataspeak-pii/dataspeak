@@ -19,10 +19,10 @@ export interface InterpretedField {
 
 export interface AnalysisInterpretation {
   originalQuestion: string;
-  intent: string;
+  intent?: string;
   confidence: number; // 0-100
-  category: string;
-  period: string;
+  category?: string;
+  period?: string;
   fields: InterpretedField[];
   sapTables: string[];
 }

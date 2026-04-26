@@ -69,13 +69,15 @@ export function ScriptView({ script }: ScriptViewProps) {
                 {script.language}
               </Badge>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Rows className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600">Linhas estimadas:</span>
-              <span className="text-sm font-semibold text-gray-800">
-                ~{script.estimatedRows.toLocaleString("pt-BR")}
-              </span>
-            </div>
+            {script.estimatedRows > 0 && (
+              <div className="flex items-center gap-1.5">
+                <Rows className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600">Linhas estimadas:</span>
+                <span className="text-sm font-semibold text-gray-800">
+                  ~{script.estimatedRows.toLocaleString("pt-BR")}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="mt-3 flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
@@ -95,7 +97,7 @@ export function ScriptView({ script }: ScriptViewProps) {
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
             <span className="text-xs text-gray-400 font-mono ml-2">
-              script_klabin.sql
+              query_gerada.sql
             </span>
           </div>
           <Button
