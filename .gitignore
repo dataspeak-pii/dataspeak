@@ -159,3 +159,10 @@ yarn-error.log*
 
 # ChromaDB - gerado localmente via indexer
 backend/data/chroma_db/
+
+# Banco simulado SQLite (regenerável via seed)
+backend/data/*.db
+backend/data/*.db-journal
+backend/data/*.db-wal
+backend/data/*.db-shm
+"@
