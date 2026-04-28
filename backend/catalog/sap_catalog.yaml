@@ -585,9 +585,10 @@ tables:
     total. Os itens com os materiais vendidos ficam em VBAP.
 
     '
-  business_context: 'Use esta tabela para perguntas sobre: volume de pedidos de venda
-    por cliente ou período, status de pedidos, canal de distribuição, ou valor total
-    em carteira. Para saber quais produtos foram pedidos, fazer JOIN com VBAP.
+  business_context: 'UUse APENAS para perguntas sobre PEDIDOS DE VENDA: volume de pedidos por cliente ou 
+    período, valor em carteira, canal de distribuição usado em pedidos. NUNCA use VBAK 
+    para faturamento ou receita realizada — para isso use VBRK. VBAK é pedido (intenção); 
+    VBRK é fatura (realização). Para detalhes por produto pedido, fazer JOIN com VBAP.
 
     '
   grain: one row per sales order
@@ -663,10 +664,12 @@ tables:
     O cabeçalho do pedido fica em VBAK.
 
     '
-  business_context: 'Use esta tabela quando a pergunta envolve: quais produtos foram
-    vendidos, quantidade vendida por material, preço negociado por item, data de entrega
-    comprometida, ou status de faturamento do item. Para receita faturada, prefira
-    VBRK/VBRP — VBAP mostra o pedido, não necessariamente o que foi efetivamente faturado.
+  business_context: 'Use esta tabela APENAS quando a pergunta for explicitamente sobre PEDIDOS DE VENDA 
+    em aberto, carteira de pedidos, quantidade pedida (não faturada), preço negociado em 
+    pedido, ou status de atendimento de pedido. NUNCA use VBAP para "faturamento", 
+    "receita", "vendas realizadas", "top materiais faturados" ou qualquer pergunta sobre 
+    o que foi efetivamente vendido — para isso, use VBRP. VBAP representa intenção de 
+    compra do cliente; VBRP representa receita real reconhecida.
 
     '
   grain: one row per item per sales order
@@ -755,10 +758,12 @@ tables:
     ao pedido de venda de origem. O cabeçalho da nota fiscal fica em VBRK.
 
     '
-  business_context: 'Use esta tabela quando a pergunta envolve: quais materiais foram
-    faturados, receita por produto, quantidade faturada por SKU, ou rastreabilidade
-    entre pedido de venda e nota fiscal. Para receita total (sem detalhamento por
-    produto), basta usar VBRK.
+  business_context: 'Use esta tabela para faturamento real por produto: quais materiais foram efetivamente
+    faturados, receita por SKU, top materiais por valor faturado, quantidade faturada por
+    produto. SEMPRE prefira VBRP sobre VBAP quando a pergunta envolver "faturamento",
+    "receita", "vendido" no sentido de receita realizada, "nota fiscal" ou "fatura". 
+    VBAP é PEDIDO (pode não ter virado receita); VBRP é FATURAMENTO REAL. Para receita 
+    total agregada (sem detalhe por produto), usar VBRK.
 
     '
   grain: one row per item per billing document
