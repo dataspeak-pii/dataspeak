@@ -3,7 +3,7 @@
 -- =============================================================================
 -- Objetivo: replicar a estrutura de 15 tabelas SAP curadas em SQLite,
 -- permitindo execução de queries Text-to-SQL geradas pelo motor de IA.
---
+
 -- Convenções:
 --   - Tipos: TEXT (strings, datas YYYYMMDD), INTEGER (inteiros), REAL (decimais)
 --   - Datas: armazenadas como TEXT no formato SAP nativo 'YYYYMMDD'
@@ -11,7 +11,7 @@
 --   - Sem CHECK constraints: validação ocorre via queries de validação pós-seed
 --   - Nomenclatura: tudo MAIÚSCULO, replicando convenção SAP original
 --   - Comentários inline em PT-BR em cada coluna (documentação executável)
---
+
 -- Ordem de leitura:
 --   Seção 1 — Mestres SD (KNA1)
 --   Seção 2 — Mestres MM (MARA, MAKT, MARC, LFA1)
