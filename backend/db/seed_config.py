@@ -1,91 +1,69 @@
-# =============================================================================
-# DataSpeak — Configurações do Seed do Banco Simulado SAP
-# Apenas constantes tipadas. Sem lógica, sem funções.
-# =============================================================================
+"""Constantes e configurações para o seed do banco simulado SAP."""
+from typing import Final
 
-# Determinismo
-RANDOM_SEED: int = 42
+RANDOM_SEED: Final[int] = 42
+DB_PATH: Final[str] = "backend/data/dataspeak.db"
+SCHEMA_PATH: Final[str] = "backend/db/schema.sql"
+FAKER_LOCALE: Final[str] = "pt_BR"
+MANDT_PADRAO: Final[str] = "100"
+BUKRS_PADRAO: Final[str] = "1000"
+WAERS_PADRAO: Final[str] = "BRL"
 
-# Caminhos
-DB_PATH: str = "backend/data/dataspeak.db"
-SCHEMA_PATH: str = "backend/db/schema.sql"
-
-# Locale
-FAKER_LOCALE: str = "pt_BR"
-
-# Volumes (multiplicados por --scale na CLI; default scale=1)
-VOLUMES: dict[str, int] = {
-    "KNA1": 50,
-    "LFA1": 30,
-    "MARA": 150,
-    "VBRK": 800,
-    "EKKO": 400,
-    "AFKO": 300,
-    "MSEG": 3000,
-    "BKPF_MANUAL": 200,
+# Volumes
+VOLUMES: Final[dict[str, int]] = {
+    "KNA1": 50, "LFA1": 30, "MARA": 150,
+    "VBAK": 600,    # pedidos de venda
+    "VBRK": 800,    # faturas
+    "EKKO": 400,    # pedidos de compra
+    "AFKO": 300,    # ordens de produção
+    "MKPF": 1500,   # documentos de movimento (cabeçalho)
 }
 
-# Plantas e seus pesos (perfil de distribuição)
-PLANTAS: list[str] = ["1000", "2000", "3000"]
-PLANTAS_PESOS: list[float] = [0.50, 0.30, 0.20]
+# Plantas e depósitos
+PLANTAS: Final[list[str]] = ["1000", "2000", "3000"]
+PLANTAS_PESOS: Final[list[float]] = [0.50, 0.30, 0.20]
+DEPOSITOS: Final[list[str]] = ["0001", "0002", "0003"]
+DEPOSITOS_PESOS: Final[list[float]] = [0.60, 0.25, 0.15]
 
-# Idiomas para MAKT
-IDIOMAS_MAKT: list[str] = ["PT", "EN"]
+# Janela temporal
+DATA_INICIO: Final[str] = "20240101"
+DATA_FIM: Final[str] = "20251231"
+SAZONALIDADE_FIM_MES_PESO: Final[float] = 0.30
+CRESCIMENTO_MENSAL: Final[float] = 0.01
 
-# Empresa (BUKRS) — única no banco simulado
-BUKRS_PADRAO: str = "1000"
+# Pareto (quanto maior alpha, mais concentrado nos primeiros)
+PARETO_ALPHA_CLIENTES: Final[float] = 1.5
+PARETO_ALPHA_FORNECEDORES: Final[float] = 1.5
+PARETO_ALPHA_MATERIAIS: Final[float] = 1.2
 
-# Janela temporal das transações (formato YYYYMMDD)
-DATA_INICIO: str = "20240101"
-DATA_FIM: str = "20251231"
+# Tipos de material
+MTART_TIPOS: Final[list[str]] = ["FERT", "HALB", "ROH", "HAWA"]
+MTART_PESOS: Final[list[float]] = [0.40, 0.20, 0.30, 0.10]
+MATKL_OPCOES: Final[list[str]] = ["001","002","003","004","005","010","011","020","021","030"]
 
-# Sazonalidade: peso extra para últimos 5 dias úteis do mês
-SAZONALIDADE_FIM_MES_PESO: float = 0.30
+# Unidades
+MEINS_OPCOES: Final[list[str]] = ["KG","UN","L","M","T"]
+MEINS_PESOS: Final[list[float]] = [0.40,0.30,0.15,0.10,0.05]
 
-# Crescimento mensal (simulando empresa em expansão)
-CRESCIMENTO_MENSAL: float = 0.01
+# Tipos de documento
+FKART_OPCOES: Final[list[str]] = ["F2","G2","RE"]
+FKART_PESOS: Final[list[float]] = [0.92,0.05,0.03]
+AUART_OPCOES: Final[list[str]] = ["ZOR","RE","KR"]
+AUART_PESOS: Final[list[float]] = [0.92,0.05,0.03]
+BSART_OPCOES: Final[list[str]] = ["NB","FO","UB"]
+BSART_PESOS: Final[list[float]] = [0.85,0.10,0.05]
 
-# Pareto: alpha controla concentração (maior = mais concentrado nos primeiros itens)
-PARETO_ALPHA_CLIENTES: float = 1.5
-PARETO_ALPHA_FORNECEDORES: float = 1.5
-PARETO_ALPHA_MATERIAIS: float = 1.2
+# Tipos de movimento MSEG
+BWART_OPCOES: Final[list[str]] = ["101","201","261","601"]
+BWART_PESOS: Final[list[float]] = [0.30,0.15,0.30,0.25]
 
-# Tipos de material (MARA.MTART) e pesos
-MTART_TIPOS: list[str] = ["FERT", "ROH", "HALB"]
-MTART_PESOS: list[float] = [0.45, 0.35, 0.20]
-
-# Grupos de mercadoria (MARA.MATKL)
-MATKL_OPCOES: list[str] = ["001", "002", "003", "004", "005", "010", "011", "020", "021", "030"]
-
-# Unidades de medida (MEINS) e pesos
-MEINS_OPCOES: list[str] = ["KG", "UN", "L", "M", "T"]
-MEINS_PESOS: list[float] = [0.40, 0.30, 0.15, 0.10, 0.05]
-
-# Tipos de fatura SD (VBRK.FKART) e pesos
-FKART_OPCOES: list[str] = ["F2", "S1", "G2"]
-FKART_PESOS: list[float] = [0.92, 0.05, 0.03]
-
-# Tipos de pedido de compra (EKKO.BSART) e pesos
-BSART_OPCOES: list[str] = ["NB", "UB", "FO"]
-BSART_PESOS: list[float] = [0.85, 0.10, 0.05]
-
-# Tipos de ordem (AUFK.AUART) e pesos
-AUART_OPCOES: list[str] = ["PP01", "IN01"]
-AUART_PESOS: list[float] = [0.85, 0.15]
-
-# Tipos de movimento (MSEG.BWART) com contexto de parceiro
-BWART_OPCOES: list[str] = ["101", "261", "601", "311"]
-BWART_PESOS: list[float] = [0.30, 0.30, 0.30, 0.10]
-
-# Tipos de documento contábil (BKPF.BLART)
-BLART_OPCOES: list[str] = ["RV", "RE", "SA"]
-
-# Contas contábeis (HKONT) usadas em BSEG
-HKONT_RECEITA: str = "3110001"
-HKONT_CUSTO: str = "4110001"
-HKONT_CLIENTE: str = "1130001"
-HKONT_FORNECEDOR: str = "2110001"
-HKONT_CAIXA: str = "1110001"
-
-# Moeda padrão
-WAERS_PADRAO: str = "BRL"
+# Listas auxiliares
+SUBSTANTIVOS_MATERIAL: Final[list[str]] = [
+    "Cabo","Chapa","Parafuso","Válvula","Motor","Engrenagem","Rolamento",
+    "Filtro","Sensor","Eixo","Cilindro","Compressor","Pistão","Bomba","Redutor"
+]
+ESPECIFICACOES_MATERIAL: Final[list[str]] = [
+    "5mm","10mm","20A","industrial","galvanizado","standard","premium",
+    "alumínio","aço","inox","temperado","alta pressão","borracha"
+]
+ESTADOS_BR: Final[list[str]] = ["SP","RJ","MG","RS","PR","SC","BA","GO","ES","PE"]

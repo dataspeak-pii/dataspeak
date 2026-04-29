@@ -331,9 +331,9 @@ tables:
   - Quais materiais têm estoque zerado na planta 1000?
   - Qual o estoque total de todos os produtos acabados?
   example_sql: "-- Estoque atual por material com descrição\nSELECT\n    d.MATNR,\
-    \ k.MAKTX AS descricao,\n    d.WERKS, d.LGORT,\n    d.LABST AS estoque_livre,\n\
-    \    d.EINME AS unidade\nFROM MARD d\nJOIN MAKT k ON d.MATNR = k.MATNR AND k.SPRAS\
-    \ = 'PT'\nWHERE d.LABST > 0\nORDER BY d.MATNR, d.WERKS;\n"
+    \ m.MAKTX AS descricao,\n    d.WERKS, d.LGORT,\n    d.LABST AS estoque_livre,\n\
+    \    d.EINME AS unidade\nFROM MARD d\nJOIN MARA m ON d.MATNR = m.MATNR\nWHERE\
+    \ d.LABST > 0\nORDER BY d.MATNR, d.WERKS;\n"
 - name: MKPF
   module: MM
   category: transaction_data
@@ -573,10 +573,10 @@ tables:
   - Qual o valor total comprado do material X em 2026?
   - Quais pedidos ainda têm itens em aberto (não entregues)?
   example_sql: "-- Itens de pedido com entrega pendente\nSELECT\n    p.EBELN, p.EBELP,\
-    \ p.MATNR, k.MAKTX AS descricao,\n    p.MENGE AS qtd_pedida, p.EINDT AS entrega_prevista,\n\
-    \    p.NETWR AS valor_total\nFROM EKPO p\nJOIN MAKT k ON p.MATNR = k.MATNR AND\
-    \ k.SPRAS = 'PT'\nWHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')\n  AND p.EINDT <=\
-    \ DATE('now', '+7 days')\nORDER BY p.EINDT;\n"
+    \ p.MATNR, m.MAKTX AS descricao,\n    p.MENGE AS qtd_pedida, p.EINDT AS entrega_prevista,\n\
+    \    p.NETWR AS valor_total\nFROM EKPO p\nJOIN MARA m ON p.MATNR = m.MATNR\nWHERE\
+    \ (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')\n  AND p.EINDT <= DATE('now', '+7 days')\n\
+    ORDER BY p.EINDT;\n"
 - name: VBAK
   module: SD
   category: transaction_data
@@ -746,10 +746,10 @@ tables:
   - Quais itens de pedido ainda não foram faturados?
   - Qual o valor total vendido do material X no trimestre?
   example_sql: "-- Top 10 materiais mais vendidos por valor\nSELECT\n    p.MATNR,\
-    \ k.MAKTX AS descricao,\n    SUM(p.KWMENG) AS qtd_total,\n    SUM(p.NETWR) AS\
-    \ valor_total\nFROM VBAP p\nJOIN VBAK v ON p.VBELN = v.VBELN\nJOIN MAKT k ON p.MATNR\
-    \ = k.MATNR AND k.SPRAS = 'PT'\nWHERE v.AUDAT BETWEEN '20260101' AND '20260331'\n\
-    GROUP BY p.MATNR, k.MAKTX\nORDER BY valor_total DESC\nLIMIT 10;\n"
+    \ m.MAKTX AS descricao,\n    SUM(p.KWMENG) AS qtd_total,\n    SUM(p.NETWR) AS\
+    \ valor_total\nFROM VBAP p\nJOIN VBAK v ON p.VBELN = v.VBELN\nJOIN MARA m ON\
+    \ p.MATNR = m.MATNR\nWHERE v.AUDAT BETWEEN '20260101' AND '20260331'\nGROUP BY\
+    \ p.MATNR, m.MAKTX\nORDER BY valor_total DESC\nLIMIT 10;\n"
 - name: VBRP
   module: SD
   category: transaction_data
@@ -831,11 +831,11 @@ tables:
   - Quantas unidades do material X foram faturadas no trimestre?
   - Quais materiais geraram mais receita no ano?
   example_sql: "-- Faturamento por material no primeiro trimestre\nSELECT\n    p.MATNR,\
-    \ k.MAKTX AS descricao,\n    SUM(p.FKIMG) AS qtd_faturada,\n    SUM(p.NETWR) AS\
-    \ receita_total\nFROM VBRP p\nJOIN VBRK h ON p.VBELN = h.VBELN\nJOIN MAKT k ON\
-    \ p.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE h.FKDAT BETWEEN '20260101' AND '20260331'\n\
-    \  AND h.FKART = 'F2'\n  AND (h.FKSTO IS NULL OR h.FKSTO <> 'X')\nGROUP BY p.MATNR,\
-    \ k.MAKTX\nORDER BY receita_total DESC;\n"
+    \ m.MAKTX AS descricao,\n    SUM(p.FKIMG) AS qtd_faturada,\n    SUM(p.NETWR) AS\
+    \ receita_total\nFROM VBRP p\nJOIN VBRK h ON p.VBELN = h.VBELN\nJOIN MARA m ON\
+    \ p.MATNR = m.MATNR\nWHERE h.FKDAT BETWEEN '20260101' AND '20260331'\n  AND h.FKART\
+    \ = 'F2'\n  AND (h.FKSTO IS NULL OR h.FKSTO <> 'X')\nGROUP BY p.MATNR, m.MAKTX\n\
+    ORDER BY receita_total DESC;\n"
 - name: KNA1
   module: SD
   category: master_data
@@ -1058,11 +1058,11 @@ tables:
   - Qual o volume planejado de produção para o próximo mês?
   - Quais ordens de produção estão atrasadas (fim programado < hoje)?
   - Qual a quantidade produzida do material X em 2026?
-  example_sql: "-- Ordens de produção com atraso\nSELECT\n    o.AUFNR, o.MATNR, k.MAKTX\
+  example_sql: "-- Ordens de produção com atraso\nSELECT\n    o.AUFNR, o.MATNR, m.MAKTX\
     \ AS descricao,\n    o.GAMNG AS qtd_planejada, o.IGMNG AS qtd_produzida,\n   \
-    \ o.GSTRS AS inicio_programado, o.GLTRS AS fim_programado\nFROM AFKO o\nJOIN MAKT\
-    \ k ON o.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE o.GLTRS < DATE('now')\n  AND\
-    \ (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)\nORDER BY o.GLTRS;\n"
+    \ o.GSTRS AS inicio_programado, o.GLTRS AS fim_programado\nFROM AFKO o\nJOIN MARA\
+    \ m ON o.MATNR = m.MATNR\nWHERE o.GLTRS < DATE('now')\n  AND (o.IGMNG IS NULL\
+    \ OR o.IGMNG < o.GAMNG)\nORDER BY o.GLTRS;\n"
 - name: AFPO
   module: PP
   category: transaction_data
@@ -1138,8 +1138,8 @@ tables:
   - Qual a quantidade confirmada de produto acabado por ordem de produção?
   - Quais ordens foram produzidas para o pedido de venda X?
   example_sql: "-- Quantidade produzida vs planejada por material\nSELECT\n    p.MATNR,\
-    \ k.MAKTX AS descricao,\n    SUM(p.PSMNG) AS qtd_planejada,\n    SUM(p.WEMNG)\
+    \ m.MAKTX AS descricao,\n    SUM(p.PSMNG) AS qtd_planejada,\n    SUM(p.WEMNG)\
     \ AS qtd_confirmada,\n    p.MEINS AS unidade\nFROM AFPO p\nJOIN AFKO o ON p.AUFNR\
-    \ = o.AUFNR\nJOIN MAKT k ON p.MATNR = k.MATNR AND k.SPRAS = 'PT'\nWHERE o.GSTRS\
-    \ BETWEEN '20260101' AND '20260331'\nGROUP BY p.MATNR, k.MAKTX, p.MEINS\nORDER\
-    \ BY qtd_confirmada DESC;"
+    \ = o.AUFNR\nJOIN MARA m ON p.MATNR = m.MATNR\nWHERE o.GSTRS BETWEEN '20260101'\
+    \ AND '20260331'\nGROUP BY p.MATNR, m.MAKTX, p.MEINS\nORDER BY qtd_confirmada\
+    \ DESC;"
