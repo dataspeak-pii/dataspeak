@@ -48,6 +48,11 @@ _ALLOWED_START_RE = re.compile(
 class SqliteExecutor:
     """Executor SQLite read-only para o banco simulado DataSpeak."""
 
+    VALID_TABLES = {
+    "MARA", "MSEG", "VBRK", "VBRP", "MARC", "MARD", "MKPF",
+    "EKKO", "EKPO", "VBAK", "VBAP", "KNA1", "LFA1", "AFKO", "AFPO",
+    }
+
     def __init__(self, database_path: str):
         self.database_path = database_path
 
@@ -62,8 +67,11 @@ class SqliteExecutor:
         timeout_seconds: float,
     ) -> ExecutionResult:
         """Valida, executa, trunca e retorna resultado."""
-        self._validate_allowlist(sql)
 
+        self._validate_allowlist(sql)
+        self._validate_tables(sql)
+        self._validate_not_error_response(sql)
+        
         conn = self._open_readonly()
         try:
             return self._run_with_timeout(
@@ -85,6 +93,19 @@ class SqliteExecutor:
                 "SQL precisa começar com SELECT ou WITH. "
                 "Operações de modificação não são permitidas."
             )
+            
+    def _validate_tables(self, sql: str) -> None:
+        sql_sem_comentarios = re.sub(r'--[^\n]*', '', sql)
+        found = {t.upper() for t in re.findall(r'\b(?:FROM|JOIN)\s+(\w+)', sql_sem_comentarios, re.IGNORECASE)}
+        invalid = found - self.VALID_TABLES
+        if invalid:
+            raise SqlSyntaxError(f"Tabelas fora do catálogo: {', '.join(sorted(invalid))}")
+
+    def _validate_not_error_response(self, sql: str) -> None:
+        no_from = not re.search(r'\bFROM\b', sql, re.IGNORECASE)
+        literal_select = bool(re.match(r"\s*SELECT\s+['\"]", sql, re.IGNORECASE))
+        if no_from and literal_select:
+            raise SqlForbiddenError("Modelo retornou mensagem de erro em vez de SQL. Reformule a pergunta.")
 
     def _open_readonly(self) -> sqlite3.Connection:
         """Abre conexão read-only enforced pelo driver (camada 1 de defesa)."""
