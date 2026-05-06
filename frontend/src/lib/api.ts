@@ -60,6 +60,9 @@ export interface QueryResponse {
   columns?: string[];
   total_rows?: number;
   estimated_rows?: number;
+  truncated?: boolean;
+  execution_error?: string | null;
+  query_id?: string;
 
   // Bloco E — KPIs e chart (Chat 07)
   kpis?: ApiKpi[];

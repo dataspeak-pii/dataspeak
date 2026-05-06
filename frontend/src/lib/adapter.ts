@@ -70,6 +70,9 @@ function mapApiResultsToTable(res: QueryResponse): DataTable {
     sapSource: res.tables_used.length
       ? `SAP — Tabelas: ${res.tables_used.join(", ")}`
       : "SAP",
+    truncated: res.truncated ?? false,
+    executionError: res.execution_error ?? null,
+    queryId: res.query_id,
   };
 }
 

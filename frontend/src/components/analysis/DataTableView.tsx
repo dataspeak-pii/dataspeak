@@ -1,13 +1,36 @@
 import type { DataTable } from "@/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table2, Database } from "lucide-react";
+import { Table2, Database, AlertTriangle, Info } from "lucide-react";
 
 interface DataTableViewProps {
   table: DataTable;
 }
 
 export function DataTableView({ table }: DataTableViewProps) {
+  if (table.executionError) {
+    return (
+      <Card className="border border-red-200 shadow-sm overflow-hidden">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-red-700">
+                Erro ao executar o SQL
+              </p>
+              <p className="text-sm text-red-600 mt-1">
+                O banco de dados retornou um erro ao processar a consulta.
+              </p>
+              <code className="mt-2 block text-xs bg-red-50 border border-red-100 rounded px-3 py-2 text-red-700 whitespace-pre-wrap break-all">
+                {table.executionError}
+              </code>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border border-gray-100 shadow-sm overflow-hidden">
       <CardHeader className="py-3 px-4 border-b border-gray-100 bg-gray-50 flex flex-row items-center justify-between">
@@ -68,6 +91,15 @@ export function DataTableView({ table }: DataTableViewProps) {
             <p className="text-xs text-gray-400">
               Exibindo {table.rows.length} de{" "}
               {table.totalRows.toLocaleString("pt-BR")} registros
+            </p>
+          </div>
+        )}
+        {table.truncated && (
+          <div className="px-4 py-3 border-t border-amber-100 bg-amber-50 flex items-center gap-2">
+            <Info className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <p className="text-xs text-amber-700">
+              Resultados truncados — exibindo as primeiras {table.rows.length}{" "}
+              linhas. Execute diretamente no banco para o conjunto completo.
             </p>
           </div>
         )}

@@ -43,6 +43,9 @@ export interface DataTable {
   rows: DataRow[];
   totalRows: number;
   sapSource: string;
+  truncated?: boolean;
+  executionError?: string | null;
+  queryId?: string;
 }
 
 export interface KPI {
