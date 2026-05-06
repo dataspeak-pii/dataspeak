@@ -23,12 +23,22 @@ export interface ApiField {
 }
 
 export interface ApiKpi {
-  id: string;
+  id?: string;
   label: string;
   value: string | number;
   unit?: string;
   trend: number;
   trend_direction: "up" | "down" | "neutral";
+}
+
+export interface ApiChartSeriesItem {
+  name: string;
+  data: number[];
+}
+
+export interface ApiChartDataRaw {
+  labels: string[];
+  series: ApiChartSeriesItem[];
 }
 
 export interface ApiChartPoint {
@@ -66,7 +76,7 @@ export interface QueryResponse {
 
   // Bloco E — KPIs e chart (Chat 07)
   kpis?: ApiKpi[];
-  chart_data?: ApiChartPoint[];
+  chart_data?: ApiChartDataRaw | ApiChartPoint[];
   chart_type?: "line" | "bar" | "pie" | "composed";
 }
 

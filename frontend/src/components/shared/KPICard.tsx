@@ -10,6 +10,8 @@ interface KPICardProps {
 export function KPICard({ kpi }: KPICardProps) {
   const isUp = kpi.trendDirection === "up";
   const isDown = kpi.trendDirection === "down";
+  const hasTrend =
+    typeof kpi.trend === "number" && !isNaN(kpi.trend) && kpi.trend !== 0;
 
   return (
     <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -25,7 +27,7 @@ export function KPICard({ kpi }: KPICardProps) {
             )}
           </div>
 
-          {kpi.trend !== 0 && (
+          {hasTrend ? (
             <div
               className={cn(
                 "flex items-center gap-0.5 text-sm font-medium px-2 py-1 rounded-lg",
@@ -38,9 +40,11 @@ export function KPICard({ kpi }: KPICardProps) {
               {!isUp && !isDown && <Minus className="w-3.5 h-3.5 text-gray-400" />}
               <span>{Math.abs(kpi.trend)}%</span>
             </div>
+          ) : (
+            <span className="text-sm text-gray-300 font-medium">—</span>
           )}
         </div>
-        {kpi.trend !== 0 && (
+        {hasTrend && (
           <p className="text-[11px] text-gray-400 mt-1">vs. período anterior</p>
         )}
       </CardContent>

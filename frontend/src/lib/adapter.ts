@@ -22,6 +22,7 @@ import type {
   QueryResponse,
   ApiField,
   ApiKpi,
+  ApiChartDataRaw,
   ApiConfidence,
 } from "./api";
 
@@ -49,15 +50,30 @@ function mapApiFieldToInterpretedField(f: ApiField): InterpretedField {
   };
 }
 
-function mapApiKpiToKpi(k: ApiKpi): KPI {
+function mapApiKpiToKpi(k: ApiKpi, index: number): KPI {
   return {
-    id: k.id,
+    id: k.id ?? `kpi-${index}`,
     label: k.label,
     value: k.value,
     unit: k.unit,
     trend: k.trend,
     trendDirection: k.trend_direction,
   };
+}
+
+function mapChartData(raw: QueryResponse["chart_data"]): ChartDataPoint[] {
+  if (!raw) return [];
+  if ("labels" in raw && "series" in raw) {
+    const { labels, series } = raw as ApiChartDataRaw;
+    return labels.map((label, i) => {
+      const point: ChartDataPoint = { label };
+      series.forEach((s) => {
+        point[s.name] = s.data[i] ?? 0;
+      });
+      return point;
+    });
+  }
+  return raw as ChartDataPoint[];
 }
 
 function mapApiResultsToTable(res: QueryResponse): DataTable {
@@ -102,7 +118,7 @@ export function adaptQueryResponse(
 
   const table = mapApiResultsToTable(res);
   const kpis: KPI[] = (res.kpis ?? []).map(mapApiKpiToKpi);
-  const chartData: ChartDataPoint[] = res.chart_data ?? [];
+  const chartData: ChartDataPoint[] = mapChartData(res.chart_data);
 
   return {
     id,

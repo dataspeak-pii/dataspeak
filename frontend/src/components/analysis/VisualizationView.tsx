@@ -43,6 +43,21 @@ export function VisualizationView({ result }: VisualizationViewProps) {
     ? Object.keys(result.chartData[0]).filter((k) => k !== "label")
     : [];
 
+  const seriesSum = (key: string) =>
+    result.chartData.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+
+  const sums = seriesKeys.map((k) => seriesSum(k));
+  const maxSum = sums.length ? Math.max(...sums) : 0;
+  const minSum = sums.length ? Math.min(...sums) : 0;
+  const incompatible = sums.length > 1 && minSum > 0 && maxSum / minSum > 100;
+
+  const visibleKeys = incompatible
+    ? [seriesKeys[sums.indexOf(maxSum)]]
+    : seriesKeys;
+  const omittedKeys = incompatible
+    ? seriesKeys.filter((k) => k !== visibleKeys[0])
+    : [];
+
   return (
     <div className="space-y-5">
       {/* KPIs */}
@@ -94,7 +109,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                {seriesKeys.map((key, i) => (
+                {visibleKeys.map((key, i) => (
                   <Bar key={key} dataKey={key} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
                 ))}
               </BarChart>
@@ -108,7 +123,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                {seriesKeys.map((key, i) => (
+                {visibleKeys.map((key, i) => (
                   <Line
                     key={key}
                     type="monotone"
@@ -124,7 +139,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                 <Pie
                   data={result.chartData.map((d) => ({
                     name: d.label,
-                    value: Number(d[seriesKeys[0]] ?? 0),
+                    value: Number(d[visibleKeys[0]] ?? 0),
                   }))}
                   cx="50%"
                   cy="50%"
@@ -149,6 +164,13 @@ export function VisualizationView({ result }: VisualizationViewProps) {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      {omittedKeys.length > 0 && (
+        <p className="text-xs text-gray-400 -mt-2 px-1">
+          Exibindo apenas <span className="font-medium text-gray-500">{visibleKeys[0]}</span> —{" "}
+          séries com escalas muito diferentes foram omitidas para melhor visualização.
+        </p>
+      )}
 
       {/* Data table */}
       <DataTableView table={result.table} />
