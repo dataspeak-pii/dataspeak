@@ -27,6 +27,7 @@ from app.executors import (
     SqlSyntaxError,
     SqlTimeoutError,
 )
+from app.analytics import compute_analytics
 from app.settings import settings
 from db.sqlite_executor import SqliteExecutor
 
@@ -89,6 +90,10 @@ class QueryResponse(BaseModel):
     total_rows: int = 0
     truncated: bool = False
     execution_error: Optional[str] = None
+    
+    kpis: list[dict] = []
+    chart_type: Optional[str] = None
+    chart_data: dict = {}
 
     # Tempo total
     duration_ms: int
@@ -193,5 +198,6 @@ async def query(req: QueryRequest):
         total_rows=execution.total_rows,
         truncated=execution.truncated,
         execution_error=execution_error,
+        **compute_analytics(execution.results, execution.columns),
         duration_ms=duration_ms,
     )
