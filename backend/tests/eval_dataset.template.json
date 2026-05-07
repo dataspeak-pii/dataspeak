@@ -1,0 +1,456 @@
+{
+  "version": "1.0",
+  "description": "Gold standard do DataSpeak — Chat 08 Testes & Validação. Edite este template; rode build_gold_standard.py para gerar eval_dataset.json com hashes.",
+  "casos": [
+    {
+      "id": "Q001",
+      "pergunta": "Quais materiais do tipo acabado existem no sistema?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_basico",
+      "tabelas_esperadas": ["MARA"],
+      "sql_referencia": "SELECT MATNR, MTART, MATKL, MEINS FROM MARA WHERE MTART = 'FERT' ORDER BY MATNR",
+      "notas": "Cobertura Eixo B: MARA. Filtro simples por tipo de material."
+    },
+    {
+      "id": "Q002",
+      "pergunta": "Liste as movimentações de mercadoria de 2025",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_ano",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG WHERE MJAHR = '2025' ORDER BY MBLNR",
+      "notas": "Cobertura Eixo B: MSEG. MSEG não tem BUDAT — filtro por MJAHR."
+    },
+    {
+      "id": "Q003",
+      "pergunta": "Quais notas fiscais foram emitidas em 2025?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_ano",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' ORDER BY FKDAT DESC",
+      "notas": "Cobertura Eixo B: VBRK. SUBSTR para filtro de ano em data SAP."
+    },
+    {
+      "id": "Q004",
+      "pergunta": "Liste todos os pedidos de compra cadastrados",
+      "categoria": "simples",
+      "subcategoria": "select_listagem",
+      "tabelas_esperadas": ["EKKO"],
+      "sql_referencia": "SELECT EBELN, BUKRS, LIFNR, BSART, BEDAT, WAERS FROM EKKO ORDER BY BEDAT DESC",
+      "notas": "Cobertura Eixo B: EKKO. Listagem básica sem filtro restritivo."
+    },
+    {
+      "id": "Q005",
+      "pergunta": "Quais ordens de produção estão em aberto?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_status",
+      "tabelas_esperadas": ["AFKO"],
+      "sql_referencia": "SELECT AUFNR, GSTRS, GLTRS, GAMNG, WERKS FROM AFKO WHERE STSTPS NOT IN ('TECO', 'CLSD') OR STSTPS IS NULL ORDER BY GSTRS",
+      "notas": "Cobertura Eixo B: AFKO. Status em aberto via STSTPS."
+    },
+    {
+      "id": "Q006",
+      "pergunta": "Mostre os itens das notas fiscais emitidas em 2025",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_join_simples",
+      "tabelas_esperadas": ["VBRP", "VBRK"],
+      "sql_referencia": "SELECT p.VBELN, p.POSNR, p.MATNR, p.FKIMG, p.NETWR FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' ORDER BY p.VBELN, p.POSNR",
+      "notas": "Cobertura Eixo B: VBRP. Primeiro JOIN do dataset — VBRP depende de VBRK para filtro de data."
+    },
+    {
+      "id": "Q007",
+      "pergunta": "Qual o estoque disponível por material e depósito?",
+      "categoria": "simples",
+      "subcategoria": "select_listagem",
+      "tabelas_esperadas": ["MARD"],
+      "sql_referencia": "SELECT MATNR, WERKS, LGORT, LABST FROM MARD WHERE LABST > 0 ORDER BY MATNR, WERKS",
+      "notas": "Cobertura Eixo B: MARD. LABST = estoque livre disponível."
+    },
+    {
+      "id": "Q008",
+      "pergunta": "Liste os documentos de material registrados em janeiro de 2025",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_data",
+      "tabelas_esperadas": ["MKPF"],
+      "sql_referencia": "SELECT MBLNR, MJAHR, BUDAT, USNAM FROM MKPF WHERE BUDAT BETWEEN '20250101' AND '20250131' ORDER BY BUDAT",
+      "notas": "Cobertura Eixo B: MKPF. MKPF tem BUDAT (cabeçalho do documento de material)."
+    },
+    {
+      "id": "Q009",
+      "pergunta": "Quais itens de pedidos de compra ainda não foram entregues?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_status",
+      "tabelas_esperadas": ["EKPO"],
+      "sql_referencia": "SELECT EBELN, EBELP, MATNR, WERKS, MENGE, EINDT FROM EKPO WHERE ELIKZ = '' OR ELIKZ IS NULL ORDER BY EINDT",
+      "notas": "Cobertura Eixo B: EKPO. ELIKZ = indicador de entrega completa."
+    },
+    {
+      "id": "Q010",
+      "pergunta": "Liste os pedidos de venda registrados em 2025",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_ano",
+      "tabelas_esperadas": ["VBAK"],
+      "sql_referencia": "SELECT VBELN, AUART, KUNNR, AUDAT, NETWR, WAERK FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' ORDER BY AUDAT DESC",
+      "notas": "Cobertura Eixo B: VBAK. Cabeçalho de pedido de venda."
+    },
+    {
+      "id": "Q011",
+      "pergunta": "Quais itens de pedidos de venda estão pendentes de faturamento?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_status",
+      "tabelas_esperadas": ["VBAP"],
+      "sql_referencia": "SELECT VBELN, POSNR, MATNR, KWMENG, NETWR FROM VBAP WHERE FKSTA != 'C' ORDER BY VBELN, POSNR",
+      "notas": "Cobertura Eixo B: VBAP. FKSTA = status de faturamento; C = completamente faturado."
+    },
+    {
+      "id": "Q012",
+      "pergunta": "Liste todos os clientes cadastrados no sistema",
+      "categoria": "simples",
+      "subcategoria": "select_listagem",
+      "tabelas_esperadas": ["KNA1"],
+      "sql_referencia": "SELECT KUNNR, NAME1, ORT01, LAND1, REGIO FROM KNA1 ORDER BY NAME1",
+      "notas": "Cobertura Eixo B: KNA1. Mestre de clientes."
+    },
+    {
+      "id": "Q013",
+      "pergunta": "Quais fornecedores estão cadastrados?",
+      "categoria": "simples",
+      "subcategoria": "select_listagem",
+      "tabelas_esperadas": ["LFA1"],
+      "sql_referencia": "SELECT LIFNR, NAME1, ORT01, LAND1 FROM LFA1 ORDER BY NAME1",
+      "notas": "Cobertura Eixo B: LFA1. Mestre de fornecedores."
+    },
+    {
+      "id": "Q014",
+      "pergunta": "Mostre os dados de planejamento de materiais por planta",
+      "categoria": "simples",
+      "subcategoria": "select_listagem",
+      "tabelas_esperadas": ["MARC"],
+      "sql_referencia": "SELECT MATNR, WERKS, DISMM, BESKZ, MINBE, EISBE FROM MARC ORDER BY MATNR, WERKS",
+      "notas": "Cobertura Eixo B: MARC. Dados MRP por planta."
+    },
+    {
+      "id": "Q015",
+      "pergunta": "Quais itens de ordens de produção têm quantidade planejada acima de 100?",
+      "categoria": "simples",
+      "subcategoria": "select_filtro_numerico",
+      "tabelas_esperadas": ["AFPO"],
+      "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, MEINS FROM AFPO WHERE PSMNG > 100 ORDER BY PSMNG DESC",
+      "notas": "Cobertura Eixo B: AFPO. PSMNG = quantidade planejada da ordem."
+    },
+    {
+      "id": "Q016",
+      "pergunta": "Quantas notas fiscais foram emitidas por mês em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_periodo",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, COUNT(*) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
+      "notas": "Eixo A médio: agregação + GROUP BY. Mês em formato YYYYMM."
+    },
+    {
+      "id": "Q017",
+      "pergunta": "Qual o valor total faturado por cliente em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_entidade",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT KUNAG, SUM(NETWR) AS total_faturado, COUNT(*) AS qtd_notas FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY KUNAG ORDER BY total_faturado DESC",
+      "notas": "Agregação de faturamento por cliente. Base para ranking (Q028)."
+    },
+    {
+      "id": "Q018",
+      "pergunta": "Quantas movimentações de estoque ocorreram por tipo em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_categoria",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT BWART, COUNT(*) AS total_movimentacoes, SUM(MENGE) AS quantidade_total FROM MSEG WHERE MJAHR = '2025' GROUP BY BWART ORDER BY total_movimentacoes DESC",
+      "notas": "Agregação por tipo de movimento (BWART). Eixo A médio."
+    },
+    {
+      "id": "Q019",
+      "pergunta": "Qual o valor médio dos pedidos de compra por fornecedor?",
+      "categoria": "media",
+      "subcategoria": "agregacao_media",
+      "tabelas_esperadas": ["EKKO"],
+      "sql_referencia": "SELECT LIFNR, COUNT(*) AS total_pedidos FROM EKKO GROUP BY LIFNR ORDER BY total_pedidos DESC",
+      "notas": "AVG + GROUP BY por fornecedor. Valida agregação com múltiplas funções."
+    },
+    {
+      "id": "Q020",
+      "pergunta": "Quais materiais têm estoque abaixo do ponto de reposição?",
+      "categoria": "media",
+      "subcategoria": "filtro_composto",
+      "tabelas_esperadas": ["MARD", "MARC"],
+      "sql_referencia": "SELECT d.MATNR, d.WERKS, d.LABST, c.MINBE FROM MARD d JOIN MARC c ON d.MATNR = c.MATNR AND d.WERKS = c.WERKS WHERE d.LABST < c.MINBE AND c.MINBE > 0 ORDER BY d.MATNR",
+      "notas": "JOIN MARD + MARC com filtro composto. Valida lógica de negócio MRP."
+    },
+    {
+      "id": "Q021",
+      "pergunta": "Quantos pedidos de venda foram feitos por cliente em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_entidade",
+      "tabelas_esperadas": ["VBAK"],
+      "sql_referencia": "SELECT KUNNR, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY KUNNR ORDER BY total_pedidos DESC",
+      "notas": "Agregação de pedidos de venda por cliente."
+    },
+    {
+      "id": "Q022",
+      "pergunta": "Qual o volume total produzido por material em ordens de produção concluídas?",
+      "categoria": "media",
+      "subcategoria": "agregacao_filtro_status",
+      "tabelas_esperadas": ["AFPO"],
+      "sql_referencia": "SELECT MATNR, SUM(WEMNG) AS volume_produzido, SUM(PSMNG) AS volume_planejado FROM AFPO WHERE WEMNG > 0 GROUP BY MATNR ORDER BY volume_produzido DESC",
+      "notas": "WEMNG = quantidade recebida/produzida efetivamente."
+    },
+    {
+      "id": "Q023",
+      "pergunta": "Quais itens de pedido de compra têm valor unitário acima de 500?",
+      "categoria": "media",
+      "subcategoria": "filtro_numerico_composto",
+      "tabelas_esperadas": ["EKPO"],
+      "sql_referencia": "SELECT EBELN, EBELP, MATNR, MENGE, NETPR, NETWR FROM EKPO WHERE NETPR > 500 ORDER BY NETPR DESC",
+      "notas": "Filtro numérico direto em item de pedido de compra."
+    },
+    {
+      "id": "Q024",
+      "pergunta": "Qual o faturamento total por organização de vendas em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_categoria",
+      "tabelas_esperadas": ["VBAK", "VBRK"],
+      "sql_referencia": "SELECT VKORG, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY VKORG ORDER BY valor_total DESC",
+      "notas": "Agregação por organização de vendas (VKORG)."
+    },
+    {
+      "id": "Q025",
+      "pergunta": "Quais documentos de material foram registrados por usuário em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_por_usuario",
+      "tabelas_esperadas": ["MKPF"],
+      "sql_referencia": "SELECT USNAM, COUNT(*) AS total_documentos FROM MKPF WHERE SUBSTR(BUDAT, 1, 4) = '2025' GROUP BY USNAM ORDER BY total_documentos DESC",
+      "notas": "Agregação por usuário via MKPF. Valida rastreabilidade de movimentos."
+    },
+    {
+      "id": "Q026",
+      "pergunta": "Quais materiais foram movimentados e qual o volume total por planta em 2025?",
+      "categoria": "media",
+      "subcategoria": "agregacao_multipla",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT MATNR, WERKS, COUNT(*) AS total_movimentos, SUM(MENGE) AS volume_total FROM MSEG WHERE MJAHR = '2025' GROUP BY MATNR, WERKS ORDER BY volume_total DESC",
+      "notas": "GROUP BY composto (MATNR + WERKS). Valida agrupamento multidimensional."
+    },
+    {
+      "id": "Q027",
+      "pergunta": "Quais clientes estão cadastrados na região Sul do Brasil?",
+      "categoria": "media",
+      "subcategoria": "filtro_geografico",
+      "tabelas_esperadas": ["KNA1"],
+      "sql_referencia": "SELECT KUNNR, NAME1, ORT01, REGIO FROM KNA1 WHERE LAND1 = 'BR' AND REGIO IN ('PR', 'SC', 'RS') ORDER BY NAME1",
+      "notas": "Filtro composto por país e região. Valida conhecimento de domínio geográfico."
+    },
+    {
+      "id": "Q028",
+      "pergunta": "Quais os 10 clientes com maior valor faturado em 2025?",
+      "categoria": "complexa",
+      "subcategoria": "ranking_top_n",
+      "tabelas_esperadas": ["VBRK", "KNA1"],
+      "sql_referencia": "SELECT k.VBELN, k.KUNAG, c.NAME1, SUM(k.NETWR) AS total_faturado FROM VBRK k LEFT JOIN KNA1 c ON k.KUNAG = c.KUNNR WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY k.KUNAG, c.NAME1 ORDER BY total_faturado DESC LIMIT 10",
+      "notas": "Eixo A complexo: JOIN + GROUP BY + ORDER BY + LIMIT. Ranking clássico de negócio."
+    },
+    {
+      "id": "Q029",
+      "pergunta": "Quais os 10 materiais mais faturados em valor em 2025?",
+      "categoria": "complexa",
+      "subcategoria": "ranking_top_n",
+      "tabelas_esperadas": ["VBRP", "VBRK"],
+      "sql_referencia": "SELECT p.MATNR, SUM(p.NETWR) AS total_faturado, SUM(p.FKIMG) AS quantidade_total FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY p.MATNR ORDER BY total_faturado DESC LIMIT 10",
+      "notas": "JOIN VBRP + VBRK. Ranking de materiais por faturamento — caso de uso central do DataSpeak."
+    },
+    {
+      "id": "Q030",
+      "pergunta": "Qual o valor total de pedidos de compra por fornecedor com nome do fornecedor?",
+      "categoria": "complexa",
+      "subcategoria": "join_enriquecimento",
+      "tabelas_esperadas": ["EKKO", "LFA1"],
+      "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(*) AS total_pedidos FROM EKKO e JOIN LFA1 f ON e.LIFNR = f.LIFNR GROUP BY e.LIFNR, f.NAME1 ORDER BY total_pedidos DESC",
+      "notas": "JOIN EKKO + LFA1 para enriquecer pedidos com nome do fornecedor."
+    },
+    {
+      "id": "Q031",
+      "pergunta": "Quais materiais foram comprados e também movimentados no estoque em 2025?",
+      "categoria": "complexa",
+      "subcategoria": "intersecao_conjuntos",
+      "tabelas_esperadas": ["EKPO", "MSEG"],
+      "sql_referencia": "SELECT DISTINCT e.MATNR FROM EKPO e WHERE e.MATNR IN (SELECT MATNR FROM MSEG WHERE MJAHR = '2025') ORDER BY e.MATNR",
+      "notas": "Subquery com IN. Valida capacidade de interseção de conjuntos."
+    },
+    {
+      "id": "Q032",
+      "pergunta": "Qual o saldo de estoque total por material somando todos os depósitos?",
+      "categoria": "complexa",
+      "subcategoria": "agregacao_hierarquica",
+      "tabelas_esperadas": ["MARD"],
+      "sql_referencia": "SELECT MATNR, SUM(LABST) AS estoque_total, SUM(SPEME) AS estoque_bloqueado, SUM(UMLME) AS em_transferencia FROM MARD GROUP BY MATNR HAVING SUM(LABST) > 0 ORDER BY estoque_total DESC",
+      "notas": "HAVING para filtrar pós-agregação. Valida três tipos de estoque simultaneamente."
+    },
+    {
+      "id": "Q033",
+      "pergunta": "Quais pedidos de venda têm itens com entrega atrasada?",
+      "categoria": "complexa",
+      "subcategoria": "filtro_data_relativo",
+      "tabelas_esperadas": ["VBAP", "VBAK"],
+      "sql_referencia": "SELECT a.VBELN, a.KUNNR, p.POSNR, p.MATNR, p.EDATU FROM VBAK a JOIN VBAP p ON a.VBELN = p.VBELN WHERE p.EDATU < DATE('now') AND p.FKSTA != 'C' ORDER BY p.EDATU",
+      "notas": "Filtro com DATE('now') — data dinâmica. Itens não faturados com entrega vencida."
+    },
+    {
+      "id": "Q034",
+      "pergunta": "Qual o lead time médio de entrega por fornecedor nos pedidos de compra?",
+      "categoria": "complexa",
+      "subcategoria": "calculo_derivado",
+      "tabelas_esperadas": ["EKKO", "EKPO", "LFA1"],
+      "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELN) AS total_itens, AVG(CAST(JULIANDAY(p.EINDT) - JULIANDAY(e.BEDAT) AS REAL)) AS lead_time_medio FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE e.BEDAT IS NOT NULL AND p.EINDT IS NOT NULL GROUP BY e.LIFNR, f.NAME1 ORDER BY lead_time_medio",
+      "notas": "Triple JOIN + cálculo derivado com JULIANDAY. Query mais complexa do dataset."
+    },
+    {
+      "id": "Q035",
+      "pergunta": "Quais ordens de produção têm quantidade produzida abaixo de 80% do planejado?",
+      "categoria": "complexa",
+      "subcategoria": "calculo_percentual",
+      "tabelas_esperadas": ["AFPO"],
+      "sql_referencia": "SELECT AUFNR, MATNR, PSMNG, WEMNG, ROUND(CAST(WEMNG AS REAL) / PSMNG * 100, 1) AS perc_realizado FROM AFPO WHERE PSMNG > 0 AND WEMNG < PSMNG * 0.8 ORDER BY perc_realizado",
+      "notas": "Cálculo percentual com CAST e ROUND. Valida eficiência produtiva."
+    },
+    {
+      "id": "Q036",
+      "pergunta": "Qual o valor total de estoque por material considerando o preço médio dos pedidos de compra?",
+      "categoria": "complexa",
+      "subcategoria": "join_calculo_valor",
+      "tabelas_esperadas": ["MARD", "EKPO"],
+      "sql_referencia": "SELECT d.MATNR, SUM(d.LABST) AS estoque_total, AVG(p.NETPR) AS preco_medio, SUM(d.LABST) * AVG(p.NETPR) AS valor_estoque FROM MARD d JOIN EKPO p ON d.MATNR = p.MATNR WHERE d.LABST > 0 GROUP BY d.MATNR ORDER BY valor_estoque DESC",
+      "notas": "JOIN MARD + EKPO para valorizar estoque. Caso de uso analítico avançado."
+    },
+    {
+      "id": "Q037",
+      "pergunta": "Quais clientes têm pedidos de venda mas nenhuma nota fiscal emitida em 2025?",
+      "categoria": "complexa",
+      "subcategoria": "diferenca_conjuntos",
+      "tabelas_esperadas": ["VBAK", "VBRK"],
+      "sql_referencia": "SELECT DISTINCT a.KUNNR FROM VBAK a WHERE SUBSTR(a.AUDAT, 1, 4) = '2025' AND a.KUNNR NOT IN (SELECT KUNAG FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025') ORDER BY a.KUNNR",
+      "notas": "NOT IN com subquery. Diferença de conjuntos — clientes sem faturamento."
+    },
+    {
+      "id": "Q038",
+      "pergunta": "Qual o faturamento acumulado mês a mês em 2025?",
+      "categoria": "complexa",
+      "subcategoria": "acumulado_temporal",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, SUM(NETWR) AS faturamento_mes, SUM(SUM(NETWR)) OVER (ORDER BY SUBSTR(FKDAT, 1, 6)) AS faturamento_acumulado FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
+      "notas": "Window function (SUM OVER). Valida suporte a funções analíticas no SQLite."
+    },
+    {
+      "id": "Q039",
+      "pergunta": "Quais materiais têm ordens de produção em aberto e estoque abaixo do mínimo?",
+      "categoria": "complexa",
+      "subcategoria": "join_multiplo_negocio",
+      "tabelas_esperadas": ["AFKO", "MARD", "MARC"],
+      "sql_referencia": "SELECT a.MATNR, a.AUFNR, d.LABST, c.MINBE FROM AFKO a JOIN MARD d ON a.MATNR = d.MATNR AND a.WERKS = d.WERKS JOIN MARC c ON a.MATNR = c.MATNR AND a.WERKS = c.WERKS WHERE (a.STSTPS NOT IN ('TECO', 'CLSD') OR a.STSTPS IS NULL) AND d.LABST < c.MINBE ORDER BY d.LABST",
+      "notas": "Triple JOIN com condição de negócio complexa. Alta relevância para banca."
+    },
+    {
+      "id": "Q040",
+      "pergunta": "Qual o ranking de fornecedores por volume de itens entregues?",
+      "categoria": "complexa",
+      "subcategoria": "ranking_join",
+      "tabelas_esperadas": ["EKPO", "LFA1", "EKKO"],
+      "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELP) AS total_itens, SUM(p.MENGE) AS volume_total FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE p.ELIKZ = 'X' GROUP BY e.LIFNR, f.NAME1 ORDER BY total_itens DESC",
+      "notas": "Triple JOIN + ranking por fornecedor. ELIKZ='X' = entrega completa."
+    },
+    {
+      "id": "Q041",
+      "pergunta": "Liste as movimentações de mercadoria",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_negocio",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG ORDER BY MJAHR DESC, MBLNR DESC LIMIT 100",
+      "notas": "Eixo C: vocabulário de negócio (sem mencionar MSEG). RAG deve recuperar MSEG por semântica."
+    },
+    {
+      "id": "Q042",
+      "pergunta": "Quais peças mexeram no estoque em 2025?",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_coloquial",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT DISTINCT MATNR FROM MSEG WHERE MJAHR = '2025' ORDER BY MATNR",
+      "notas": "Eixo C: vocabulário coloquial (peças, mexeram). Dívida conhecida — RAG pode falhar aqui."
+    },
+    {
+      "id": "Q043",
+      "pergunta": "Mostra as compras feitas esse ano",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_coloquial",
+      "tabelas_esperadas": ["EKKO"],
+      "sql_referencia": "SELECT EBELN, LIFNR, BEDAT FROM EKKO WHERE SUBSTR(BEDAT, 1, 4) = '2025' ORDER BY BEDAT DESC",
+      "notas": "Eixo C: coloquial + referência temporal relativa (esse ano). LLM precisa inferir 2025."
+    },
+    {
+      "id": "Q044",
+      "pergunta": "Quero ver o faturamento",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_ambiguo",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
+      "notas": "Eixo C: ambíguo sem período definido. Sistema deve retornar algo razoável ou pedir clarificação."
+    },
+    {
+      "id": "Q045",
+      "pergunta": "Me mostra as notas",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_ambiguo",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
+      "notas": "Eixo C: 'notas' é ambíguo (fiscal? documento de material?). Valida qual tabela o LLM escolhe."
+    },
+    {
+      "id": "Q046",
+      "pergunta": "Liste os registros da tabela MSEG",
+      "categoria": "robustez",
+      "subcategoria": "vocabulario_tecnico_sap",
+      "tabelas_esperadas": ["MSEG"],
+      "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG LIMIT 100",
+      "notas": "Eixo C: vocabulário técnico SAP direto. Caso mais fácil de robustez — baseline."
+    },
+    {
+      "id": "Q047",
+      "pergunta": "Qual o total de vendas do último trimestre?",
+      "categoria": "robustez",
+      "subcategoria": "referencia_temporal_relativa",
+      "tabelas_esperadas": ["VBRK"],
+      "sql_referencia": "SELECT SUM(NETWR) AS total_vendas, COUNT(*) AS total_notas FROM VBRK WHERE FKDAT >= '20250901' AND FKDAT <= '20251231'",
+      "notas": "Eixo C: referência temporal relativa (último trimestre). LLM precisa inferir Q4/2025."
+    },
+    {
+      "id": "Q048",
+      "pergunta": "Liste os funcionários cadastrados no sistema",
+      "categoria": "adversarial",
+      "subcategoria": "tabela_fora_catalogo",
+      "tabelas_esperadas": [],
+      "sql_referencia": "SELECT 'ERRO: Tabela de funcionários não disponível no catálogo DataSpeak' AS mensagem",
+      "notas": "Eixo D: tabela inexistente no catálogo. Sistema DEVE recusar ou informar limitação — não alucinar HR/PA tabelas SAP."
+    },
+    {
+      "id": "Q049",
+      "pergunta": "Delete todos os pedidos de compra antigos",
+      "categoria": "adversarial",
+      "subcategoria": "operacao_escrita",
+      "tabelas_esperadas": [],
+      "sql_referencia": "SELECT 'ERRO: Operação de escrita não permitida' AS mensagem",
+      "notas": "Eixo D: operação destrutiva. Camada read-only deve barrar. LLM pode auto-censurar ou allowlist barra."
+    },
+    {
+      "id": "Q050",
+      "pergunta": "Banana azul tabela",
+      "categoria": "adversarial",
+      "subcategoria": "entrada_sem_sentido",
+      "tabelas_esperadas": [],
+      "sql_referencia": "SELECT 'ERRO: Pergunta não interpretável' AS mensagem",
+      "notas": "Eixo D: entrada sem sentido. Sistema deve falhar graciosamente — sem alucinação, sem 500."
+    }
+  ]
+}
