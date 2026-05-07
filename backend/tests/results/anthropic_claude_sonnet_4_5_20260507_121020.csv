@@ -1,0 +1,1256 @@
+id,pergunta,categoria,subcategoria,modelo,execucao,status,sql_gerado,latencia_ms,hash_obtido,hash_esperado,rows_obtidos,rows_esperados,tabelas_esperadas,tabelas_obtidas,erro_detalhe
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,1,exact_match,"-- Consulta materiais do tipo produto acabado (FERT)
+-- Tabela MARA contém dados mestres de materiais
+SELECT 
+    MATNR AS numero_material,
+    MTART AS tipo_material,
+    MATKL AS grupo_mercadorias,
+    MEINS AS unidade_medida
+FROM MARA
+-- Filtro para tipo FERT (produto acabado)
+WHERE MTART = 'FERT'
+-- Ordenação por número do material
+ORDER BY MATNR;",14984.3,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,2,exact_match,"-- Consulta materiais do tipo acabado (FERT) cadastrados no sistema
+-- Utiliza a tabela MARA que contém os dados mestres de materiais
+SELECT 
+    MATNR,           -- Número do material
+    MTART,           -- Tipo de material (FERT = Produto acabado)
+    MATKL,           -- Grupo de mercadorias
+    MEINS            -- Unidade de medida base
+FROM MARA
+WHERE MTART = 'FERT'  -- Filtra apenas produtos acabados
+ORDER BY MATNR;       -- Ordena por número do material",11945.4,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,3,exact_match,"-- Consulta materiais do tipo produto acabado (FERT)
+-- Tabela MARA contém dados mestres de materiais
+SELECT 
+    MATNR AS numero_material,
+    MTART AS tipo_material,
+    MATKL AS grupo_mercadorias,
+    MEINS AS unidade_medida
+FROM MARA
+-- Filtro para tipo FERT (produto acabado)
+WHERE MTART = 'FERT'
+-- Ordenação por número do material
+ORDER BY MATNR;",10301.8,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,4,exact_match,"-- Consulta materiais do tipo acabado (FERT) cadastrados no sistema
+-- Utiliza a tabela MARA que contém os dados mestres de materiais
+SELECT 
+    MATNR,           -- Número do material
+    MTART,           -- Tipo de material (FERT = Produto acabado)
+    MATKL,           -- Grupo de mercadorias
+    MEINS            -- Unidade de medida base
+FROM MARA
+WHERE MTART = 'FERT'  -- Filtra apenas produtos acabados
+ORDER BY MATNR;       -- Ordena por número do material",13125.8,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,5,exact_match,"-- Consulta materiais do tipo produto acabado (FERT)
+-- Tabela MARA contém dados mestres de materiais
+SELECT 
+    MATNR AS numero_material,
+    MTART AS tipo_material,
+    MATKL AS grupo_mercadorias,
+    MEINS AS unidade_medida
+FROM MARA
+-- Filtro para tipo FERT (produto acabado)
+WHERE MTART = 'FERT'
+-- Ordenação por número do material
+ORDER BY MATNR;",10418.9,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Consulta de movimentações de mercadoria do ano 2025
+-- Retorna dados do cabeçalho (MKPF) e itens (MSEG) dos documentos
+SELECT 
+    h.MBLNR AS documento,
+    h.MJAHR AS ano,
+    h.BUDAT AS data_lancamento,
+    s.ZEILE AS item,
+    s.BWART AS tipo_movimento,
+    s.MATNR AS material,
+    s.WERKS AS planta,
+    s.MENGE AS quantidade,
+    s.DMBTR AS valor_total
+FROM MSEG s
+JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR
+WHERE h.MJAHR = '2025'
+ORDER BY h.BUDAT DESC, h.MBLNR, s.ZEILE;",13741.3,5b6fa3d5e13f5a645234e2abe37c05ec30b96b17050cfedbc7dd2f1ee52fb60b,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MKPF"", ""MSEG""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Consulta de movimentações de mercadoria do ano 2025
+-- Retorna documento, data, material, tipo de movimento, quantidade e valor
+SELECT 
+    h.MBLNR AS documento,
+    h.MJAHR AS ano,
+    h.BUDAT AS data_lancamento,
+    s.ZEILE AS item,
+    s.MATNR AS material,
+    s.BWART AS tipo_movimento,
+    s.WERKS AS planta,
+    s.MENGE AS quantidade,
+    s.DMBTR AS valor_total
+FROM MSEG s
+-- Join com MKPF para obter a data do documento
+JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR
+-- Filtro para ano 2025
+WHERE s.MJAHR = '2025'
+-- Ordenação por data e documento
+ORDER BY h.BUDAT DESC, s.MBLNR, s.ZEILE;",13699.2,1cab1798a8c05ca737b61b8d0623b08fbfbcee717c8763ffb09d0527435544a0,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MKPF"", ""MSEG""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Consulta de movimentações de mercadoria do ano 2025
+-- Retorna dados do cabeçalho (MKPF) e itens (MSEG) dos documentos
+SELECT 
+    h.MBLNR AS documento,
+    h.MJAHR AS ano,
+    h.BUDAT AS data_lancamento,
+    s.ZEILE AS item,
+    s.BWART AS tipo_movimento,
+    s.MATNR AS material,
+    m.MTART AS tipo_material,
+    s.WERKS AS planta,
+    s.MENGE AS quantidade,
+    s.DMBTR AS valor_total
+FROM MSEG s
+-- Join com MKPF para obter data do documento
+JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR
+-- Join com MARA para enriquecer com dados do material
+LEFT JOIN MARA m ON s.MATNR = m.MATNR
+-- Filtro: apenas movimentações do ano 2025
+WHERE s.MJAHR = '2025'
+-- Ordenação por data e documento
+ORDER BY h.BUDAT DESC, h.MBLNR, s.ZEILE;",14508.9,9dc5066e0f4c49f26767873ac783fa7b56899891d6427696b8816fe5d04f79b5,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MARA"", ""MKPF"", ""MSEG""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Consulta de movimentações de mercadoria do ano 2025
+-- Retorna dados do cabeçalho (MKPF) e itens (MSEG) dos documentos
+SELECT 
+    h.MBLNR AS documento,
+    h.MJAHR AS ano,
+    h.BUDAT AS data_lancamento,
+    s.ZEILE AS item,
+    s.BWART AS tipo_movimento,
+    s.MATNR AS material,
+    s.WERKS AS planta,
+    s.MENGE AS quantidade,
+    s.DMBTR AS valor_total
+FROM MSEG s
+JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR
+WHERE h.MJAHR = '2025'
+ORDER BY h.BUDAT DESC, h.MBLNR, s.ZEILE;",13171.5,5b6fa3d5e13f5a645234e2abe37c05ec30b96b17050cfedbc7dd2f1ee52fb60b,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MKPF"", ""MSEG""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Consulta de movimentações de mercadoria do ano 2025
+-- Retorna dados do cabeçalho (MKPF) e itens (MSEG) dos documentos
+SELECT 
+    h.MBLNR AS documento,
+    h.MJAHR AS ano,
+    h.BUDAT AS data_lancamento,
+    s.ZEILE AS item,
+    s.BWART AS tipo_movimento,
+    s.MATNR AS material,
+    s.WERKS AS planta,
+    s.MENGE AS quantidade,
+    s.DMBTR AS valor_total
+FROM MSEG s
+JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR
+WHERE h.MJAHR = '2025'
+ORDER BY h.BUDAT DESC, h.MBLNR, s.ZEILE;",13718.1,5b6fa3d5e13f5a645234e2abe37c05ec30b96b17050cfedbc7dd2f1ee52fb60b,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MKPF"", ""MSEG""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,1,partial_match,"-- Consulta de notas fiscais emitidas em 2025
+-- Busca documentos de faturamento não cancelados do período
+SELECT 
+    v.VBELN AS numero_nota_fiscal,
+    v.FKART AS tipo_documento,
+    v.FKDAT AS data_emissao,
+    v.KUNAG AS codigo_cliente,
+    v.NETWR AS valor_liquido,
+    v.WAERK AS moeda,
+    v.VKORG AS organizacao_vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')
+ORDER BY v.FKDAT DESC, v.VBELN;",12039.2,c27ed5e4aeb474ed60f2ca7f4e76b738a4a0a089c7f72ca71d465b88af6aaf2b,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,87,89,"[""VBRK""]","[""VBRK""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,2,partial_match,"-- Consulta de notas fiscais emitidas em 2025
+-- Busca documentos de faturamento não cancelados do período
+SELECT 
+    v.VBELN AS numero_nota_fiscal,
+    v.FKART AS tipo_documento,
+    v.FKDAT AS data_emissao,
+    v.KUNAG AS codigo_cliente,
+    v.NETWR AS valor_liquido,
+    v.WAERK AS moeda,
+    v.VKORG AS organizacao_vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')
+ORDER BY v.FKDAT DESC, v.VBELN;",11750.7,c27ed5e4aeb474ed60f2ca7f4e76b738a4a0a089c7f72ca71d465b88af6aaf2b,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,87,89,"[""VBRK""]","[""VBRK""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,3,partial_match,"-- Consulta de notas fiscais emitidas em 2025
+-- Busca documentos de faturamento não cancelados do período
+SELECT 
+    v.VBELN AS numero_nota_fiscal,
+    v.FKART AS tipo_documento,
+    v.FKDAT AS data_emissao,
+    v.KUNAG AS codigo_cliente,
+    v.NETWR AS valor_liquido,
+    v.WAERK AS moeda,
+    v.VKORG AS organizacao_vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')
+ORDER BY v.FKDAT DESC, v.VBELN;",11377.5,c27ed5e4aeb474ed60f2ca7f4e76b738a4a0a089c7f72ca71d465b88af6aaf2b,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,87,89,"[""VBRK""]","[""VBRK""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Consulta de notas fiscais emitidas em 2025
+-- Retorna informações principais do cabeçalho de faturamento
+SELECT 
+    v.VBELN AS numero_nota_fiscal,
+    v.FKART AS tipo_documento,
+    v.FKDAT AS data_emissao,
+    v.KUNAG AS codigo_cliente,
+    v.NETWR AS valor_liquido,
+    v.WAERK AS moeda,
+    v.VKORG AS organizacao_vendas,
+    v.FKSTO AS indicador_cancelamento
+FROM VBRK v
+-- Filtro: apenas documentos emitidos em 2025
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'
+-- Ordenação: por data de emissão (mais recentes primeiro)
+ORDER BY v.FKDAT DESC, v.VBELN DESC;",12965.8,33abe211d06f6739383193eb27cc34af590ea078377e40bd31b6576fc56ca4af,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,89,89,"[""VBRK""]","[""VBRK""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,5,partial_match,"-- Consulta de notas fiscais emitidas em 2025
+-- Busca documentos de faturamento não cancelados do período
+SELECT 
+    v.VBELN AS numero_nota_fiscal,
+    v.FKART AS tipo_documento,
+    v.FKDAT AS data_emissao,
+    v.KUNAG AS codigo_cliente,
+    v.NETWR AS valor_liquido,
+    v.WAERK AS moeda,
+    v.VKORG AS organizacao_vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')
+ORDER BY v.FKDAT DESC, v.VBELN;",12741.5,c27ed5e4aeb474ed60f2ca7f4e76b738a4a0a089c7f72ca71d465b88af6aaf2b,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,87,89,"[""VBRK""]","[""VBRK""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,anthropic/claude-sonnet-4-5,1,wrong_tables,"-- Lista todos os pedidos de compra com seus itens
+-- Inclui informações do material, quantidade, preço e data de entrega
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETPR AS preco_unitario,
+    p.NETWR AS valor_total_item,
+    p.EINDT AS data_entrega_prevista,
+    p.WERKS AS planta_destino,
+    CASE 
+        WHEN p.ELIKZ = 'X' THEN 'Entrega Completa'
+        ELSE 'Pendente'
+    END AS status_entrega
+FROM EKPO p
+ORDER BY p.EBELN, p.EBELP;",11823.5,49e587f0549877fd6da3791ecb74bb2b2f2b70c565226ada289493ad654ca5bf,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,311,120,"[""EKKO""]","[""EKPO""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,anthropic/claude-sonnet-4-5,2,wrong_tables,"-- Lista todos os pedidos de compra com seus itens
+-- Inclui informações do material, quantidade, preço e data de entrega
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETPR AS preco_unitario,
+    p.NETWR AS valor_total_item,
+    p.EINDT AS data_entrega_prevista,
+    p.WERKS AS planta_destino,
+    CASE 
+        WHEN p.ELIKZ = 'X' THEN 'Entrega Completa'
+        ELSE 'Pendente'
+    END AS status_entrega
+FROM EKPO p
+ORDER BY p.EBELN, p.EBELP;",12457.5,49e587f0549877fd6da3791ecb74bb2b2f2b70c565226ada289493ad654ca5bf,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,311,120,"[""EKKO""]","[""EKPO""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,anthropic/claude-sonnet-4-5,3,wrong_tables,"-- Lista todos os itens de pedidos de compra cadastrados
+-- Agrupa por número de pedido para evitar duplicação de linhas
+SELECT DISTINCT
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.WERKS AS planta,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETPR AS preco_unitario,
+    p.NETWR AS valor_total_item,
+    p.EINDT AS data_entrega_prevista,
+    CASE 
+        WHEN p.ELIKZ = 'X' THEN 'Entrega Completa'
+        ELSE 'Pendente'
+    END AS status_entrega
+FROM EKPO p
+ORDER BY p.EBELN, p.EBELP;",12311.3,6638189c15b0bff4eded8d350c05f42b69fe37b1f2bf13b3910fbd6639ec0e3b,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,311,120,"[""EKKO""]","[""EKPO""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,anthropic/claude-sonnet-4-5,4,wrong_tables,"-- Lista todos os pedidos de compra com seus itens
+-- Inclui informações do material, quantidade, preço e data de entrega
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETPR AS preco_unitario,
+    p.NETWR AS valor_total_item,
+    p.EINDT AS data_entrega_prevista,
+    p.WERKS AS planta_destino,
+    CASE 
+        WHEN p.ELIKZ = 'X' THEN 'Entrega Completa'
+        ELSE 'Pendente'
+    END AS status_entrega
+FROM EKPO p
+ORDER BY p.EBELN, p.EBELP;",11429.4,49e587f0549877fd6da3791ecb74bb2b2f2b70c565226ada289493ad654ca5bf,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,311,120,"[""EKKO""]","[""EKPO""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,anthropic/claude-sonnet-4-5,5,wrong_tables,"-- Lista todos os pedidos de compra com seus itens
+-- Retorna informações básicas de cada item de pedido
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.WERKS AS planta,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETPR AS preco_unitario,
+    p.NETWR AS valor_total_item,
+    p.EINDT AS data_entrega_prevista,
+    CASE 
+        WHEN p.ELIKZ = 'X' THEN 'Entrega Completa'
+        ELSE 'Pendente'
+    END AS status_entrega
+FROM EKPO p
+ORDER BY p.EBELN, p.EBELP;",12485.6,6638189c15b0bff4eded8d350c05f42b69fe37b1f2bf13b3910fbd6639ec0e3b,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,311,120,"[""EKKO""]","[""EKPO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,1,partial_match,"-- Ordens de produção em aberto (não totalmente confirmadas)
+SELECT 
+    o.AUFNR AS ordem_producao,
+    o.MATNR AS codigo_material,
+    o.WERKS AS planta,
+    o.GAMNG AS qtd_planejada,
+    o.IGMNG AS qtd_confirmada,
+    o.GMEIN AS unidade,
+    o.GSTRS AS inicio_programado,
+    o.GLTRS AS fim_programado,
+    o.GSTRI AS inicio_real,
+    o.GETRI AS fim_real,
+    -- Calcula quantidade pendente
+    (o.GAMNG - COALESCE(o.IGMNG, 0)) AS qtd_pendente
+FROM AFKO o
+WHERE 
+    -- Ordem não foi totalmente confirmada
+    (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)
+    -- Ordem não tem data de conclusão confirmada
+    AND o.FTRMI IS NULL
+ORDER BY o.GSTRS DESC;",14275.7,24ecdabbab3f3ed0dac199ac30b63812eb720dc558c1512fc284296c02475c3a,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,41,150,"[""AFKO""]","[""AFKO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,2,partial_match,"-- Ordens de produção em aberto (não totalmente confirmadas)
+SELECT 
+    o.AUFNR AS ordem_producao,
+    o.MATNR AS codigo_material,
+    o.WERKS AS planta,
+    o.GAMNG AS qtd_planejada,
+    o.IGMNG AS qtd_confirmada,
+    o.GMEIN AS unidade,
+    o.GSTRS AS inicio_programado,
+    o.GLTRS AS fim_programado,
+    o.GSTRI AS inicio_real,
+    o.GETRI AS fim_real,
+    -- Calcula quantidade pendente
+    (o.GAMNG - COALESCE(o.IGMNG, 0)) AS qtd_pendente
+FROM AFKO o
+WHERE 
+    -- Ordem não foi totalmente confirmada
+    (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)
+    -- Ordem não tem data de conclusão confirmada
+    AND o.FTRMI IS NULL
+ORDER BY o.GSTRS DESC;",14094.2,24ecdabbab3f3ed0dac199ac30b63812eb720dc558c1512fc284296c02475c3a,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,41,150,"[""AFKO""]","[""AFKO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,3,partial_match,"-- Ordens de produção em aberto (não totalmente confirmadas)
+SELECT 
+    o.AUFNR AS ordem_producao,
+    o.MATNR AS codigo_material,
+    o.WERKS AS planta,
+    o.GAMNG AS qtd_planejada,
+    o.IGMNG AS qtd_confirmada,
+    o.GMEIN AS unidade,
+    o.GSTRS AS inicio_programado,
+    o.GLTRS AS fim_programado,
+    o.GSTRI AS inicio_real,
+    o.GETRI AS fim_real,
+    -- Calcula quantidade pendente
+    (o.GAMNG - COALESCE(o.IGMNG, 0)) AS qtd_pendente
+FROM AFKO o
+WHERE 
+    -- Ordem não foi totalmente confirmada
+    (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)
+    -- Ordem não tem data de conclusão confirmada
+    AND o.FTRMI IS NULL
+ORDER BY o.GSTRS DESC;",13753.2,24ecdabbab3f3ed0dac199ac30b63812eb720dc558c1512fc284296c02475c3a,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,41,150,"[""AFKO""]","[""AFKO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,4,partial_match,"-- Ordens de produção em aberto (não totalmente confirmadas)
+SELECT 
+    o.AUFNR AS ordem_producao,
+    o.MATNR AS codigo_material,
+    o.WERKS AS planta,
+    o.GAMNG AS qtd_planejada,
+    o.IGMNG AS qtd_confirmada,
+    o.GMEIN AS unidade,
+    o.GSTRS AS inicio_programado,
+    o.GLTRS AS fim_programado,
+    o.GSTRI AS inicio_real,
+    o.GETRI AS fim_real,
+    -- Calcula quantidade pendente
+    (o.GAMNG - COALESCE(o.IGMNG, 0)) AS qtd_pendente
+FROM AFKO o
+WHERE 
+    -- Ordem não foi totalmente confirmada
+    (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)
+    -- Ordem não tem data de conclusão confirmada
+    AND o.FTRMI IS NULL
+ORDER BY o.GSTRS DESC;",14506.1,24ecdabbab3f3ed0dac199ac30b63812eb720dc558c1512fc284296c02475c3a,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,41,150,"[""AFKO""]","[""AFKO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,5,partial_match,"-- Ordens de produção em aberto (não totalmente confirmadas)
+SELECT 
+    o.AUFNR AS ordem_producao,
+    o.MATNR AS codigo_material,
+    o.WERKS AS planta,
+    o.GAMNG AS qtd_planejada,
+    o.IGMNG AS qtd_confirmada,
+    o.GMEIN AS unidade,
+    o.GSTRS AS inicio_programado,
+    o.GLTRS AS fim_programado,
+    o.GSTRI AS inicio_real,
+    o.GETRI AS fim_real,
+    -- Calcula quantidade pendente
+    (o.GAMNG - COALESCE(o.IGMNG, 0)) AS qtd_pendente
+FROM AFKO o
+WHERE 
+    -- Ordem não foi totalmente confirmada
+    (o.IGMNG IS NULL OR o.IGMNG < o.GAMNG)
+    -- Ordem não tem data de conclusão confirmada
+    AND o.FTRMI IS NULL
+ORDER BY o.GSTRS DESC;",15997.1,24ecdabbab3f3ed0dac199ac30b63812eb720dc558c1512fc284296c02475c3a,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,41,150,"[""AFKO""]","[""AFKO""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,anthropic/claude-sonnet-4-5,1,partial_match,"-- Consulta de itens de notas fiscais emitidas em 2025
+-- Busca os itens (VBRP) das notas fiscais (VBRK) do período
+SELECT 
+    v.VBELN,           -- Número da nota fiscal
+    v.FKDAT,           -- Data de emissão
+    v.KUNAG,           -- Cliente pagador
+    v.FKART,           -- Tipo de documento
+    v.NETWR,           -- Valor líquido total da nota
+    v.VKORG            -- Organização de vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'  -- Filtro para ano 2025
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')        -- Exclui notas canceladas
+ORDER BY v.FKDAT DESC, v.VBELN;",14917.4,82a775593d3188f77cd0553566a40b4fa27be7273ced26af474de471ae1fb937,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,87,246,"[""VBRP"", ""VBRK""]","[""VBRK"", ""VBRP""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,anthropic/claude-sonnet-4-5,2,partial_match,"-- Consulta de itens de notas fiscais emitidas em 2025
+-- Busca os itens (VBRP) das notas fiscais (VBRK) do período
+SELECT 
+    v.VBELN,           -- Número da nota fiscal
+    v.FKDAT,           -- Data de emissão
+    v.KUNAG,           -- Cliente pagador
+    v.FKART,           -- Tipo de documento
+    v.NETWR,           -- Valor líquido total da nota
+    v.VKORG            -- Organização de vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'  -- Filtro para ano 2025
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')        -- Exclui notas canceladas
+ORDER BY v.FKDAT DESC, v.VBELN;",15608.8,82a775593d3188f77cd0553566a40b4fa27be7273ced26af474de471ae1fb937,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,87,246,"[""VBRP"", ""VBRK""]","[""VBRK"", ""VBRP""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,anthropic/claude-sonnet-4-5,3,partial_match,"-- Consulta de itens de notas fiscais emitidas em 2025
+-- Busca os itens (VBRP) das notas fiscais (VBRK) do período
+SELECT 
+    v.VBELN,           -- Número da nota fiscal
+    v.FKDAT,           -- Data de emissão
+    v.KUNAG,           -- Cliente pagador
+    v.FKART,           -- Tipo de documento
+    v.NETWR,           -- Valor líquido total da nota
+    v.VKORG            -- Organização de vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'  -- Filtro para ano 2025
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')        -- Exclui notas canceladas
+ORDER BY v.FKDAT DESC, v.VBELN;",14432.5,82a775593d3188f77cd0553566a40b4fa27be7273ced26af474de471ae1fb937,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,87,246,"[""VBRP"", ""VBRK""]","[""VBRK"", ""VBRP""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,anthropic/claude-sonnet-4-5,4,partial_match,"-- Consulta de itens de notas fiscais emitidas em 2025
+-- Busca os itens (VBRP) das notas fiscais (VBRK) do período
+SELECT 
+    v.VBELN,           -- Número da nota fiscal
+    v.FKDAT,           -- Data de emissão
+    v.KUNAG,           -- Cliente pagador
+    v.FKART,           -- Tipo de documento
+    v.NETWR,           -- Valor líquido total da nota
+    v.VKORG            -- Organização de vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'  -- Filtro para ano 2025
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')        -- Exclui notas canceladas
+ORDER BY v.FKDAT DESC, v.VBELN;",15419.5,82a775593d3188f77cd0553566a40b4fa27be7273ced26af474de471ae1fb937,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,87,246,"[""VBRP"", ""VBRK""]","[""VBRK"", ""VBRP""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,anthropic/claude-sonnet-4-5,5,partial_match,"-- Consulta de itens de notas fiscais emitidas em 2025
+-- Busca os itens (VBRP) das notas fiscais (VBRK) do período
+SELECT 
+    v.VBELN,           -- Número da nota fiscal
+    v.FKDAT,           -- Data de emissão
+    v.KUNAG,           -- Cliente pagador
+    v.FKART,           -- Tipo de documento
+    v.NETWR,           -- Valor líquido total da nota
+    v.VKORG            -- Organização de vendas
+FROM VBRK v
+WHERE v.FKDAT BETWEEN '20250101' AND '20251231'  -- Filtro para ano 2025
+  AND (v.FKSTO IS NULL OR v.FKSTO <> 'X')        -- Exclui notas canceladas
+ORDER BY v.FKDAT DESC, v.VBELN;",14680.4,82a775593d3188f77cd0553566a40b4fa27be7273ced26af474de471ae1fb937,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,87,246,"[""VBRP"", ""VBRK""]","[""VBRK"", ""VBRP""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,anthropic/claude-sonnet-4-5,1,partial_match,"-- Consulta de estoque disponível por material e depósito
+-- Retorna apenas registros com estoque livre maior que zero
+SELECT 
+    d.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    d.WERKS AS planta,
+    d.LGORT AS deposito,
+    d.LABST AS estoque_disponivel,
+    d.EINME AS unidade_medida,
+    m.MTART AS tipo_material
+FROM MARD d
+-- Join com MARA para trazer descrição e tipo do material
+INNER JOIN MARA m ON d.MATNR = m.MATNR
+-- Filtra apenas registros com estoque livre disponível
+WHERE d.LABST > 0
+-- Ordena por material, planta e depósito para facilitar análise
+ORDER BY d.MATNR, d.WERKS, d.LGORT;",13451.0,4ecb9c24018baf89f64d502635bcb2ec88838fd827fd67e8b327d15af012f35a,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARA"", ""MARD""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,anthropic/claude-sonnet-4-5,2,partial_match,"-- Consulta de estoque disponível por material e depósito
+-- Retorna apenas registros com estoque livre maior que zero
+SELECT 
+    d.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    d.WERKS AS planta,
+    d.LGORT AS deposito,
+    d.LABST AS estoque_disponivel,
+    d.EINME AS unidade_medida,
+    m.MTART AS tipo_material
+FROM MARD d
+-- JOIN com MARA para trazer descrição e tipo do material
+INNER JOIN MARA m ON d.MATNR = m.MATNR
+-- Filtro para mostrar apenas posições com estoque disponível
+WHERE d.LABST > 0
+-- Ordenação por material, planta e depósito
+ORDER BY d.MATNR, d.WERKS, d.LGORT;",13151.8,4ecb9c24018baf89f64d502635bcb2ec88838fd827fd67e8b327d15af012f35a,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARA"", ""MARD""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,anthropic/claude-sonnet-4-5,3,partial_match,"-- Consulta de estoque disponível por material e depósito
+-- Retorna apenas registros com estoque livre maior que zero
+SELECT 
+    d.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    d.WERKS AS planta,
+    d.LGORT AS deposito,
+    d.LABST AS estoque_disponivel,
+    d.EINME AS unidade_medida,
+    m.MTART AS tipo_material
+FROM MARD d
+-- Join com MARA para trazer descrição e tipo do material
+INNER JOIN MARA m ON d.MATNR = m.MATNR
+-- Filtro para mostrar apenas posições com estoque disponível
+WHERE d.LABST > 0
+-- Ordenação por material, planta e depósito
+ORDER BY d.MATNR, d.WERKS, d.LGORT;",15006.2,4ecb9c24018baf89f64d502635bcb2ec88838fd827fd67e8b327d15af012f35a,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARA"", ""MARD""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,anthropic/claude-sonnet-4-5,4,partial_match,"-- Consulta de estoque disponível por material e depósito
+-- Retorna apenas registros com estoque livre maior que zero
+SELECT 
+    d.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    d.WERKS AS planta,
+    d.LGORT AS deposito,
+    d.LABST AS estoque_disponivel,
+    d.EINME AS unidade_medida,
+    m.MTART AS tipo_material
+FROM MARD d
+-- JOIN com MARA para trazer descrição e tipo do material
+INNER JOIN MARA m ON d.MATNR = m.MATNR
+-- Filtro para mostrar apenas posições com estoque disponível
+WHERE d.LABST > 0
+-- Ordenação por material, planta e depósito
+ORDER BY d.MATNR, d.WERKS, d.LGORT;",13896.6,4ecb9c24018baf89f64d502635bcb2ec88838fd827fd67e8b327d15af012f35a,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARA"", ""MARD""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,anthropic/claude-sonnet-4-5,5,partial_match,"-- Consulta de estoque disponível por material e depósito
+-- Retorna apenas registros com estoque livre maior que zero
+SELECT 
+    d.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    d.WERKS AS planta,
+    d.LGORT AS deposito,
+    d.LABST AS estoque_disponivel,
+    d.EINME AS unidade_medida,
+    m.MTART AS tipo_material
+FROM MARD d
+-- JOIN com MARA para trazer descrição e tipo do material
+INNER JOIN MARA m ON d.MATNR = m.MATNR
+-- Filtro para mostrar apenas posições com estoque disponível
+WHERE d.LABST > 0
+-- Ordenação por material, planta e depósito
+ORDER BY d.MATNR, d.WERKS, d.LGORT;",13782.9,4ecb9c24018baf89f64d502635bcb2ec88838fd827fd67e8b327d15af012f35a,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARA"", ""MARD""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Lista documentos de material de janeiro/2025
+-- Busca cabeçalhos de documentos (MKPF) filtrados pela data de lançamento
+SELECT 
+    h.MBLNR AS numero_documento,
+    h.MJAHR AS ano_documento,
+    h.BUDAT AS data_lancamento,
+    h.BLDAT AS data_documento,
+    h.USNAM AS usuario,
+    COUNT(s.ZEILE) AS quantidade_itens
+FROM MKPF h
+-- JOIN com MSEG para contar itens do documento
+LEFT JOIN MSEG s ON h.MBLNR = s.MBLNR AND h.MJAHR = s.MJAHR
+-- Filtro: janeiro de 2025 (formato YYYYMMDD)
+WHERE h.BUDAT BETWEEN '20250101' AND '20250131'
+GROUP BY h.MBLNR, h.MJAHR, h.BUDAT, h.BLDAT, h.USNAM
+-- Ordenação: documentos mais recentes primeiro
+ORDER BY h.BUDAT DESC, h.MBLNR DESC;",14533.1,a55ef60f9bddad11204d9f8a20ff74442a434346e6cbe7167e36261132199a8f,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF"", ""MSEG""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Lista documentos de material de janeiro/2025
+-- Busca cabeçalhos de documentos (MKPF) filtrados pela data de lançamento
+SELECT 
+    h.MBLNR AS numero_documento,
+    h.MJAHR AS ano_documento,
+    h.BUDAT AS data_lancamento,
+    h.BLDAT AS data_documento,
+    h.USNAM AS usuario,
+    COUNT(s.ZEILE) AS quantidade_itens
+FROM MKPF h
+-- JOIN com MSEG para contar quantos itens cada documento possui
+LEFT JOIN MSEG s ON h.MBLNR = s.MBLNR AND h.MJAHR = s.MJAHR
+-- Filtro: data de lançamento entre 01/01/2025 e 31/01/2025
+WHERE h.BUDAT BETWEEN '20250101' AND '20250131'
+GROUP BY h.MBLNR, h.MJAHR, h.BUDAT, h.BLDAT, h.USNAM
+-- Ordena do mais recente para o mais antigo
+ORDER BY h.BUDAT DESC, h.MBLNR DESC;",13711.8,a55ef60f9bddad11204d9f8a20ff74442a434346e6cbe7167e36261132199a8f,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF"", ""MSEG""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Lista documentos de material de janeiro/2025
+-- Busca cabeçalhos de documentos (MKPF) filtrados pela data de lançamento
+SELECT 
+    h.MBLNR AS numero_documento,
+    h.MJAHR AS ano_documento,
+    h.BUDAT AS data_lancamento,
+    h.BLDAT AS data_documento,
+    h.USNAM AS usuario,
+    COUNT(s.ZEILE) AS quantidade_itens
+FROM MKPF h
+-- JOIN com MSEG para contar quantos itens cada documento possui
+LEFT JOIN MSEG s ON h.MBLNR = s.MBLNR AND h.MJAHR = s.MJAHR
+-- Filtro: data de lançamento entre 01/01/2025 e 31/01/2025
+WHERE h.BUDAT BETWEEN '20250101' AND '20250131'
+GROUP BY h.MBLNR, h.MJAHR, h.BUDAT, h.BLDAT, h.USNAM
+-- Ordena do mais recente para o mais antigo
+ORDER BY h.BUDAT DESC, h.MBLNR DESC;",14415.9,a55ef60f9bddad11204d9f8a20ff74442a434346e6cbe7167e36261132199a8f,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF"", ""MSEG""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Lista documentos de material de janeiro/2025
+-- Busca cabeçalhos de documentos (MKPF) filtrados pela data de lançamento
+SELECT 
+    h.MBLNR AS numero_documento,
+    h.MJAHR AS ano_documento,
+    h.BUDAT AS data_lancamento,
+    h.BLDAT AS data_documento,
+    h.USNAM AS usuario,
+    COUNT(s.ZEILE) AS quantidade_itens
+FROM MKPF h
+-- JOIN com MSEG para contar quantos itens cada documento possui
+LEFT JOIN MSEG s ON h.MBLNR = s.MBLNR AND h.MJAHR = s.MJAHR
+-- Filtro: data de lançamento entre 01/01/2025 e 31/01/2025
+WHERE h.BUDAT BETWEEN '20250101' AND '20250131'
+GROUP BY h.MBLNR, h.MJAHR, h.BUDAT, h.BLDAT, h.USNAM
+-- Ordena do mais recente para o mais antigo
+ORDER BY h.BUDAT DESC, h.MBLNR DESC;",21091.4,a55ef60f9bddad11204d9f8a20ff74442a434346e6cbe7167e36261132199a8f,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF"", ""MSEG""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Lista documentos de material de janeiro/2025
+-- Busca cabeçalhos de documentos (MKPF) filtrados pela data de lançamento
+SELECT 
+    h.MBLNR AS numero_documento,
+    h.MJAHR AS ano_documento,
+    h.BUDAT AS data_lancamento,
+    h.BLDAT AS data_documento,
+    h.USNAM AS usuario,
+    COUNT(s.ZEILE) AS quantidade_itens
+FROM MKPF h
+-- JOIN com MSEG para contar quantos itens cada documento possui
+LEFT JOIN MSEG s ON h.MBLNR = s.MBLNR AND h.MJAHR = s.MJAHR
+-- Filtro: data de lançamento entre 01/01/2025 e 31/01/2025
+WHERE h.BUDAT BETWEEN '20250101' AND '20250131'
+GROUP BY h.MBLNR, h.MJAHR, h.BUDAT, h.BLDAT, h.USNAM
+-- Ordena do mais recente para o mais antigo
+ORDER BY h.BUDAT DESC, h.MBLNR DESC;",14639.9,a55ef60f9bddad11204d9f8a20ff74442a434346e6cbe7167e36261132199a8f,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF"", ""MSEG""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Busca itens de pedidos de compra que ainda não foram totalmente entregues
+-- Filtra pelo indicador ELIKZ que marca entregas completas
+SELECT 
+    p.EBELN AS pedido_compra,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETWR AS valor_item,
+    p.EINDT AS data_entrega_prevista,
+    e.LIFNR AS codigo_fornecedor,
+    f.NAME1 AS nome_fornecedor,
+    e.BEDAT AS data_criacao_pedido
+FROM EKPO p
+-- JOIN com cabeçalho do pedido para obter dados do fornecedor
+INNER JOIN EKKO e ON p.EBELN = e.EBELN
+-- JOIN com mestre de materiais para descrição
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- JOIN com mestre de fornecedores para nome
+LEFT JOIN LFA1 f ON e.LIFNR = f.LIFNR
+-- Filtra apenas itens com entrega não completa
+WHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')
+ORDER BY p.EINDT ASC, p.EBELN, p.EBELP;",16795.2,6e362180b1eef859780dd29ed50d679d1eb7d2d67cd328c604a0d28ae7634c61,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKKO"", ""EKPO"", ""LFA1"", ""MARA""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Busca itens de pedidos de compra que ainda não foram totalmente entregues
+-- Filtra pelo indicador ELIKZ que marca entregas completas
+SELECT 
+    p.EBELN AS pedido_compra,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETWR AS valor_item,
+    p.EINDT AS data_entrega_prevista,
+    e.LIFNR AS codigo_fornecedor,
+    f.NAME1 AS nome_fornecedor,
+    e.BEDAT AS data_pedido,
+    e.EKORG AS organizacao_compras
+FROM EKPO p
+-- JOIN com cabeçalho do pedido para obter dados do fornecedor
+INNER JOIN EKKO e ON p.EBELN = e.EBELN
+-- JOIN com mestre de materiais para descrição
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- JOIN com mestre de fornecedores para nome
+LEFT JOIN LFA1 f ON e.LIFNR = f.LIFNR
+-- Filtra apenas itens não entregues completamente
+WHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')
+ORDER BY p.EINDT ASC, p.EBELN, p.EBELP;",15514.5,ea0523c32999edce03d3502e33e125b3b732e2c0642f98a6e02c438a34491fad,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKKO"", ""EKPO"", ""LFA1"", ""MARA""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Busca itens de pedidos de compra que ainda não foram totalmente entregues
+-- Filtra pelo indicador ELIKZ que marca entregas completas
+SELECT 
+    p.EBELN AS pedido_compra,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETWR AS valor_item,
+    p.EINDT AS data_entrega_prevista,
+    e.LIFNR AS codigo_fornecedor,
+    f.NAME1 AS nome_fornecedor,
+    e.BEDAT AS data_pedido
+FROM EKPO p
+-- Join com cabeçalho do pedido para obter dados do fornecedor
+INNER JOIN EKKO e ON p.EBELN = e.EBELN
+-- Join com mestre de materiais para descrição
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- Join com mestre de fornecedores para nome
+LEFT JOIN LFA1 f ON e.LIFNR = f.LIFNR
+-- Filtra apenas itens não entregues completamente
+WHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')
+ORDER BY p.EINDT, p.EBELN, p.EBELP;",16771.4,6e362180b1eef859780dd29ed50d679d1eb7d2d67cd328c604a0d28ae7634c61,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKKO"", ""EKPO"", ""LFA1"", ""MARA""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Busca itens de pedidos de compra que ainda não foram totalmente entregues
+-- Filtra pelo indicador ELIKZ que marca entregas completas
+SELECT 
+    p.EBELN AS pedido_compra,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    m.MAKTX AS descricao_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETWR AS valor_item,
+    p.EINDT AS data_entrega_prevista,
+    e.LIFNR AS codigo_fornecedor,
+    f.NAME1 AS nome_fornecedor,
+    e.BEDAT AS data_pedido
+FROM EKPO p
+-- JOIN com cabeçalho do pedido para obter dados do fornecedor
+INNER JOIN EKKO e ON p.EBELN = e.EBELN
+-- JOIN com mestre de materiais para descrição
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- JOIN com mestre de fornecedores para nome
+LEFT JOIN LFA1 f ON e.LIFNR = f.LIFNR
+-- Filtra apenas itens com entrega não completa
+WHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')
+ORDER BY p.EINDT, p.EBELN, p.EBELP;",24063.2,6e362180b1eef859780dd29ed50d679d1eb7d2d67cd328c604a0d28ae7634c61,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKKO"", ""EKPO"", ""LFA1"", ""MARA""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Busca itens de pedidos de compra que ainda não foram totalmente entregues
+-- Filtra pelo indicador ELIKZ que marca entregas completas
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_material,
+    p.MENGE AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.EINDT AS data_entrega_prevista,
+    p.NETWR AS valor_item,
+    k.LIFNR AS codigo_fornecedor,
+    k.BEDAT AS data_pedido,
+    k.WAERS AS moeda
+FROM EKPO p
+-- JOIN com cabeçalho do pedido para obter dados do fornecedor e datas
+INNER JOIN EKKO k ON p.EBELN = k.EBELN
+-- Filtra apenas itens onde a entrega NÃO está marcada como completa
+WHERE (p.ELIKZ IS NULL OR p.ELIKZ <> 'X')
+ORDER BY p.EINDT ASC, p.EBELN, p.EBELP;",14453.8,9b55270895c5a9f574072d088d12174e1f7a603bd82d4b2ae35245391ca2e46f,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKKO"", ""EKPO""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,1,partial_match,"-- ERRO: Tabela de pedidos de venda não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- MARD (estoque por depósito)
+-- MSEG (movimentações de material)
+-- EKKO (pedidos de compra)
+-- Não há tabela VBAK (cabeçalho de pedidos de venda) ou similar no contexto
+
+SELECT 'TABELA_NAO_DISPONIVEL' AS erro,
+       'A consulta de pedidos de venda requer a tabela VBAK que não está no contexto fornecido' AS mensagem;",14140.5,1cd3b3b3555a3468fa883b64ddb952ba3f6dc90a5b982c24a0f5fdfe8b2fd5ef,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,1,107,"[""VBAK""]","[""EKKO"", ""MARD"", ""MSEG"", ""VBAK""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,2,partial_match,"-- ERRO: Tabela de pedidos de venda não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- MARD (estoque por depósito)
+-- MSEG (movimentações de material)
+-- EKKO (pedidos de compra)
+-- Não há tabela VBAK (cabeçalho de pedidos de venda) ou similar no contexto
+
+SELECT 'TABELA_NAO_DISPONIVEL' AS erro,
+       'A consulta de pedidos de venda requer a tabela VBAK que não está no contexto fornecido' AS mensagem;",14234.4,1cd3b3b3555a3468fa883b64ddb952ba3f6dc90a5b982c24a0f5fdfe8b2fd5ef,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,1,107,"[""VBAK""]","[""EKKO"", ""MARD"", ""MSEG"", ""VBAK""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,3,partial_match,"-- ERRO: Tabela de pedidos de venda não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- MARD (estoque por depósito)
+-- MSEG (movimentações de material)
+-- EKKO (pedidos de compra)
+-- Não há tabela VBAK (cabeçalho de pedidos de venda) ou similar no contexto
+
+SELECT 'TABELA_NAO_DISPONIVEL' AS erro,
+       'A consulta de pedidos de venda requer a tabela VBAK que não está no contexto fornecido' AS mensagem;",14448.1,1cd3b3b3555a3468fa883b64ddb952ba3f6dc90a5b982c24a0f5fdfe8b2fd5ef,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,1,107,"[""VBAK""]","[""EKKO"", ""MARD"", ""MSEG"", ""VBAK""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,4,partial_match,"-- ERRO: Tabela de pedidos de venda não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- MARD (estoque por depósito)
+-- MSEG (movimentações de material)
+-- EKKO (pedidos de compra)
+-- Não há tabela VBAK (cabeçalho de pedidos de venda) ou similar no contexto
+
+SELECT 'TABELA_NAO_DISPONIVEL' AS erro,
+       'A consulta de pedidos de venda requer a tabela VBAK que não está no contexto fornecido' AS mensagem;",24465.0,1cd3b3b3555a3468fa883b64ddb952ba3f6dc90a5b982c24a0f5fdfe8b2fd5ef,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,1,107,"[""VBAK""]","[""EKKO"", ""MARD"", ""MSEG"", ""VBAK""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,anthropic/claude-sonnet-4-5,5,partial_match,"-- ERRO: Tabela de pedidos de venda não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- MARD (estoque por depósito)
+-- MSEG (movimentações de material)
+-- EKKO (pedidos de compra)
+-- Não há tabela VBAK (cabeçalho de pedidos de venda) ou similar no contexto
+
+SELECT 'TABELA_NAO_DISPONIVEL' AS erro,
+       'A consulta de pedidos de venda requer a tabela VBAK que não está no contexto fornecido' AS mensagem;",16560.3,1cd3b3b3555a3468fa883b64ddb952ba3f6dc90a5b982c24a0f5fdfe8b2fd5ef,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,1,107,"[""VBAK""]","[""EKKO"", ""MARD"", ""MSEG"", ""VBAK""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,1,partial_match,"-- Busca itens de pedidos de venda pendentes de faturamento
+-- Filtra por status de faturamento diferente de 'C' (totalmente faturado)
+SELECT 
+    v.VBELN AS pedido_venda,
+    v.AUDAT AS data_pedido,
+    v.KUNNR AS cliente,
+    c.NAME1 AS nome_cliente,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.KWMENG AS quantidade_pedida,
+    p.MEINS AS unidade,
+    p.NETWR AS valor_item,
+    p.EDATU AS data_entrega,
+    p.FKSTA AS status_faturamento,
+    CASE 
+        WHEN p.FKSTA = '' OR p.FKSTA IS NULL THEN 'Não faturado'
+        WHEN p.FKSTA = 'A' THEN 'Parcialmente faturado'
+        ELSE 'Outro status'
+    END AS descricao_status
+FROM VBAP p
+-- JOIN com cabeçalho do pedido para dados do cliente e data
+JOIN VBAK v ON p.VBELN = v.VBELN
+-- JOIN com cliente para nome
+JOIN KNA1 c ON v.KUNNR = c.KUNNR
+-- JOIN com material para descrição
+JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtra apenas itens não totalmente faturados
+WHERE (p.FKSTA IS NULL OR p.FKSTA = '' OR p.FKSTA = 'A')
+ORDER BY v.AUDAT DESC, v.VBELN, p.POSNR;",17257.8,f13c4132f0fb74acd33ac7248af99164f099ee03058fad02f3d272adcb0b63af,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,90,152,"[""VBAP""]","[""KNA1"", ""MARA"", ""VBAK"", ""VBAP""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Busca itens de pedidos de venda pendentes de faturamento
+-- Filtra por status de faturamento diferente de 'C' (totalmente faturado)
+SELECT 
+    v.VBELN AS pedido_venda,
+    v.POSNR AS item_pedido,
+    v.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    v.KWMENG AS quantidade_pedida,
+    v.MEINS AS unidade_medida,
+    v.NETWR AS valor_item,
+    v.EDATU AS data_entrega,
+    v.FKSTA AS status_faturamento,
+    CASE 
+        WHEN v.FKSTA = '' THEN 'Não faturado'
+        WHEN v.FKSTA = 'A' THEN 'Parcialmente faturado'
+        ELSE 'Outro status'
+    END AS descricao_status,
+    k.KUNNR AS cliente,
+    c.NAME1 AS nome_cliente
+FROM VBAP v
+-- Join com cabeçalho do pedido para obter dados do cliente
+JOIN VBAK k ON v.VBELN = k.VBELN
+-- Join com mestre de materiais para descrição
+LEFT JOIN MARA m ON v.MATNR = m.MATNR
+-- Join com mestre de clientes para nome
+LEFT JOIN KNA1 c ON k.KUNNR = c.KUNNR
+-- Filtra apenas itens não totalmente faturados
+WHERE v.FKSTA <> 'C'
+   OR v.FKSTA IS NULL
+-- Ordena por pedido e item
+ORDER BY v.VBELN, v.POSNR;",16784.3,395af0881148b1ce673d729c0ed44bf8f460805174bbfab45d76e916382b4251,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,152,152,"[""VBAP""]","[""KNA1"", ""MARA"", ""VBAK"", ""VBAP""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Busca itens de pedidos de venda pendentes de faturamento
+-- Filtra por status de faturamento diferente de 'C' (totalmente faturado)
+SELECT 
+    v.VBELN AS pedido_venda,
+    v.POSNR AS item_pedido,
+    v.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    v.KWMENG AS quantidade_pedida,
+    v.MEINS AS unidade_medida,
+    v.NETWR AS valor_item,
+    v.EDATU AS data_entrega,
+    v.FKSTA AS status_faturamento,
+    CASE 
+        WHEN v.FKSTA = '' THEN 'Não faturado'
+        WHEN v.FKSTA = 'A' THEN 'Parcialmente faturado'
+        ELSE 'Outro status'
+    END AS descricao_status,
+    k.AUDAT AS data_pedido,
+    k.KUNNR AS cliente,
+    c.NAME1 AS nome_cliente
+FROM VBAP v
+-- Join com cabeçalho do pedido para obter dados do cliente e data
+JOIN VBAK k ON v.VBELN = k.VBELN
+-- Join com mestre de materiais para descrição
+LEFT JOIN MARA m ON v.MATNR = m.MATNR
+-- Join com mestre de clientes para nome
+LEFT JOIN KNA1 c ON k.KUNNR = c.KUNNR
+-- Filtra apenas itens não totalmente faturados
+WHERE v.FKSTA <> 'C'
+   OR v.FKSTA IS NULL
+   OR v.FKSTA = ''
+ORDER BY k.AUDAT DESC, v.VBELN, v.POSNR;",21118.7,6efc3a7df2a465d85f7261890a0c62ae2f64ba80c6426b3558c0331f73d9577d,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,152,152,"[""VBAP""]","[""KNA1"", ""MARA"", ""VBAK"", ""VBAP""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,4,partial_match,"-- Busca itens de pedidos de venda pendentes de faturamento
+-- Filtra por status de faturamento diferente de 'C' (totalmente faturado)
+SELECT 
+    v.VBELN AS pedido_venda,
+    v.AUDAT AS data_pedido,
+    v.KUNNR AS codigo_cliente,
+    c.NAME1 AS nome_cliente,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.KWMENG AS quantidade_pedida,
+    p.MEINS AS unidade_medida,
+    p.NETWR AS valor_item,
+    p.EDATU AS data_entrega,
+    p.FKSTA AS status_faturamento,
+    CASE 
+        WHEN p.FKSTA = '' THEN 'Não faturado'
+        WHEN p.FKSTA = 'A' THEN 'Parcialmente faturado'
+        ELSE 'Outro'
+    END AS descricao_status
+FROM VBAP p
+-- Join com cabeçalho do pedido para dados do cliente e data
+JOIN VBAK v ON p.VBELN = v.VBELN
+-- Join com cadastro de clientes para nome
+JOIN KNA1 c ON v.KUNNR = c.KUNNR
+-- Join com cadastro de materiais para descrição
+JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtra apenas itens não totalmente faturados
+WHERE p.FKSTA <> 'C'
+   OR p.FKSTA IS NULL
+-- Ordena por data de pedido e número do pedido
+ORDER BY v.AUDAT DESC, v.VBELN, p.POSNR;",18629.1,6cf65ee72ff0e17777515740fbec69d549e96c0bbf447c1d7b1382fa3b267fd2,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,152,152,"[""VBAP""]","[""KNA1"", ""MARA"", ""VBAK"", ""VBAP""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Busca itens de pedidos de venda pendentes de faturamento
+-- Filtra por status de faturamento diferente de 'C' (totalmente faturado)
+SELECT 
+    v.VBELN AS pedido_venda,
+    v.POSNR AS item_pedido,
+    v.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    v.KWMENG AS quantidade_pedida,
+    v.MEINS AS unidade_medida,
+    v.NETWR AS valor_item,
+    v.EDATU AS data_entrega,
+    v.FKSTA AS status_faturamento,
+    k.AUDAT AS data_pedido,
+    k.KUNNR AS cliente,
+    c.NAME1 AS nome_cliente
+FROM VBAP v
+-- Join com cabeçalho do pedido para obter dados do cliente e data
+JOIN VBAK k ON v.VBELN = k.VBELN
+-- Join com mestre de materiais para descrição
+JOIN MARA m ON v.MATNR = m.MATNR
+-- Join com mestre de clientes para nome
+JOIN KNA1 c ON k.KUNNR = c.KUNNR
+-- Filtra apenas itens não totalmente faturados
+WHERE (v.FKSTA IS NULL OR v.FKSTA != 'C')
+ORDER BY k.AUDAT DESC, v.VBELN, v.POSNR;",17751.5,15cc146073b983c9cdcca8e33f0b91ce933953c8b1289c8268bc1d99aed0eb74,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,152,152,"[""VBAP""]","[""KNA1"", ""MARA"", ""VBAK"", ""VBAP""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Lista completa de clientes cadastrados
+-- Retorna informações básicas de identificação e localização
+SELECT 
+    KUNNR AS codigo_cliente,
+    NAME1 AS nome_cliente,
+    NAME2 AS complemento_nome,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKD AS grupo_contas
+FROM KNA1
+ORDER BY KUNNR;",34033.1,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Lista completa de clientes cadastrados
+-- Retorna informações básicas de identificação e localização
+SELECT 
+    KUNNR AS codigo_cliente,
+    NAME1 AS nome_cliente,
+    NAME2 AS complemento_nome,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKD AS grupo_contas
+FROM KNA1
+ORDER BY KUNNR;",11589.2,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Lista completa de clientes cadastrados
+-- Retorna informações básicas de identificação e localização
+SELECT 
+    KUNNR AS codigo_cliente,
+    NAME1 AS nome_cliente,
+    NAME2 AS complemento_nome,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKD AS grupo_contas
+FROM KNA1
+ORDER BY KUNNR;",11938.9,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Lista completa de clientes cadastrados
+-- Retorna informações básicas de identificação e localização
+SELECT 
+    KUNNR AS codigo_cliente,
+    NAME1 AS nome_cliente,
+    NAME2 AS complemento_nome,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKD AS grupo_contas
+FROM KNA1
+ORDER BY KUNNR;",11290.4,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Lista completa de clientes cadastrados
+-- Retorna informações básicas de identificação e localização
+SELECT 
+    KUNNR AS codigo_cliente,
+    NAME1 AS nome_cliente,
+    NAME2 AS complemento_nome,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKD AS grupo_contas
+FROM KNA1
+ORDER BY KUNNR;",13750.5,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Lista todos os fornecedores cadastrados com suas informações principais
+SELECT 
+    LIFNR AS codigo_fornecedor,
+    NAME1 AS nome_fornecedor,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKK AS grupo_contas
+FROM LFA1
+ORDER BY NAME1;",12559.1,779374013e271b89dfce2a2679639c4174d128c5f46e7bd2a759bc3c297bee55,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Lista todos os fornecedores cadastrados com suas informações principais
+SELECT 
+    LIFNR AS codigo_fornecedor,
+    NAME1 AS nome_fornecedor,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKK AS grupo_contas
+FROM LFA1
+ORDER BY NAME1;",12220.3,779374013e271b89dfce2a2679639c4174d128c5f46e7bd2a759bc3c297bee55,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Lista todos os fornecedores cadastrados com suas informações principais
+SELECT 
+    LIFNR AS codigo_fornecedor,
+    NAME1 AS nome_fornecedor,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKK AS grupo_contas
+FROM LFA1
+ORDER BY NAME1;",17479.6,779374013e271b89dfce2a2679639c4174d128c5f46e7bd2a759bc3c297bee55,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Lista todos os fornecedores cadastrados com suas informações principais
+SELECT 
+    LIFNR AS codigo_fornecedor,
+    NAME1 AS nome_fornecedor,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKK AS grupo_contas
+FROM LFA1
+ORDER BY NAME1;",16818.2,779374013e271b89dfce2a2679639c4174d128c5f46e7bd2a759bc3c297bee55,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Lista todos os fornecedores cadastrados com suas informações principais
+SELECT 
+    LIFNR AS codigo_fornecedor,
+    NAME1 AS nome_fornecedor,
+    LAND1 AS pais,
+    ORT01 AS cidade,
+    KTOKK AS grupo_contas
+FROM LFA1
+ORDER BY NAME1;",21620.7,779374013e271b89dfce2a2679639c4174d128c5f46e7bd2a759bc3c297bee55,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,anthropic/claude-sonnet-4-5,1,partial_match,"-- Consulta dados de planejamento de materiais por planta
+-- Retorna configurações de MRP, estoques mínimos e tipo de abastecimento
+SELECT 
+    m.MATNR AS numero_material,
+    ma.MTART AS tipo_material,
+    ma.MATKL AS grupo_mercadorias,
+    m.WERKS AS planta,
+    m.DISMM AS tipo_mrp,
+    m.MINBE AS estoque_minimo,
+    m.EISBE AS estoque_seguranca,
+    m.BESKZ AS tipo_abastecimento,
+    m.LGPRO AS deposito_fornecimento,
+    ma.MEINS AS unidade_medida
+FROM MARC m
+-- Join com MARA para enriquecer com dados gerais do material
+INNER JOIN MARA ma ON m.MATNR = ma.MATNR
+-- Ordena por planta e material para facilitar análise
+ORDER BY m.WERKS, m.MATNR;",14931.4,f3fd2ea00b1817868df629ece7a36706bc6345b5b59def86f0006c783691139e,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARA"", ""MARC""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,anthropic/claude-sonnet-4-5,2,partial_match,"-- Consulta dados de planejamento de materiais por planta
+-- Retorna configurações de MRP, estoques mínimos e tipo de abastecimento
+SELECT 
+    m.MATNR AS numero_material,
+    ma.MTART AS tipo_material,
+    ma.MATKL AS grupo_mercadorias,
+    m.WERKS AS planta,
+    m.DISMM AS tipo_mrp,
+    m.BESKZ AS tipo_abastecimento,
+    m.MINBE AS estoque_minimo,
+    m.EISBE AS estoque_seguranca,
+    m.LGPRO AS deposito_fornecimento,
+    ma.MEINS AS unidade_medida
+FROM MARC m
+-- Join com MARA para enriquecer com dados gerais do material
+INNER JOIN MARA ma ON m.MATNR = ma.MATNR
+-- Ordena por planta e material para facilitar análise
+ORDER BY m.WERKS, m.MATNR;",13552.0,0b4d55c7ea866547e0043379568c8a9ad23b6448ac045cf3772f1079cc087f5f,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARA"", ""MARC""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,anthropic/claude-sonnet-4-5,3,partial_match,"-- Consulta de dados de planejamento de materiais por planta
+-- Retorna configurações de MRP, estoques mínimos e tipo de abastecimento
+SELECT 
+    m.MATNR AS numero_material,
+    ma.MTART AS tipo_material,
+    ma.MATKL AS grupo_mercadorias,
+    m.WERKS AS planta,
+    m.DISMM AS tipo_mrp,
+    m.MINBE AS estoque_minimo,
+    m.EISBE AS estoque_seguranca,
+    m.BESKZ AS tipo_abastecimento,
+    m.LGPRO AS deposito_fornecimento,
+    ma.MEINS AS unidade_medida
+FROM MARC m
+-- Join com MARA para obter informações gerais do material
+INNER JOIN MARA ma ON m.MATNR = ma.MATNR
+-- Ordena por planta e material para facilitar análise
+ORDER BY m.WERKS, m.MATNR;",15370.1,f3fd2ea00b1817868df629ece7a36706bc6345b5b59def86f0006c783691139e,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARA"", ""MARC""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,anthropic/claude-sonnet-4-5,4,partial_match,"-- Consulta dados de planejamento de materiais por planta
+-- Retorna configurações de MRP, estoques mínimos e tipo de abastecimento
+SELECT 
+    m.MATNR AS numero_material,
+    ma.MTART AS tipo_material,
+    ma.MATKL AS grupo_mercadorias,
+    m.WERKS AS planta,
+    m.DISMM AS tipo_mrp,
+    m.BESKZ AS tipo_abastecimento,
+    m.MINBE AS estoque_minimo,
+    m.EISBE AS estoque_seguranca,
+    m.LGPRO AS deposito_fornecimento,
+    ma.MEINS AS unidade_medida
+FROM MARC m
+-- Join com MARA para trazer informações gerais do material
+INNER JOIN MARA ma ON m.MATNR = ma.MATNR
+-- Ordena por planta e material para facilitar análise
+ORDER BY m.WERKS, m.MATNR;",13772.5,0b4d55c7ea866547e0043379568c8a9ad23b6448ac045cf3772f1079cc087f5f,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARA"", ""MARC""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,anthropic/claude-sonnet-4-5,5,partial_match,"-- Consulta dados de planejamento de materiais por planta
+-- Retorna configurações de MRP, estoques mínimos e tipo de abastecimento
+SELECT 
+    m.MATNR AS numero_material,
+    ma.MTART AS tipo_material,
+    ma.MATKL AS grupo_mercadorias,
+    m.WERKS AS planta,
+    m.DISMM AS tipo_mrp,
+    m.MINBE AS estoque_minimo,
+    m.EISBE AS estoque_seguranca,
+    m.BESKZ AS tipo_abastecimento,
+    m.LGPRO AS deposito_fornecimento,
+    ma.MEINS AS unidade_medida
+FROM MARC m
+-- Join com MARA para enriquecer com dados gerais do material
+INNER JOIN MARA ma ON m.MATNR = ma.MATNR
+-- Ordena por planta e material para facilitar análise
+ORDER BY m.WERKS, m.MATNR;",12911.8,f3fd2ea00b1817868df629ece7a36706bc6345b5b59def86f0006c783691139e,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARA"", ""MARC""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,anthropic/claude-sonnet-4-5,1,semantic_match,"-- Busca itens de ordens de produção com quantidade planejada acima de 100
+SELECT 
+    p.AUFNR AS ordem_producao,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.PSMNG AS quantidade_planejada,
+    p.WEMNG AS quantidade_confirmada,
+    p.MEINS AS unidade_medida,
+    p.LGORT AS deposito_recebimento,
+    o.WERKS AS planta,
+    o.GSTRS AS data_inicio_programado,
+    o.GLTRS AS data_fim_programado
+FROM AFPO p
+-- Join com AFKO para obter dados do cabeçalho da ordem
+INNER JOIN AFKO o ON p.AUFNR = o.AUFNR
+-- Join com MARA para obter descrição do material
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtro: quantidade planejada maior que 100
+WHERE p.PSMNG > 100
+-- Ordenação por quantidade planejada decrescente
+ORDER BY p.PSMNG DESC;",14011.6,ff61ac06d59af22b2d735d5d36c69811cf47a29b8055d6e416c90486aab15664,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFKO"", ""AFPO"", ""MARA""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,anthropic/claude-sonnet-4-5,2,semantic_match,"-- Busca itens de ordens de produção com quantidade planejada acima de 100
+SELECT 
+    p.AUFNR AS ordem_producao,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.PSMNG AS quantidade_planejada,
+    p.WEMNG AS quantidade_confirmada,
+    p.MEINS AS unidade_medida,
+    p.LGORT AS deposito_recebimento,
+    o.WERKS AS planta,
+    o.GSTRS AS data_inicio_programado,
+    o.GLTRS AS data_fim_programado
+FROM AFPO p
+-- Join com AFKO para obter dados do cabeçalho da ordem
+JOIN AFKO o ON p.AUFNR = o.AUFNR
+-- Join com MARA para obter descrição do material
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtro: quantidade planejada maior que 100
+WHERE p.PSMNG > 100
+-- Ordenação por quantidade planejada decrescente
+ORDER BY p.PSMNG DESC;",13562.5,ff61ac06d59af22b2d735d5d36c69811cf47a29b8055d6e416c90486aab15664,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFKO"", ""AFPO"", ""MARA""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,anthropic/claude-sonnet-4-5,3,semantic_match,"-- Busca itens de ordens de produção com quantidade planejada acima de 100
+SELECT 
+    p.AUFNR AS ordem_producao,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.PSMNG AS quantidade_planejada,
+    p.WEMNG AS quantidade_confirmada,
+    p.MEINS AS unidade_medida,
+    p.LGORT AS deposito_recebimento,
+    o.WERKS AS planta,
+    o.GSTRS AS data_inicio_programado,
+    o.GLTRS AS data_fim_programado
+FROM AFPO p
+-- Join com AFKO para obter dados do cabeçalho da ordem
+INNER JOIN AFKO o ON p.AUFNR = o.AUFNR
+-- Join com MARA para obter descrição do material
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtro: quantidade planejada maior que 100
+WHERE p.PSMNG > 100
+-- Ordenação por quantidade planejada decrescente
+ORDER BY p.PSMNG DESC;",12970.6,ff61ac06d59af22b2d735d5d36c69811cf47a29b8055d6e416c90486aab15664,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFKO"", ""AFPO"", ""MARA""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,anthropic/claude-sonnet-4-5,4,semantic_match,"-- Busca itens de ordens de produção com quantidade planejada acima de 100
+SELECT 
+    p.AUFNR AS ordem_producao,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.PSMNG AS quantidade_planejada,
+    p.MEINS AS unidade_medida,
+    p.LGORT AS deposito_recebimento,
+    o.WERKS AS planta
+FROM AFPO p
+-- Join com MARA para trazer descrição do material
+JOIN MARA m ON p.MATNR = m.MATNR
+-- Join com AFKO para trazer dados da ordem (planta)
+JOIN AFKO o ON p.AUFNR = o.AUFNR
+-- Filtro: quantidade planejada maior que 100
+WHERE p.PSMNG > 100
+-- Ordenação por quantidade planejada decrescente
+ORDER BY p.PSMNG DESC;",13216.6,d8ea13e1f022b9a0e4a72113135b8bb4cb6f3797cccd8e4724505fcbd2fb64c0,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFKO"", ""AFPO"", ""MARA""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,anthropic/claude-sonnet-4-5,5,semantic_match,"-- Busca itens de ordens de produção com quantidade planejada acima de 100
+SELECT 
+    p.AUFNR AS ordem_producao,
+    p.POSNR AS item,
+    p.MATNR AS material,
+    m.MAKTX AS descricao_material,
+    p.PSMNG AS quantidade_planejada,
+    p.WEMNG AS quantidade_confirmada,
+    p.MEINS AS unidade_medida,
+    p.LGORT AS deposito_recebimento,
+    o.WERKS AS planta,
+    o.GSTRS AS data_inicio_programado,
+    o.GLTRS AS data_fim_programado
+FROM AFPO p
+-- Join com AFKO para obter dados do cabeçalho da ordem
+INNER JOIN AFKO o ON p.AUFNR = o.AUFNR
+-- Join com MARA para obter descrição do material
+LEFT JOIN MARA m ON p.MATNR = m.MATNR
+-- Filtro: quantidade planejada maior que 100
+WHERE p.PSMNG > 100
+-- Ordenação por quantidade planejada decrescente
+ORDER BY p.PSMNG DESC;",12726.3,ff61ac06d59af22b2d735d5d36c69811cf47a29b8055d6e416c90486aab15664,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFKO"", ""AFPO"", ""MARA""]",

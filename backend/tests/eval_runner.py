@@ -161,16 +161,37 @@ def execute_sql(db_path: Path, sql: str, max_rows: int) -> ExecutionResult:
 # ──────────────────────────────────────────────────────────────────────────────
 # Avaliador multinível
 # ──────────────────────────────────────────────────────────────────────────────
+ALIASES_CONHECIDOS = {
+    "CODIGO_MATERIAL": "MATNR", "NUMERO_MATERIAL": "MATNR",
+    "TIPO_MATERIAL": "MTART", "GRUPO_MERCADORIAS": "MATKL",
+    "UNIDADE_MEDIDA": "MEINS", "UNIDADE": "MEINS",
+    "PLANTA": "WERKS", "DEPOSITO": "LGORT", "ALMOXARIFADO": "LGORT",
+    "ESTOQUE_DISPONIVEL": "LABST", "ESTOQUE_LIVRE": "LABST",
+    "DOCUMENTO": "MBLNR", "ANO": "MJAHR", "ITEM": "ZEILE",
+    "TIPO_MOVIMENTO": "BWART", "QUANTIDADE": "MENGE",
+    "NUMERO_NOTA_FISCAL": "VBELN", "NOTA_FISCAL": "VBELN",
+    "NUMERO_PEDIDO": "EBELN", "ITEM_PEDIDO": "EBELP",
+    "NUMERO_ORDEM": "AUFNR", "ORDEM_PRODUCAO": "AUFNR",
+    "CODIGO_CLIENTE": "KUNNR", "CLIENTE": "KUNNR",
+    "CODIGO_FORNECEDOR": "LIFNR", "FORNECEDOR": "LIFNR",
+    "DATA_EMISSAO": "FKDAT", "DATA_PEDIDO": "BEDAT",
+    "TIPO_MRP": "DISMM", "ESTOQUE_MINIMO": "MINBE",
+    "ESTOQUE_SEGURANCA": "EISBE", "TIPO_ABASTECIMENTO": "BESKZ",
+    "MES": "mes", "USUARIO": "USNAM",
+    "ORGANIZACAO_VENDAS": "VKORG",
+}
+
+
 def localizar_indices_chave(
     columns_obtidas: list[str],
     chave_primaria: list[str],
     columns_esperadas: list[str],
 ) -> list[int] | None:
     """
-    Forma C — Híbrida com nome OU posição:
-    1. Tenta achar cada coluna-chave pelo nome no resultado obtido (case-insensitive)
-    2. Se não achar, usa posição: posição da chave nas colunas_esperadas
-    3. Se posição também falhar, retorna None
+    Forma C estendida com dicionário de aliases:
+    1. Nome direto (case-insensitive)
+    2. Alias português → SAP via ALIASES_CONHECIDOS
+    3. Posição no gold standard
     """
     if not chave_primaria:
         return None
@@ -186,15 +207,24 @@ def localizar_indices_chave(
             indices.append(col_obtidas_upper.index(chave_upper))
             continue
 
-        # Tentativa 2: posição (índice da chave na ordem esperada)
+        # Tentativa 2: alias reverso — alguma coluna obtida mapeia para esta chave?
+        found = False
+        for i, col in enumerate(col_obtidas_upper):
+            if ALIASES_CONHECIDOS.get(col) == chave_upper or ALIASES_CONHECIDOS.get(col, "").upper() == chave_upper:
+                indices.append(i)
+                found = True
+                break
+        if found:
+            continue
+
+        # Tentativa 3: posição no gold standard
         cols_esp_upper = [c.upper() for c in columns_esperadas]
         if chave_upper in cols_esp_upper:
-            pos_esperada = cols_esp_upper.index(chave_upper)
-            if pos_esperada < len(columns_obtidas):
-                indices.append(pos_esperada)
+            pos = cols_esp_upper.index(chave_upper)
+            if pos < len(columns_obtidas):
+                indices.append(pos)
                 continue
 
-        # Falhou nas duas tentativas
         return None
 
     return indices
