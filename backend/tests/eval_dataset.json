@@ -17,7 +17,7 @@
       ],
       "sql_referencia": "SELECT MATNR, MTART, MATKL, MEINS FROM MARA WHERE MTART = 'FERT' ORDER BY MATNR",
       "notas": "Cobertura Eixo B: MARA. Filtro simples por tipo de material.",
-      "resultado_esperado_hash": "c9b922ef509f92a9cb7641e7b2162cee77c103046910019c05cd63d4353ebddf",
+      "resultado_esperado_hash": "7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c",
       "resultado_esperado_rows": 79,
       "resultado_esperado_cols": [
         "MATNR",
@@ -37,7 +37,7 @@
       ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG WHERE MJAHR = '2025' ORDER BY MBLNR",
       "notas": "Cobertura Eixo B: MSEG. MSEG não tem BUDAT — filtro por MJAHR.",
-      "resultado_esperado_hash": "15ba3d9f2214d60e4466c5ef3ce97c23f124a01743604f43c601e37e9cc34697",
+      "resultado_esperado_hash": "d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b",
       "resultado_esperado_rows": 246,
       "resultado_esperado_cols": [
         "MBLNR",
@@ -59,7 +59,7 @@
       ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' ORDER BY FKDAT DESC",
       "notas": "Cobertura Eixo B: VBRK. SUBSTR para filtro de ano em data SAP.",
-      "resultado_esperado_hash": "aa0d7925767b17a64dec713a4d24b751509b9ce2aaab63fef0a2c0a7f9e5b512",
+      "resultado_esperado_hash": "7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7",
       "resultado_esperado_rows": 89,
       "resultado_esperado_cols": [
         "VBELN",
@@ -80,7 +80,7 @@
       ],
       "sql_referencia": "SELECT EBELN, BUKRS, LIFNR, BSART, BEDAT, WAERS FROM EKKO ORDER BY BEDAT DESC",
       "notas": "Cobertura Eixo B: EKKO. Listagem básica sem filtro restritivo.",
-      "resultado_esperado_hash": "bb057a5a6b4c91eded0cc9a1b05552628a7a74e123312786cb7c0cb24887f7a1",
+      "resultado_esperado_hash": "5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3",
       "resultado_esperado_rows": 120,
       "resultado_esperado_cols": [
         "EBELN",
@@ -102,7 +102,7 @@
       ],
       "sql_referencia": "SELECT AUFNR, GSTRS, GLTRS, GAMNG, WERKS FROM AFKO WHERE STSTPS NOT IN ('TECO', 'CLSD') OR STSTPS IS NULL ORDER BY GSTRS",
       "notas": "Cobertura Eixo B: AFKO. Status em aberto via STSTPS.",
-      "resultado_esperado_hash": "a2b7be7309a96d786f502da0f0938dbe28e225e0051116a8d2827b4e684494a4",
+      "resultado_esperado_hash": "f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129",
       "resultado_esperado_rows": 150,
       "resultado_esperado_cols": [
         "AUFNR",
@@ -124,7 +124,7 @@
       ],
       "sql_referencia": "SELECT p.VBELN, p.POSNR, p.MATNR, p.FKIMG, p.NETWR FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' ORDER BY p.VBELN, p.POSNR",
       "notas": "Cobertura Eixo B: VBRP. Primeiro JOIN do dataset — VBRP depende de VBRK para filtro de data.",
-      "resultado_esperado_hash": "be5fdd50b454b171731b3dbde222ca1f5afd35dc9a6d2f69e5d9198c2665bfd4",
+      "resultado_esperado_hash": "8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923",
       "resultado_esperado_rows": 246,
       "resultado_esperado_cols": [
         "VBELN",
@@ -145,7 +145,7 @@
       ],
       "sql_referencia": "SELECT MATNR, WERKS, LGORT, LABST FROM MARD WHERE LABST > 0 ORDER BY MATNR, WERKS",
       "notas": "Cobertura Eixo B: MARD. LABST = estoque livre disponível.",
-      "resultado_esperado_hash": "e8d28e5e84b35f735539db7baab6ac51b3082294c5d1108d567987c05a146bfc",
+      "resultado_esperado_hash": "c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce",
       "resultado_esperado_rows": 481,
       "resultado_esperado_cols": [
         "MATNR",
@@ -165,7 +165,7 @@
       ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BUDAT, USNAM FROM MKPF WHERE BUDAT BETWEEN '20250101' AND '20250131' ORDER BY BUDAT",
       "notas": "Cobertura Eixo B: MKPF. MKPF tem BUDAT (cabeçalho do documento de material).",
-      "resultado_esperado_hash": "a17ec82b729fe521d9a7440ee0879386eae56edff1147fa1259a47af43f0f9f4",
+      "resultado_esperado_hash": "1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad",
       "resultado_esperado_rows": 10,
       "resultado_esperado_cols": [
         "MBLNR",
@@ -185,7 +185,7 @@
       ],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, WERKS, MENGE, EINDT FROM EKPO WHERE ELIKZ = '' OR ELIKZ IS NULL ORDER BY EINDT",
       "notas": "Cobertura Eixo B: EKPO. ELIKZ = indicador de entrega completa.",
-      "resultado_esperado_hash": "6bde488e011e90222b6b773b0e58ed4846190c1f0f859e27e1fac03d0cb5e96a",
+      "resultado_esperado_hash": "fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a",
       "resultado_esperado_rows": 140,
       "resultado_esperado_cols": [
         "EBELN",
@@ -207,7 +207,7 @@
       ],
       "sql_referencia": "SELECT VBELN, AUART, KUNNR, AUDAT, NETWR, WAERK FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' ORDER BY AUDAT DESC",
       "notas": "Cobertura Eixo B: VBAK. Cabeçalho de pedido de venda.",
-      "resultado_esperado_hash": "234f161fa2cb6e21efddf2ffaae604aa7b8758970024715ef06f0949f6eb7724",
+      "resultado_esperado_hash": "6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b",
       "resultado_esperado_rows": 107,
       "resultado_esperado_cols": [
         "VBELN",
@@ -229,7 +229,7 @@
       ],
       "sql_referencia": "SELECT VBELN, POSNR, MATNR, KWMENG, NETWR FROM VBAP WHERE FKSTA != 'C' ORDER BY VBELN, POSNR",
       "notas": "Cobertura Eixo B: VBAP. FKSTA = status de faturamento; C = completamente faturado.",
-      "resultado_esperado_hash": "aeced10073110d494f0fb87e4a07f1956cc559fe31729639b4ecc204eeb75102",
+      "resultado_esperado_hash": "0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab",
       "resultado_esperado_rows": 152,
       "resultado_esperado_cols": [
         "VBELN",
@@ -250,7 +250,7 @@
       ],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, LAND1, REGIO FROM KNA1 ORDER BY NAME1",
       "notas": "Cobertura Eixo B: KNA1. Mestre de clientes.",
-      "resultado_esperado_hash": "8934cd2cd3c9ead4cb3ab985e6afcaf678262805a30b574ddb520d9932369b32",
+      "resultado_esperado_hash": "c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7",
       "resultado_esperado_rows": 80,
       "resultado_esperado_cols": [
         "KUNNR",
@@ -271,7 +271,7 @@
       ],
       "sql_referencia": "SELECT LIFNR, NAME1, ORT01, LAND1 FROM LFA1 ORDER BY NAME1",
       "notas": "Cobertura Eixo B: LFA1. Mestre de fornecedores.",
-      "resultado_esperado_hash": "47f4a9de109cc14d22384bcbb05ef76ce3f57939eb41df3e7c96fa46f40f839a",
+      "resultado_esperado_hash": "a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212",
       "resultado_esperado_rows": 60,
       "resultado_esperado_cols": [
         "LIFNR",
@@ -291,7 +291,7 @@
       ],
       "sql_referencia": "SELECT MATNR, WERKS, DISMM, BESKZ, MINBE, EISBE FROM MARC ORDER BY MATNR, WERKS",
       "notas": "Cobertura Eixo B: MARC. Dados MRP por planta.",
-      "resultado_esperado_hash": "556921e895140104c89f84d48c04543fe2b6642d4e28dfc85172a2629bb041cb",
+      "resultado_esperado_hash": "1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c",
       "resultado_esperado_rows": 295,
       "resultado_esperado_cols": [
         "MATNR",
@@ -313,7 +313,7 @@
       ],
       "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, MEINS FROM AFPO WHERE PSMNG > 100 ORDER BY PSMNG DESC",
       "notas": "Cobertura Eixo B: AFPO. PSMNG = quantidade planejada da ordem.",
-      "resultado_esperado_hash": "24bba9be456f6c3a4ed689f749050b96c8010c914b0171538b0642efa9716c1f",
+      "resultado_esperado_hash": "6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655",
       "resultado_esperado_rows": 203,
       "resultado_esperado_cols": [
         "AUFNR",
@@ -335,7 +335,7 @@
       ],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, COUNT(*) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
       "notas": "Eixo A médio: agregação + GROUP BY. Mês em formato YYYYMM.",
-      "resultado_esperado_hash": "f57be4cc2d85e9122fcfdc007cbad1b0bdfd2def8002e4c67aa2a465edae86d2",
+      "resultado_esperado_hash": "64dc3394d12e7fe3b930270447f79a23c0bc13be1592302d9436722dbf8e13bb",
       "resultado_esperado_rows": 12,
       "resultado_esperado_cols": [
         "mes",
@@ -354,7 +354,7 @@
       ],
       "sql_referencia": "SELECT KUNAG, SUM(NETWR) AS total_faturado, COUNT(*) AS qtd_notas FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY KUNAG ORDER BY total_faturado DESC",
       "notas": "Agregação de faturamento por cliente. Base para ranking (Q028).",
-      "resultado_esperado_hash": "df78f7444b3979612e168baca051dadc37fba8bdbb8cb88f635eaac27c305105",
+      "resultado_esperado_hash": "36a697e71f8758d6a84efc371e69b64980597482bbccaaa6afb8687f0f254285",
       "resultado_esperado_rows": 18,
       "resultado_esperado_cols": [
         "KUNAG",
@@ -373,7 +373,7 @@
       ],
       "sql_referencia": "SELECT BWART, COUNT(*) AS total_movimentacoes, SUM(MENGE) AS quantidade_total FROM MSEG WHERE MJAHR = '2025' GROUP BY BWART ORDER BY total_movimentacoes DESC",
       "notas": "Agregação por tipo de movimento (BWART). Eixo A médio.",
-      "resultado_esperado_hash": "ed3eb73297d9da3d1853813fb001dbd6f3f01ad1d50bf7b7a64d512252b953f1",
+      "resultado_esperado_hash": "e17fa8766d5cbf47671e581d40d7c8fdf6543eb9db3321d7bc2f8f58f7aeec79",
       "resultado_esperado_rows": 4,
       "resultado_esperado_cols": [
         "BWART",
@@ -392,7 +392,7 @@
       ],
       "sql_referencia": "SELECT LIFNR, COUNT(*) AS total_pedidos FROM EKKO GROUP BY LIFNR ORDER BY total_pedidos DESC",
       "notas": "AVG + GROUP BY por fornecedor. Valida agregação com múltiplas funções.",
-      "resultado_esperado_hash": "f1eb67c40cb8527887a4fc49011bf602a296a6ba4be89dc691bc432a05bb00d5",
+      "resultado_esperado_hash": "9cb1260e4eb355dc5401cad8e525c684b5208c5e207cc174d0372058fe37d77a",
       "resultado_esperado_rows": 21,
       "resultado_esperado_cols": [
         "LIFNR",
@@ -411,7 +411,7 @@
       ],
       "sql_referencia": "SELECT d.MATNR, d.WERKS, d.LABST, c.MINBE FROM MARD d JOIN MARC c ON d.MATNR = c.MATNR AND d.WERKS = c.WERKS WHERE d.LABST < c.MINBE AND c.MINBE > 0 ORDER BY d.MATNR",
       "notas": "JOIN MARD + MARC com filtro composto. Valida lógica de negócio MRP.",
-      "resultado_esperado_hash": "5d84714fbb06a5a4a7fe8d72f4aa21f51372426b13557f564899f3d8ec3ec7b7",
+      "resultado_esperado_hash": "857c5724d96c4ffb4ee574f9881a74f15c13225cc7bdf711d7b46109f1e1b5c6",
       "resultado_esperado_rows": 4,
       "resultado_esperado_cols": [
         "MATNR",
@@ -431,7 +431,7 @@
       ],
       "sql_referencia": "SELECT KUNNR, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY KUNNR ORDER BY total_pedidos DESC",
       "notas": "Agregação de pedidos de venda por cliente.",
-      "resultado_esperado_hash": "7f5739234ee4a73e5864dcdee7ff794001eedd7508125d68e9befd95c3ab9ba5",
+      "resultado_esperado_hash": "2caad2f9e5b70cf640dfc38dc7dcd173efe2b549fb96f1ecef543df8181f58a5",
       "resultado_esperado_rows": 26,
       "resultado_esperado_cols": [
         "KUNNR",
@@ -450,7 +450,7 @@
       ],
       "sql_referencia": "SELECT MATNR, SUM(WEMNG) AS volume_produzido, SUM(PSMNG) AS volume_planejado FROM AFPO WHERE WEMNG > 0 GROUP BY MATNR ORDER BY volume_produzido DESC",
       "notas": "WEMNG = quantidade recebida/produzida efetivamente.",
-      "resultado_esperado_hash": "44dda1f6bb20100428afcf9928a173e1e53043f3ae4ecd16985deb12e381d016",
+      "resultado_esperado_hash": "ffb9c2c6a33c350f63078c1c655b787c87c764c03a4482e8411aa794a2c0e740",
       "resultado_esperado_rows": 86,
       "resultado_esperado_cols": [
         "MATNR",
@@ -469,7 +469,7 @@
       ],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, MENGE, NETPR, NETWR FROM EKPO WHERE NETPR > 500 ORDER BY NETPR DESC",
       "notas": "Filtro numérico direto em item de pedido de compra.",
-      "resultado_esperado_hash": "2502259a1d8a6cf1f53a782efc9d5ae67f1748e5fc2ef91e3188559839d76ad8",
+      "resultado_esperado_hash": "eb2cc55f31768dcdf84b699d67b760f6408677f3cff150b53fba0a2096c313bb",
       "resultado_esperado_rows": 256,
       "resultado_esperado_cols": [
         "EBELN",
@@ -492,7 +492,7 @@
       ],
       "sql_referencia": "SELECT VKORG, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY VKORG ORDER BY valor_total DESC",
       "notas": "Agregação por organização de vendas (VKORG).",
-      "resultado_esperado_hash": "ab6bd966d34aad55bc8f7c75c0c0ea09f6f140b4867cd42e577f9d01539e3fcc",
+      "resultado_esperado_hash": "616f32f1a9393fea41568a0f746f17bded5ff87846ef5bd31971f3427a8c7b86",
       "resultado_esperado_rows": 2,
       "resultado_esperado_cols": [
         "VKORG",
@@ -511,7 +511,7 @@
       ],
       "sql_referencia": "SELECT USNAM, COUNT(*) AS total_documentos FROM MKPF WHERE SUBSTR(BUDAT, 1, 4) = '2025' GROUP BY USNAM ORDER BY total_documentos DESC",
       "notas": "Agregação por usuário via MKPF. Valida rastreabilidade de movimentos.",
-      "resultado_esperado_hash": "de7079cb12aa271ea45a7c35c227edc039b550b95f727c216918265f504131bb",
+      "resultado_esperado_hash": "8df1242009e20b654021340146f20fb6f7eeb21cf3a2aeae4c133f93e8d76ed0",
       "resultado_esperado_rows": 141,
       "resultado_esperado_cols": [
         "USNAM",
@@ -529,7 +529,7 @@
       ],
       "sql_referencia": "SELECT MATNR, WERKS, COUNT(*) AS total_movimentos, SUM(MENGE) AS volume_total FROM MSEG WHERE MJAHR = '2025' GROUP BY MATNR, WERKS ORDER BY volume_total DESC",
       "notas": "GROUP BY composto (MATNR + WERKS). Valida agrupamento multidimensional.",
-      "resultado_esperado_hash": "36636a284793c20c274610181bac7dfe32766cf61dfd2a5cce02f3995b2596ac",
+      "resultado_esperado_hash": "7830b878f55eceefdd8ad9aeb3355c6e5379a0d9abc698c2ee6295e7c9e41dc8",
       "resultado_esperado_rows": 74,
       "resultado_esperado_cols": [
         "MATNR",
@@ -549,7 +549,7 @@
       ],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, REGIO FROM KNA1 WHERE LAND1 = 'BR' AND REGIO IN ('PR', 'SC', 'RS') ORDER BY NAME1",
       "notas": "Filtro composto por país e região. Valida conhecimento de domínio geográfico.",
-      "resultado_esperado_hash": "6e95e76b0ae799381fec0dadc153df6765bd2a95293d9740676edd9333f8aa76",
+      "resultado_esperado_hash": "5ba2c45f55fbe68218bdc2b954f555e174fe8d545d7695db392b140e0a7a626b",
       "resultado_esperado_rows": 27,
       "resultado_esperado_cols": [
         "KUNNR",
@@ -570,7 +570,7 @@
       ],
       "sql_referencia": "SELECT k.VBELN, k.KUNAG, c.NAME1, SUM(k.NETWR) AS total_faturado FROM VBRK k LEFT JOIN KNA1 c ON k.KUNAG = c.KUNNR WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY k.KUNAG, c.NAME1 ORDER BY total_faturado DESC LIMIT 10",
       "notas": "Eixo A complexo: JOIN + GROUP BY + ORDER BY + LIMIT. Ranking clássico de negócio.",
-      "resultado_esperado_hash": "bc38243c9d63075a1cc3c8183b5ac07ab993780c47749bdd239a84450dab7f3d",
+      "resultado_esperado_hash": "341e2c4f3fbe657c8f20db3c6dd53157870a095da87eefebecaa284833dcef8f",
       "resultado_esperado_rows": 10,
       "resultado_esperado_cols": [
         "VBELN",
@@ -591,7 +591,7 @@
       ],
       "sql_referencia": "SELECT p.MATNR, SUM(p.NETWR) AS total_faturado, SUM(p.FKIMG) AS quantidade_total FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY p.MATNR ORDER BY total_faturado DESC LIMIT 10",
       "notas": "JOIN VBRP + VBRK. Ranking de materiais por faturamento — caso de uso central do DataSpeak.",
-      "resultado_esperado_hash": "65c8b19a0380b32a8135097cf16ff034e38132731f13df27185ff0682b4c8000",
+      "resultado_esperado_hash": "708a7f2e037fdf81a635f072c9093cc59034a3bbaee1253f647e02ea61a76f54",
       "resultado_esperado_rows": 10,
       "resultado_esperado_cols": [
         "MATNR",
@@ -611,7 +611,7 @@
       ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(*) AS total_pedidos FROM EKKO e JOIN LFA1 f ON e.LIFNR = f.LIFNR GROUP BY e.LIFNR, f.NAME1 ORDER BY total_pedidos DESC",
       "notas": "JOIN EKKO + LFA1 para enriquecer pedidos com nome do fornecedor.",
-      "resultado_esperado_hash": "0233a0380d381d232d28712d864756fc48b7468cd2e61c953ccb6f6f7b5a5d2f",
+      "resultado_esperado_hash": "9b5bf2fcc9b27b3cea4acd72b36d26b9535f8c7abb44fa570139e27628e76ae4",
       "resultado_esperado_rows": 21,
       "resultado_esperado_cols": [
         "LIFNR",
@@ -631,7 +631,7 @@
       ],
       "sql_referencia": "SELECT DISTINCT e.MATNR FROM EKPO e WHERE e.MATNR IN (SELECT MATNR FROM MSEG WHERE MJAHR = '2025') ORDER BY e.MATNR",
       "notas": "Subquery com IN. Valida capacidade de interseção de conjuntos.",
-      "resultado_esperado_hash": "727b57a123db5426736110ee2f58d1e6d3a5c4d59ef313465132b5f8355ab11b",
+      "resultado_esperado_hash": "03a4eca586bc68b56fe627d1b1ec38ff88034f2a6879670246b035c8ba3437c0",
       "resultado_esperado_rows": 31,
       "resultado_esperado_cols": [
         "MATNR"
@@ -648,7 +648,7 @@
       ],
       "sql_referencia": "SELECT MATNR, SUM(LABST) AS estoque_total, SUM(SPEME) AS estoque_bloqueado, SUM(UMLME) AS em_transferencia FROM MARD GROUP BY MATNR HAVING SUM(LABST) > 0 ORDER BY estoque_total DESC",
       "notas": "HAVING para filtrar pós-agregação. Valida três tipos de estoque simultaneamente.",
-      "resultado_esperado_hash": "75789763dfba4d5ddf034dd57687de52555ee25815cd54df94001ed4595e4152",
+      "resultado_esperado_hash": "5dac8fb86b146f47d198e6759e596f0b6c74592f22470aba346091945af66fa4",
       "resultado_esperado_rows": 200,
       "resultado_esperado_cols": [
         "MATNR",
@@ -669,7 +669,7 @@
       ],
       "sql_referencia": "SELECT a.VBELN, a.KUNNR, p.POSNR, p.MATNR, p.EDATU FROM VBAK a JOIN VBAP p ON a.VBELN = p.VBELN WHERE p.EDATU < DATE('now') AND p.FKSTA != 'C' ORDER BY p.EDATU",
       "notas": "Filtro com DATE('now') — data dinâmica. Itens não faturados com entrega vencida.",
-      "resultado_esperado_hash": "690ee94e23e8df3f40b84e035d7c8f810782f184176b604ec2ff95abdad4ddc4",
+      "resultado_esperado_hash": "5db92785bcd58dd26654ead20aa3d5ab7c9e9464c74638675f32bc69e30f1096",
       "resultado_esperado_rows": 148,
       "resultado_esperado_cols": [
         "VBELN",
@@ -692,7 +692,7 @@
       ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELN) AS total_itens, AVG(CAST(JULIANDAY(p.EINDT) - JULIANDAY(e.BEDAT) AS REAL)) AS lead_time_medio FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE e.BEDAT IS NOT NULL AND p.EINDT IS NOT NULL GROUP BY e.LIFNR, f.NAME1 ORDER BY lead_time_medio",
       "notas": "Triple JOIN + cálculo derivado com JULIANDAY. Query mais complexa do dataset.",
-      "resultado_esperado_hash": "8c960305473811532e77e3d6d231264a921240a0f238d0cda34750701e12fd56",
+      "resultado_esperado_hash": "adede469e06a82a8a304d581ed100a1ec215534040da20d28211407f1077a71b",
       "resultado_esperado_rows": 21,
       "resultado_esperado_cols": [
         "LIFNR",
@@ -712,7 +712,7 @@
       ],
       "sql_referencia": "SELECT AUFNR, MATNR, PSMNG, WEMNG, ROUND(CAST(WEMNG AS REAL) / PSMNG * 100, 1) AS perc_realizado FROM AFPO WHERE PSMNG > 0 AND WEMNG < PSMNG * 0.8 ORDER BY perc_realizado",
       "notas": "Cálculo percentual com CAST e ROUND. Valida eficiência produtiva.",
-      "resultado_esperado_hash": "4d6bb9f6a90b1b31b09a9dc3ba30dfd47be620e8f86349f9d0b121047a9440d5",
+      "resultado_esperado_hash": "f76e27bd965d48c150edda976f0f16342d1bb16026c438d4807c42d3bff09e07",
       "resultado_esperado_rows": 60,
       "resultado_esperado_cols": [
         "AUFNR",
@@ -734,7 +734,7 @@
       ],
       "sql_referencia": "SELECT d.MATNR, SUM(d.LABST) AS estoque_total, AVG(p.NETPR) AS preco_medio, SUM(d.LABST) * AVG(p.NETPR) AS valor_estoque FROM MARD d JOIN EKPO p ON d.MATNR = p.MATNR WHERE d.LABST > 0 GROUP BY d.MATNR ORDER BY valor_estoque DESC",
       "notas": "JOIN MARD + EKPO para valorizar estoque. Caso de uso analítico avançado.",
-      "resultado_esperado_hash": "407fc58b976f1439aa554519c02d94d3a09776023b75d404a4c05ae52ffd8098",
+      "resultado_esperado_hash": "f20517f9f460bd502bfc9ede34febd0a0baf7420f76141bfd5cdb58b07ff46f4",
       "resultado_esperado_rows": 62,
       "resultado_esperado_cols": [
         "MATNR",
@@ -755,7 +755,7 @@
       ],
       "sql_referencia": "SELECT DISTINCT a.KUNNR FROM VBAK a WHERE SUBSTR(a.AUDAT, 1, 4) = '2025' AND a.KUNNR NOT IN (SELECT KUNAG FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025') ORDER BY a.KUNNR",
       "notas": "NOT IN com subquery. Diferença de conjuntos — clientes sem faturamento.",
-      "resultado_esperado_hash": "e626c85658515062adbe5bbb15b073284ecc562fbecf2bad31fcdd9cf92cf9a0",
+      "resultado_esperado_hash": "e71a39329ad08eb5c6ea5f2ec700d98f0720845882599bd726d5734bb5c85400",
       "resultado_esperado_rows": 14,
       "resultado_esperado_cols": [
         "KUNNR"
@@ -772,7 +772,7 @@
       ],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, SUM(NETWR) AS faturamento_mes, SUM(SUM(NETWR)) OVER (ORDER BY SUBSTR(FKDAT, 1, 6)) AS faturamento_acumulado FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
       "notas": "Window function (SUM OVER). Valida suporte a funções analíticas no SQLite.",
-      "resultado_esperado_hash": "513bcd4e3cca33e971b894e5162deda694e3d71a6eb3c628219913fcd58ffffe",
+      "resultado_esperado_hash": "97f20ff9ebe87c97da66f9dc3b581972a851cbfb4acc525b28318a72f13b1fee",
       "resultado_esperado_rows": 12,
       "resultado_esperado_cols": [
         "mes",
@@ -793,7 +793,7 @@
       ],
       "sql_referencia": "SELECT a.MATNR, a.AUFNR, d.LABST, c.MINBE FROM AFKO a JOIN MARD d ON a.MATNR = d.MATNR AND a.WERKS = d.WERKS JOIN MARC c ON a.MATNR = c.MATNR AND a.WERKS = c.WERKS WHERE (a.STSTPS NOT IN ('TECO', 'CLSD') OR a.STSTPS IS NULL) AND d.LABST < c.MINBE ORDER BY d.LABST",
       "notas": "Triple JOIN com condição de negócio complexa. Alta relevância para banca.",
-      "resultado_esperado_hash": "f710fce4d3f009d0b1e952a5e81787f2b7b90da1b9f7941c9be0361770bfa3a1",
+      "resultado_esperado_hash": "d26a1b114238b919799fe2c253a8ba72404f9de16fab5034b4ae7fffdccf1c78",
       "resultado_esperado_rows": 1,
       "resultado_esperado_cols": [
         "MATNR",
@@ -815,7 +815,7 @@
       ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELP) AS total_itens, SUM(p.MENGE) AS volume_total FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE p.ELIKZ = 'X' GROUP BY e.LIFNR, f.NAME1 ORDER BY total_itens DESC",
       "notas": "Triple JOIN + ranking por fornecedor. ELIKZ='X' = entrega completa.",
-      "resultado_esperado_hash": "dedc85b5b9b38f54f1e091985417533bba79192968573c12a1413b1f5fe19a3e",
+      "resultado_esperado_hash": "c1705c2d867ad976703f9ba0c0566b97831a3129f76ba218e1c1242db8685744",
       "resultado_esperado_rows": 21,
       "resultado_esperado_cols": [
         "LIFNR",
@@ -835,7 +835,7 @@
       ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG ORDER BY MJAHR DESC, MBLNR DESC LIMIT 100",
       "notas": "Eixo C: vocabulário de negócio (sem mencionar MSEG). RAG deve recuperar MSEG por semântica.",
-      "resultado_esperado_hash": "990d4df1e9e49415ca8a9cf2de9ba5b7b27833670722ea7ae36d6cef8f517e3f",
+      "resultado_esperado_hash": "38413d8047cdd9fa17546b0715515c85554b2c210195560a0084fa72f7dfb189",
       "resultado_esperado_rows": 100,
       "resultado_esperado_cols": [
         "MBLNR",
@@ -857,7 +857,7 @@
       ],
       "sql_referencia": "SELECT DISTINCT MATNR FROM MSEG WHERE MJAHR = '2025' ORDER BY MATNR",
       "notas": "Eixo C: vocabulário coloquial (peças, mexeram). Dívida conhecida — RAG pode falhar aqui.",
-      "resultado_esperado_hash": "1a1a8619278423d7595c064fd0382f9c0ebcb73c09f11fba9c65a77ea07ab35b",
+      "resultado_esperado_hash": "9c7e995cf385e70d59541742c4e0a76f63f7b4cd997493fdaedb94e6c0fa1283",
       "resultado_esperado_rows": 66,
       "resultado_esperado_cols": [
         "MATNR"
@@ -874,7 +874,7 @@
       ],
       "sql_referencia": "SELECT EBELN, LIFNR, BEDAT FROM EKKO WHERE SUBSTR(BEDAT, 1, 4) = '2025' ORDER BY BEDAT DESC",
       "notas": "Eixo C: coloquial + referência temporal relativa (esse ano). LLM precisa inferir 2025.",
-      "resultado_esperado_hash": "b35bcb5d64c8a9cbdc221153f37e0331839448506c71416b6fb17f954ad7be7d",
+      "resultado_esperado_hash": "1660c99b2f3a639ae266802b6b6d991d50f62cbb1c8b1a7dcc63cef09b787a8e",
       "resultado_esperado_rows": 76,
       "resultado_esperado_cols": [
         "EBELN",
@@ -893,7 +893,7 @@
       ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
       "notas": "Eixo C: ambíguo sem período definido. Sistema deve retornar algo razoável ou pedir clarificação.",
-      "resultado_esperado_hash": "1f0bd0a01dbe0871b3990a51bab7173ee03aec69b03559643aac59488929f8c1",
+      "resultado_esperado_hash": "bf3af9c5a4285bb82a234450463919e14646073b9fcc371ca12e5da6070786de",
       "resultado_esperado_rows": 100,
       "resultado_esperado_cols": [
         "VBELN",
@@ -914,7 +914,7 @@
       ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
       "notas": "Eixo C: 'notas' é ambíguo (fiscal? documento de material?). Valida qual tabela o LLM escolhe.",
-      "resultado_esperado_hash": "2c17664919aa61fb98c6b3152dd14b841e0250def2c89486b99bc3c4bcbe4bcf",
+      "resultado_esperado_hash": "43319a465c545a8135ffb6facfdaa7c15c99764fbee8e5b01efe718976cfa0db",
       "resultado_esperado_rows": 100,
       "resultado_esperado_cols": [
         "VBELN",
@@ -934,7 +934,7 @@
       ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG LIMIT 100",
       "notas": "Eixo C: vocabulário técnico SAP direto. Caso mais fácil de robustez — baseline.",
-      "resultado_esperado_hash": "a47fc4f2af5a89daf15beb9af8ae5387a8a8b4290d481a1ecc73d36b4233dba3",
+      "resultado_esperado_hash": "e302464bcc2928dbf10b7ab12b0761ae925c6ebe35389c19bf01e50622c6ee3f",
       "resultado_esperado_rows": 100,
       "resultado_esperado_cols": [
         "MBLNR",
@@ -956,7 +956,7 @@
       ],
       "sql_referencia": "SELECT SUM(NETWR) AS total_vendas, COUNT(*) AS total_notas FROM VBRK WHERE FKDAT >= '20250901' AND FKDAT <= '20251231'",
       "notas": "Eixo C: referência temporal relativa (último trimestre). LLM precisa inferir Q4/2025.",
-      "resultado_esperado_hash": "6f8af3ea56bfc7a20cea923bb560d95b2882aebf950ec7cc888d9acd8e7a06af",
+      "resultado_esperado_hash": "93b22161961a8c32feb02e800d2d58b789e453a4719679b3ad9d8f9bda1ab8e5",
       "resultado_esperado_rows": 1,
       "resultado_esperado_cols": [
         "total_vendas",
@@ -972,7 +972,7 @@
       "tabelas_esperadas": [],
       "sql_referencia": "SELECT 'ERRO: Tabela de funcionários não disponível no catálogo DataSpeak' AS mensagem",
       "notas": "Eixo D: tabela inexistente no catálogo. Sistema DEVE recusar ou informar limitação — não alucinar HR/PA tabelas SAP.",
-      "resultado_esperado_hash": "29395385ba0d97b51e0e308af641e5594a9a742b208c0b437ebfed55481bc9a2",
+      "resultado_esperado_hash": "602987674006e683d60f0e9f8136d91106ad16213e373f44928f7a9e72d46384",
       "resultado_esperado_rows": 1,
       "resultado_esperado_cols": [
         "mensagem"
@@ -987,7 +987,7 @@
       "tabelas_esperadas": [],
       "sql_referencia": "SELECT 'ERRO: Operação de escrita não permitida' AS mensagem",
       "notas": "Eixo D: operação destrutiva. Camada read-only deve barrar. LLM pode auto-censurar ou allowlist barra.",
-      "resultado_esperado_hash": "3846bbb4b387731069793990f68a19928787e6e7d6d9a1cf6fda05db5ff85123",
+      "resultado_esperado_hash": "f84f805a35e9c70a8687403aad21c02c69579112d35f257ef18b885fe4ed3e83",
       "resultado_esperado_rows": 1,
       "resultado_esperado_cols": [
         "mensagem"
@@ -1002,7 +1002,7 @@
       "tabelas_esperadas": [],
       "sql_referencia": "SELECT 'ERRO: Pergunta não interpretável' AS mensagem",
       "notas": "Eixo D: entrada sem sentido. Sistema deve falhar graciosamente — sem alucinação, sem 500.",
-      "resultado_esperado_hash": "a4e6ba2809ca1992bee002eef03b478eea2567cc9a48bdf8810140a2fd226911",
+      "resultado_esperado_hash": "3405002f7a9165f87ff23e97f027923a543f6de5a311fd17f82b6e7c285a6797",
       "resultado_esperado_rows": 1,
       "resultado_esperado_cols": [
         "mensagem"

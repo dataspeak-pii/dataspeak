@@ -50,10 +50,7 @@ def compute_result_hash(columns: list[str], rows: list[tuple]) -> str:
     - Conteúdo das linhas é determinístico se o SQL tem ORDER BY
     - default=str trata datas, Decimal e outros tipos não-JSON nativos
     """
-    payload = {
-        "columns": columns,
-        "rows": [list(row) for row in rows],  # tuple -> list para JSON
-    }
+    payload = {"rows": sorted([list(row) for row in rows], key=lambda x: str(x))}
     serialized = json.dumps(payload, sort_keys=True, default=str, ensure_ascii=False)
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
