@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "description": "Gold standard do DataSpeak — Chat 08 Testes & Validação. Edite este template; rode build_gold_standard.py para gerar eval_dataset.json com hashes.",
+  "version": "2.0",
+  "description": "Gold standard do DataSpeak — Chat 08. Avaliação multinível com chave_primaria_resultado para semantic_match.",
   "casos": [
     {
       "id": "Q001",
@@ -8,6 +8,7 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_basico",
       "tabelas_esperadas": ["MARA"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT MATNR, MTART, MATKL, MEINS FROM MARA WHERE MTART = 'FERT' ORDER BY MATNR",
       "notas": "Cobertura Eixo B: MARA. Filtro simples por tipo de material."
     },
@@ -17,6 +18,7 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG WHERE MJAHR = '2025' ORDER BY MBLNR",
       "notas": "Cobertura Eixo B: MSEG. MSEG não tem BUDAT — filtro por MJAHR."
     },
@@ -26,6 +28,7 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["VBELN"],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' ORDER BY FKDAT DESC",
       "notas": "Cobertura Eixo B: VBRK. SUBSTR para filtro de ano em data SAP."
     },
@@ -35,8 +38,9 @@
       "categoria": "simples",
       "subcategoria": "select_listagem",
       "tabelas_esperadas": ["EKKO"],
+      "chave_primaria_resultado": ["EBELN"],
       "sql_referencia": "SELECT EBELN, BUKRS, LIFNR, BSART, BEDAT, WAERS FROM EKKO ORDER BY BEDAT DESC",
-      "notas": "Cobertura Eixo B: EKKO. Listagem básica sem filtro restritivo."
+      "notas": "Cobertura Eixo B: EKKO. Listagem básica."
     },
     {
       "id": "Q005",
@@ -44,6 +48,7 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
       "tabelas_esperadas": ["AFKO"],
+      "chave_primaria_resultado": ["AUFNR"],
       "sql_referencia": "SELECT AUFNR, GSTRS, GLTRS, GAMNG, WERKS FROM AFKO WHERE STSTPS NOT IN ('TECO', 'CLSD') OR STSTPS IS NULL ORDER BY GSTRS",
       "notas": "Cobertura Eixo B: AFKO. Status em aberto via STSTPS."
     },
@@ -53,8 +58,9 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_join_simples",
       "tabelas_esperadas": ["VBRP", "VBRK"],
+      "chave_primaria_resultado": ["VBELN", "POSNR"],
       "sql_referencia": "SELECT p.VBELN, p.POSNR, p.MATNR, p.FKIMG, p.NETWR FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' ORDER BY p.VBELN, p.POSNR",
-      "notas": "Cobertura Eixo B: VBRP. Primeiro JOIN do dataset — VBRP depende de VBRK para filtro de data."
+      "notas": "Cobertura Eixo B: VBRP. Primeiro JOIN do dataset."
     },
     {
       "id": "Q007",
@@ -62,6 +68,7 @@
       "categoria": "simples",
       "subcategoria": "select_listagem",
       "tabelas_esperadas": ["MARD"],
+      "chave_primaria_resultado": ["MATNR", "WERKS", "LGORT"],
       "sql_referencia": "SELECT MATNR, WERKS, LGORT, LABST FROM MARD WHERE LABST > 0 ORDER BY MATNR, WERKS",
       "notas": "Cobertura Eixo B: MARD. LABST = estoque livre disponível."
     },
@@ -71,8 +78,9 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_data",
       "tabelas_esperadas": ["MKPF"],
+      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
       "sql_referencia": "SELECT MBLNR, MJAHR, BUDAT, USNAM FROM MKPF WHERE BUDAT BETWEEN '20250101' AND '20250131' ORDER BY BUDAT",
-      "notas": "Cobertura Eixo B: MKPF. MKPF tem BUDAT (cabeçalho do documento de material)."
+      "notas": "Cobertura Eixo B: MKPF."
     },
     {
       "id": "Q009",
@@ -80,6 +88,7 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
       "tabelas_esperadas": ["EKPO"],
+      "chave_primaria_resultado": ["EBELN", "EBELP"],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, WERKS, MENGE, EINDT FROM EKPO WHERE ELIKZ = '' OR ELIKZ IS NULL ORDER BY EINDT",
       "notas": "Cobertura Eixo B: EKPO. ELIKZ = indicador de entrega completa."
     },
@@ -89,8 +98,9 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
       "tabelas_esperadas": ["VBAK"],
+      "chave_primaria_resultado": ["VBELN"],
       "sql_referencia": "SELECT VBELN, AUART, KUNNR, AUDAT, NETWR, WAERK FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' ORDER BY AUDAT DESC",
-      "notas": "Cobertura Eixo B: VBAK. Cabeçalho de pedido de venda."
+      "notas": "Cobertura Eixo B: VBAK."
     },
     {
       "id": "Q011",
@@ -98,8 +108,9 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
       "tabelas_esperadas": ["VBAP"],
+      "chave_primaria_resultado": ["VBELN", "POSNR"],
       "sql_referencia": "SELECT VBELN, POSNR, MATNR, KWMENG, NETWR FROM VBAP WHERE FKSTA != 'C' ORDER BY VBELN, POSNR",
-      "notas": "Cobertura Eixo B: VBAP. FKSTA = status de faturamento; C = completamente faturado."
+      "notas": "Cobertura Eixo B: VBAP. FKSTA = status de faturamento."
     },
     {
       "id": "Q012",
@@ -107,8 +118,9 @@
       "categoria": "simples",
       "subcategoria": "select_listagem",
       "tabelas_esperadas": ["KNA1"],
+      "chave_primaria_resultado": ["KUNNR"],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, LAND1, REGIO FROM KNA1 ORDER BY NAME1",
-      "notas": "Cobertura Eixo B: KNA1. Mestre de clientes."
+      "notas": "Cobertura Eixo B: KNA1."
     },
     {
       "id": "Q013",
@@ -116,8 +128,9 @@
       "categoria": "simples",
       "subcategoria": "select_listagem",
       "tabelas_esperadas": ["LFA1"],
+      "chave_primaria_resultado": ["LIFNR"],
       "sql_referencia": "SELECT LIFNR, NAME1, ORT01, LAND1 FROM LFA1 ORDER BY NAME1",
-      "notas": "Cobertura Eixo B: LFA1. Mestre de fornecedores."
+      "notas": "Cobertura Eixo B: LFA1."
     },
     {
       "id": "Q014",
@@ -125,8 +138,9 @@
       "categoria": "simples",
       "subcategoria": "select_listagem",
       "tabelas_esperadas": ["MARC"],
+      "chave_primaria_resultado": ["MATNR", "WERKS"],
       "sql_referencia": "SELECT MATNR, WERKS, DISMM, BESKZ, MINBE, EISBE FROM MARC ORDER BY MATNR, WERKS",
-      "notas": "Cobertura Eixo B: MARC. Dados MRP por planta."
+      "notas": "Cobertura Eixo B: MARC."
     },
     {
       "id": "Q015",
@@ -134,8 +148,9 @@
       "categoria": "simples",
       "subcategoria": "select_filtro_numerico",
       "tabelas_esperadas": ["AFPO"],
+      "chave_primaria_resultado": ["AUFNR", "POSNR"],
       "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, MEINS FROM AFPO WHERE PSMNG > 100 ORDER BY PSMNG DESC",
-      "notas": "Cobertura Eixo B: AFPO. PSMNG = quantidade planejada da ordem."
+      "notas": "Cobertura Eixo B: AFPO."
     },
     {
       "id": "Q016",
@@ -143,8 +158,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_periodo",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["mes"],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, COUNT(*) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
-      "notas": "Eixo A médio: agregação + GROUP BY. Mês em formato YYYYMM."
+      "notas": "Agregação + GROUP BY. Mês em formato YYYYMM."
     },
     {
       "id": "Q017",
@@ -152,8 +168,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_entidade",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["KUNAG"],
       "sql_referencia": "SELECT KUNAG, SUM(NETWR) AS total_faturado, COUNT(*) AS qtd_notas FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY KUNAG ORDER BY total_faturado DESC",
-      "notas": "Agregação de faturamento por cliente. Base para ranking (Q028)."
+      "notas": "Agregação de faturamento por cliente."
     },
     {
       "id": "Q018",
@@ -161,8 +178,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_categoria",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["BWART"],
       "sql_referencia": "SELECT BWART, COUNT(*) AS total_movimentacoes, SUM(MENGE) AS quantidade_total FROM MSEG WHERE MJAHR = '2025' GROUP BY BWART ORDER BY total_movimentacoes DESC",
-      "notas": "Agregação por tipo de movimento (BWART). Eixo A médio."
+      "notas": "Agregação por tipo de movimento."
     },
     {
       "id": "Q019",
@@ -170,8 +188,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_media",
       "tabelas_esperadas": ["EKKO"],
+      "chave_primaria_resultado": ["LIFNR"],
       "sql_referencia": "SELECT LIFNR, COUNT(*) AS total_pedidos FROM EKKO GROUP BY LIFNR ORDER BY total_pedidos DESC",
-      "notas": "AVG + GROUP BY por fornecedor. Valida agregação com múltiplas funções."
+      "notas": "Agregação por fornecedor (EKKO sem NETWR no schema)."
     },
     {
       "id": "Q020",
@@ -179,8 +198,9 @@
       "categoria": "media",
       "subcategoria": "filtro_composto",
       "tabelas_esperadas": ["MARD", "MARC"],
+      "chave_primaria_resultado": ["MATNR", "WERKS"],
       "sql_referencia": "SELECT d.MATNR, d.WERKS, d.LABST, c.MINBE FROM MARD d JOIN MARC c ON d.MATNR = c.MATNR AND d.WERKS = c.WERKS WHERE d.LABST < c.MINBE AND c.MINBE > 0 ORDER BY d.MATNR",
-      "notas": "JOIN MARD + MARC com filtro composto. Valida lógica de negócio MRP."
+      "notas": "JOIN MARD + MARC."
     },
     {
       "id": "Q021",
@@ -188,6 +208,7 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_entidade",
       "tabelas_esperadas": ["VBAK"],
+      "chave_primaria_resultado": ["KUNNR"],
       "sql_referencia": "SELECT KUNNR, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY KUNNR ORDER BY total_pedidos DESC",
       "notas": "Agregação de pedidos de venda por cliente."
     },
@@ -197,8 +218,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_filtro_status",
       "tabelas_esperadas": ["AFPO"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT MATNR, SUM(WEMNG) AS volume_produzido, SUM(PSMNG) AS volume_planejado FROM AFPO WHERE WEMNG > 0 GROUP BY MATNR ORDER BY volume_produzido DESC",
-      "notas": "WEMNG = quantidade recebida/produzida efetivamente."
+      "notas": "WEMNG = quantidade recebida/produzida."
     },
     {
       "id": "Q023",
@@ -206,17 +228,19 @@
       "categoria": "media",
       "subcategoria": "filtro_numerico_composto",
       "tabelas_esperadas": ["EKPO"],
+      "chave_primaria_resultado": ["EBELN", "EBELP"],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, MENGE, NETPR, NETWR FROM EKPO WHERE NETPR > 500 ORDER BY NETPR DESC",
-      "notas": "Filtro numérico direto em item de pedido de compra."
+      "notas": "Filtro numérico em item de pedido."
     },
     {
       "id": "Q024",
       "pergunta": "Qual o faturamento total por organização de vendas em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_categoria",
-      "tabelas_esperadas": ["VBAK", "VBRK"],
+      "tabelas_esperadas": ["VBAK"],
+      "chave_primaria_resultado": ["VKORG"],
       "sql_referencia": "SELECT VKORG, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY VKORG ORDER BY valor_total DESC",
-      "notas": "Agregação por organização de vendas (VKORG)."
+      "notas": "Agregação por organização de vendas."
     },
     {
       "id": "Q025",
@@ -224,8 +248,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_usuario",
       "tabelas_esperadas": ["MKPF"],
+      "chave_primaria_resultado": ["USNAM"],
       "sql_referencia": "SELECT USNAM, COUNT(*) AS total_documentos FROM MKPF WHERE SUBSTR(BUDAT, 1, 4) = '2025' GROUP BY USNAM ORDER BY total_documentos DESC",
-      "notas": "Agregação por usuário via MKPF. Valida rastreabilidade de movimentos."
+      "notas": "Agregação por usuário via MKPF."
     },
     {
       "id": "Q026",
@@ -233,8 +258,9 @@
       "categoria": "media",
       "subcategoria": "agregacao_multipla",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["MATNR", "WERKS"],
       "sql_referencia": "SELECT MATNR, WERKS, COUNT(*) AS total_movimentos, SUM(MENGE) AS volume_total FROM MSEG WHERE MJAHR = '2025' GROUP BY MATNR, WERKS ORDER BY volume_total DESC",
-      "notas": "GROUP BY composto (MATNR + WERKS). Valida agrupamento multidimensional."
+      "notas": "GROUP BY composto."
     },
     {
       "id": "Q027",
@@ -242,8 +268,9 @@
       "categoria": "media",
       "subcategoria": "filtro_geografico",
       "tabelas_esperadas": ["KNA1"],
+      "chave_primaria_resultado": ["KUNNR"],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, REGIO FROM KNA1 WHERE LAND1 = 'BR' AND REGIO IN ('PR', 'SC', 'RS') ORDER BY NAME1",
-      "notas": "Filtro composto por país e região. Valida conhecimento de domínio geográfico."
+      "notas": "Filtro composto país e região."
     },
     {
       "id": "Q028",
@@ -251,8 +278,9 @@
       "categoria": "complexa",
       "subcategoria": "ranking_top_n",
       "tabelas_esperadas": ["VBRK", "KNA1"],
+      "chave_primaria_resultado": ["KUNAG"],
       "sql_referencia": "SELECT k.VBELN, k.KUNAG, c.NAME1, SUM(k.NETWR) AS total_faturado FROM VBRK k LEFT JOIN KNA1 c ON k.KUNAG = c.KUNNR WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY k.KUNAG, c.NAME1 ORDER BY total_faturado DESC LIMIT 10",
-      "notas": "Eixo A complexo: JOIN + GROUP BY + ORDER BY + LIMIT. Ranking clássico de negócio."
+      "notas": "JOIN + GROUP BY + ORDER BY + LIMIT."
     },
     {
       "id": "Q029",
@@ -260,8 +288,9 @@
       "categoria": "complexa",
       "subcategoria": "ranking_top_n",
       "tabelas_esperadas": ["VBRP", "VBRK"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT p.MATNR, SUM(p.NETWR) AS total_faturado, SUM(p.FKIMG) AS quantidade_total FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY p.MATNR ORDER BY total_faturado DESC LIMIT 10",
-      "notas": "JOIN VBRP + VBRK. Ranking de materiais por faturamento — caso de uso central do DataSpeak."
+      "notas": "JOIN VBRP + VBRK."
     },
     {
       "id": "Q030",
@@ -269,8 +298,9 @@
       "categoria": "complexa",
       "subcategoria": "join_enriquecimento",
       "tabelas_esperadas": ["EKKO", "LFA1"],
+      "chave_primaria_resultado": ["LIFNR"],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(*) AS total_pedidos FROM EKKO e JOIN LFA1 f ON e.LIFNR = f.LIFNR GROUP BY e.LIFNR, f.NAME1 ORDER BY total_pedidos DESC",
-      "notas": "JOIN EKKO + LFA1 para enriquecer pedidos com nome do fornecedor."
+      "notas": "JOIN EKKO + LFA1."
     },
     {
       "id": "Q031",
@@ -278,8 +308,9 @@
       "categoria": "complexa",
       "subcategoria": "intersecao_conjuntos",
       "tabelas_esperadas": ["EKPO", "MSEG"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT DISTINCT e.MATNR FROM EKPO e WHERE e.MATNR IN (SELECT MATNR FROM MSEG WHERE MJAHR = '2025') ORDER BY e.MATNR",
-      "notas": "Subquery com IN. Valida capacidade de interseção de conjuntos."
+      "notas": "Subquery com IN."
     },
     {
       "id": "Q032",
@@ -287,8 +318,9 @@
       "categoria": "complexa",
       "subcategoria": "agregacao_hierarquica",
       "tabelas_esperadas": ["MARD"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT MATNR, SUM(LABST) AS estoque_total, SUM(SPEME) AS estoque_bloqueado, SUM(UMLME) AS em_transferencia FROM MARD GROUP BY MATNR HAVING SUM(LABST) > 0 ORDER BY estoque_total DESC",
-      "notas": "HAVING para filtrar pós-agregação. Valida três tipos de estoque simultaneamente."
+      "notas": "HAVING para filtrar pós-agregação."
     },
     {
       "id": "Q033",
@@ -296,8 +328,9 @@
       "categoria": "complexa",
       "subcategoria": "filtro_data_relativo",
       "tabelas_esperadas": ["VBAP", "VBAK"],
+      "chave_primaria_resultado": ["VBELN", "POSNR"],
       "sql_referencia": "SELECT a.VBELN, a.KUNNR, p.POSNR, p.MATNR, p.EDATU FROM VBAK a JOIN VBAP p ON a.VBELN = p.VBELN WHERE p.EDATU < DATE('now') AND p.FKSTA != 'C' ORDER BY p.EDATU",
-      "notas": "Filtro com DATE('now') — data dinâmica. Itens não faturados com entrega vencida."
+      "notas": "Filtro com DATE('now')."
     },
     {
       "id": "Q034",
@@ -305,8 +338,9 @@
       "categoria": "complexa",
       "subcategoria": "calculo_derivado",
       "tabelas_esperadas": ["EKKO", "EKPO", "LFA1"],
+      "chave_primaria_resultado": ["LIFNR"],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELN) AS total_itens, AVG(CAST(JULIANDAY(p.EINDT) - JULIANDAY(e.BEDAT) AS REAL)) AS lead_time_medio FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE e.BEDAT IS NOT NULL AND p.EINDT IS NOT NULL GROUP BY e.LIFNR, f.NAME1 ORDER BY lead_time_medio",
-      "notas": "Triple JOIN + cálculo derivado com JULIANDAY. Query mais complexa do dataset."
+      "notas": "Triple JOIN + JULIANDAY."
     },
     {
       "id": "Q035",
@@ -314,8 +348,9 @@
       "categoria": "complexa",
       "subcategoria": "calculo_percentual",
       "tabelas_esperadas": ["AFPO"],
-      "sql_referencia": "SELECT AUFNR, MATNR, PSMNG, WEMNG, ROUND(CAST(WEMNG AS REAL) / PSMNG * 100, 1) AS perc_realizado FROM AFPO WHERE PSMNG > 0 AND WEMNG < PSMNG * 0.8 ORDER BY perc_realizado",
-      "notas": "Cálculo percentual com CAST e ROUND. Valida eficiência produtiva."
+      "chave_primaria_resultado": ["AUFNR", "POSNR"],
+      "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, ROUND(CAST(WEMNG AS REAL) / PSMNG * 100, 1) AS perc_realizado FROM AFPO WHERE PSMNG > 0 AND WEMNG < PSMNG * 0.8 ORDER BY perc_realizado",
+      "notas": "Cálculo percentual."
     },
     {
       "id": "Q036",
@@ -323,8 +358,9 @@
       "categoria": "complexa",
       "subcategoria": "join_calculo_valor",
       "tabelas_esperadas": ["MARD", "EKPO"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT d.MATNR, SUM(d.LABST) AS estoque_total, AVG(p.NETPR) AS preco_medio, SUM(d.LABST) * AVG(p.NETPR) AS valor_estoque FROM MARD d JOIN EKPO p ON d.MATNR = p.MATNR WHERE d.LABST > 0 GROUP BY d.MATNR ORDER BY valor_estoque DESC",
-      "notas": "JOIN MARD + EKPO para valorizar estoque. Caso de uso analítico avançado."
+      "notas": "JOIN MARD + EKPO."
     },
     {
       "id": "Q037",
@@ -332,8 +368,9 @@
       "categoria": "complexa",
       "subcategoria": "diferenca_conjuntos",
       "tabelas_esperadas": ["VBAK", "VBRK"],
+      "chave_primaria_resultado": ["KUNNR"],
       "sql_referencia": "SELECT DISTINCT a.KUNNR FROM VBAK a WHERE SUBSTR(a.AUDAT, 1, 4) = '2025' AND a.KUNNR NOT IN (SELECT KUNAG FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025') ORDER BY a.KUNNR",
-      "notas": "NOT IN com subquery. Diferença de conjuntos — clientes sem faturamento."
+      "notas": "NOT IN com subquery."
     },
     {
       "id": "Q038",
@@ -341,8 +378,9 @@
       "categoria": "complexa",
       "subcategoria": "acumulado_temporal",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["mes"],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, SUM(NETWR) AS faturamento_mes, SUM(SUM(NETWR)) OVER (ORDER BY SUBSTR(FKDAT, 1, 6)) AS faturamento_acumulado FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
-      "notas": "Window function (SUM OVER). Valida suporte a funções analíticas no SQLite."
+      "notas": "Window function."
     },
     {
       "id": "Q039",
@@ -350,8 +388,9 @@
       "categoria": "complexa",
       "subcategoria": "join_multiplo_negocio",
       "tabelas_esperadas": ["AFKO", "MARD", "MARC"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT a.MATNR, a.AUFNR, d.LABST, c.MINBE FROM AFKO a JOIN MARD d ON a.MATNR = d.MATNR AND a.WERKS = d.WERKS JOIN MARC c ON a.MATNR = c.MATNR AND a.WERKS = c.WERKS WHERE (a.STSTPS NOT IN ('TECO', 'CLSD') OR a.STSTPS IS NULL) AND d.LABST < c.MINBE ORDER BY d.LABST",
-      "notas": "Triple JOIN com condição de negócio complexa. Alta relevância para banca."
+      "notas": "Triple JOIN."
     },
     {
       "id": "Q040",
@@ -359,8 +398,9 @@
       "categoria": "complexa",
       "subcategoria": "ranking_join",
       "tabelas_esperadas": ["EKPO", "LFA1", "EKKO"],
+      "chave_primaria_resultado": ["LIFNR"],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELP) AS total_itens, SUM(p.MENGE) AS volume_total FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE p.ELIKZ = 'X' GROUP BY e.LIFNR, f.NAME1 ORDER BY total_itens DESC",
-      "notas": "Triple JOIN + ranking por fornecedor. ELIKZ='X' = entrega completa."
+      "notas": "Triple JOIN."
     },
     {
       "id": "Q041",
@@ -368,8 +408,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_negocio",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG ORDER BY MJAHR DESC, MBLNR DESC LIMIT 100",
-      "notas": "Eixo C: vocabulário de negócio (sem mencionar MSEG). RAG deve recuperar MSEG por semântica."
+      "notas": "Vocabulário de negócio."
     },
     {
       "id": "Q042",
@@ -377,8 +418,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_coloquial",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["MATNR"],
       "sql_referencia": "SELECT DISTINCT MATNR FROM MSEG WHERE MJAHR = '2025' ORDER BY MATNR",
-      "notas": "Eixo C: vocabulário coloquial (peças, mexeram). Dívida conhecida — RAG pode falhar aqui."
+      "notas": "Vocabulário coloquial. Dívida conhecida."
     },
     {
       "id": "Q043",
@@ -386,8 +428,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_coloquial",
       "tabelas_esperadas": ["EKKO"],
+      "chave_primaria_resultado": ["EBELN"],
       "sql_referencia": "SELECT EBELN, LIFNR, BEDAT FROM EKKO WHERE SUBSTR(BEDAT, 1, 4) = '2025' ORDER BY BEDAT DESC",
-      "notas": "Eixo C: coloquial + referência temporal relativa (esse ano). LLM precisa inferir 2025."
+      "notas": "Coloquial + temporal relativo."
     },
     {
       "id": "Q044",
@@ -395,8 +438,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_ambiguo",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["VBELN"],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
-      "notas": "Eixo C: ambíguo sem período definido. Sistema deve retornar algo razoável ou pedir clarificação."
+      "notas": "Ambíguo sem período."
     },
     {
       "id": "Q045",
@@ -404,8 +448,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_ambiguo",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": ["VBELN"],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
-      "notas": "Eixo C: 'notas' é ambíguo (fiscal? documento de material?). Valida qual tabela o LLM escolhe."
+      "notas": "Notas é ambíguo."
     },
     {
       "id": "Q046",
@@ -413,8 +458,9 @@
       "categoria": "robustez",
       "subcategoria": "vocabulario_tecnico_sap",
       "tabelas_esperadas": ["MSEG"],
+      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG LIMIT 100",
-      "notas": "Eixo C: vocabulário técnico SAP direto. Caso mais fácil de robustez — baseline."
+      "notas": "Vocabulário técnico SAP direto."
     },
     {
       "id": "Q047",
@@ -422,8 +468,9 @@
       "categoria": "robustez",
       "subcategoria": "referencia_temporal_relativa",
       "tabelas_esperadas": ["VBRK"],
+      "chave_primaria_resultado": [],
       "sql_referencia": "SELECT SUM(NETWR) AS total_vendas, COUNT(*) AS total_notas FROM VBRK WHERE FKDAT >= '20250901' AND FKDAT <= '20251231'",
-      "notas": "Eixo C: referência temporal relativa (último trimestre). LLM precisa inferir Q4/2025."
+      "notas": "Referência temporal relativa. Sem PK por ser agregado total."
     },
     {
       "id": "Q048",
@@ -431,8 +478,9 @@
       "categoria": "adversarial",
       "subcategoria": "tabela_fora_catalogo",
       "tabelas_esperadas": [],
+      "chave_primaria_resultado": [],
       "sql_referencia": "SELECT 'ERRO: Tabela de funcionários não disponível no catálogo DataSpeak' AS mensagem",
-      "notas": "Eixo D: tabela inexistente no catálogo. Sistema DEVE recusar ou informar limitação — não alucinar HR/PA tabelas SAP."
+      "notas": "Tabela fora do catálogo."
     },
     {
       "id": "Q049",
@@ -440,8 +488,9 @@
       "categoria": "adversarial",
       "subcategoria": "operacao_escrita",
       "tabelas_esperadas": [],
+      "chave_primaria_resultado": [],
       "sql_referencia": "SELECT 'ERRO: Operação de escrita não permitida' AS mensagem",
-      "notas": "Eixo D: operação destrutiva. Camada read-only deve barrar. LLM pode auto-censurar ou allowlist barra."
+      "notas": "Operação destrutiva."
     },
     {
       "id": "Q050",
@@ -449,8 +498,9 @@
       "categoria": "adversarial",
       "subcategoria": "entrada_sem_sentido",
       "tabelas_esperadas": [],
+      "chave_primaria_resultado": [],
       "sql_referencia": "SELECT 'ERRO: Pergunta não interpretável' AS mensagem",
-      "notas": "Eixo D: entrada sem sentido. Sistema deve falhar graciosamente — sem alucinação, sem 500."
+      "notas": "Entrada sem sentido."
     }
   ]
 }

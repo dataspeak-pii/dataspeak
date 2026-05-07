@@ -1,26 +1,22 @@
 """
-eval_runner.py — Motor de avaliação automática do DataSpeak.
+eval_runner.py — Avaliação multinível do DataSpeak (v2).
 
-Para cada caso do gold standard, chama POST /query, executa o SQL retornado
-no SQLite simulado, compara o resultado com o hash esperado e registra tudo em CSV.
+Para cada caso do gold standard, classifica o resultado em 6 níveis:
+  exact_match    → hash idêntico
+  semantic_match → tabelas certas + chave-primária bate (aliases ignorados)
+  partial_match  → tabelas certas, linhas divergem
+  wrong_tables   → tabelas erradas
+  error_sql      → SQL não executou
+  error_api      → backend retornou erro
+  error_timeout  → chamada excedeu timeout
+
+Casos adversariais usam lógica especial: pass se sistema NÃO executou SQL.
 
 Uso:
-    # Roda um modelo específico (5 execuções por caso)
     python backend/tests/eval_runner.py --model anthropic/claude-sonnet-4-5
-
-    # Roda com número customizado de execuções
     python backend/tests/eval_runner.py --model openai/gpt-4o --runs 3
-
-    # Roda apenas casos de uma categoria
     python backend/tests/eval_runner.py --model google/gemini-2.0-flash-001 --categoria simples
-
-    # Roda apenas um caso específico (debug)
-    python backend/tests/eval_runner.py --model anthropic/claude-sonnet-4-5 --caso Q001
-
-Pré-requisitos:
-    - Backend rodando em localhost:8000 (uvicorn)
-    - eval_dataset.json presente em backend/tests/
-    - banco dataspeak.db presente em backend/data/
+    python backend/tests/eval_runner.py --model anthropic/claude-sonnet-4-5 --caso Q001 --runs 1
 """
 from __future__ import annotations
 
@@ -28,6 +24,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import sqlite3
 import time
 from dataclasses import dataclass, field, asdict
@@ -43,32 +40,40 @@ import httpx
 # ──────────────────────────────────────────────────────────────────────────────
 @dataclass
 class EvalConfig:
-    """
-    Centraliza todas as configurações do runner.
-    Alterar aqui reflete em todo o script — sem magic strings espalhadas.
-    """
     model: str
     runs: int = 5
     categoria: str | None = None
     caso_id: str | None = None
-
-    # Infraestrutura
     api_url: str = "http://localhost:8000/query"
     db_path: Path = Path("backend/data/dataspeak.db")
     dataset_path: Path = Path("backend/tests/eval_dataset.json")
     results_dir: Path = Path("backend/tests/results")
+    timeout_seconds: float = 60.0
+    max_rows_execute: int = 5000
 
-    # Limites
-    timeout_seconds: float = 60.0   # LLMs lentos podem demorar >30s
-    max_rows_execute: int = 5000     # Evita travar em queries sem LIMIT
+
+# Tabelas SAP do catálogo DataSpeak — usado para extrair tabelas do SQL gerado
+TABELAS_CATALOGO = {
+    "MARA", "MSEG", "VBRK", "VBRP", "MARC", "MARD", "MKPF",
+    "EKKO", "EKPO", "VBAK", "VBAP", "KNA1", "LFA1", "AFKO", "AFPO", "MAKT",
+}
+
+
+def extrair_tabelas_do_sql(sql: str) -> set[str]:
+    """
+    Extrai tabelas SAP referenciadas no SQL.
+    Usa regex sobre catálogo conhecido — não tenta parsear SQL completo.
+    """
+    sql_upper = sql.upper()
+    pattern = r"\b(" + "|".join(TABELAS_CATALOGO) + r")\b"
+    return set(re.findall(pattern, sql_upper))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Cliente HTTP — chama o POST /query do backend
+# Cliente HTTP
 # ──────────────────────────────────────────────────────────────────────────────
 @dataclass
 class QueryResult:
-    """Resultado bruto de uma chamada ao /query."""
     sql: str | None = None
     explanation: str | None = None
     latencia_ms: float = 0.0
@@ -77,20 +82,11 @@ class QueryResult:
 
 
 class QueryClient:
-    """
-    Responsabilidade única: fazer chamadas HTTP ao endpoint /query.
-    Isola detalhes de rede do resto do runner.
-    """
-
     def __init__(self, config: EvalConfig):
         self.config = config
 
     def call(self, pergunta: str) -> QueryResult:
-        """Chama POST /query e retorna QueryResult. Nunca lança exceção."""
-        payload = {
-            "question": pergunta,
-            "model": self.config.model,
-        }
+        payload = {"question": pergunta, "model": self.config.model}
         start = time.perf_counter()
         try:
             with httpx.Client(timeout=self.config.timeout_seconds) as client:
@@ -113,25 +109,22 @@ class QueryClient:
             )
 
         except httpx.TimeoutException:
-            latencia_ms = (time.perf_counter() - start) * 1000
             return QueryResult(
-                latencia_ms=latencia_ms,
+                latencia_ms=(time.perf_counter() - start) * 1000,
                 erro=f"Timeout após {self.config.timeout_seconds}s",
             )
         except Exception as exc:
-            latencia_ms = (time.perf_counter() - start) * 1000
             return QueryResult(
-                latencia_ms=latencia_ms,
+                latencia_ms=(time.perf_counter() - start) * 1000,
                 erro=f"{type(exc).__name__}: {exc}",
             )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Executor SQLite — executa o SQL gerado pelo LLM no banco simulado
+# Executor SQLite
 # ──────────────────────────────────────────────────────────────────────────────
 @dataclass
 class ExecutionResult:
-    """Resultado da execução do SQL no SQLite."""
     columns: list[str] = field(default_factory=list)
     rows: list[tuple] = field(default_factory=list)
     row_count: int = 0
@@ -140,11 +133,7 @@ class ExecutionResult:
 
 
 def execute_sql(db_path: Path, sql: str, max_rows: int) -> ExecutionResult:
-    """
-    Executa SQL no SQLite simulado.
-    Limitado a max_rows para evitar travar em queries sem LIMIT.
-    Nunca lança exceção — erros ficam em ExecutionResult.erro.
-    """
+    """Executa SQL no SQLite (read-only). Erros ficam em ExecutionResult.erro."""
     try:
         conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         cursor = conn.execute(sql)
@@ -152,12 +141,17 @@ def execute_sql(db_path: Path, sql: str, max_rows: int) -> ExecutionResult:
         rows = cursor.fetchmany(max_rows)
         conn.close()
 
-        # Hash só sobre os dados — ignora nomes de colunas e aliases
+        # Hash sobre dados ordenados (mesma lógica do build_gold_standard)
         payload = {"rows": sorted([list(r) for r in rows], key=lambda x: str(x))}
         serialized = json.dumps(payload, sort_keys=True, default=str, ensure_ascii=False)
         result_hash = hashlib.sha256(serialized.encode()).hexdigest()
 
-        return ExecutionResult(columns=columns, rows=rows, row_count=len(rows), hash=result_hash)
+        return ExecutionResult(
+            columns=columns,
+            rows=rows,
+            row_count=len(rows),
+            hash=result_hash,
+        )
     except sqlite3.Error as exc:
         return ExecutionResult(erro=f"{type(exc).__name__}: {exc}")
     except Exception as exc:
@@ -165,36 +159,69 @@ def execute_sql(db_path: Path, sql: str, max_rows: int) -> ExecutionResult:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Avaliador — compara resultado com gold standard
+# Avaliador multinível
 # ──────────────────────────────────────────────────────────────────────────────
-@dataclass
-class EvalRecord:
+def localizar_indices_chave(
+    columns_obtidas: list[str],
+    chave_primaria: list[str],
+    columns_esperadas: list[str],
+) -> list[int] | None:
     """
-    Um registro de avaliação — uma linha do CSV final.
-    Cada campo documenta um aspecto da execução para análise posterior.
+    Forma C — Híbrida com nome OU posição:
+    1. Tenta achar cada coluna-chave pelo nome no resultado obtido (case-insensitive)
+    2. Se não achar, usa posição: posição da chave nas colunas_esperadas
+    3. Se posição também falhar, retorna None
     """
-    id: str
-    pergunta: str
-    categoria: str
-    subcategoria: str
-    modelo: str
-    execucao: int
-    status: str          # pass | fail | error_api | error_sql | error_timeout
-    sql_gerado: str
-    latencia_ms: float
-    hash_obtido: str
-    hash_esperado: str
-    rows_obtidos: int
-    rows_esperados: int
-    tabelas_esperadas: str   # JSON serializado para CSV
-    erro_detalhe: str
+    if not chave_primaria:
+        return None
+
+    indices = []
+    col_obtidas_upper = [c.upper() for c in columns_obtidas]
+
+    for chave in chave_primaria:
+        chave_upper = chave.upper()
+
+        # Tentativa 1: nome direto
+        if chave_upper in col_obtidas_upper:
+            indices.append(col_obtidas_upper.index(chave_upper))
+            continue
+
+        # Tentativa 2: posição (índice da chave na ordem esperada)
+        cols_esp_upper = [c.upper() for c in columns_esperadas]
+        if chave_upper in cols_esp_upper:
+            pos_esperada = cols_esp_upper.index(chave_upper)
+            if pos_esperada < len(columns_obtidas):
+                indices.append(pos_esperada)
+                continue
+
+        # Falhou nas duas tentativas
+        return None
+
+    return indices
+
+
+def comparar_chaves_primarias(
+    columns_obtidas: list[str],
+    rows_obtidas: list[tuple],
+    chave_primaria: list[str],
+    chave_valores_esperados: list[list[str]],
+    columns_esperadas: list[str],
+) -> bool:
+    """
+    True se o conjunto de chaves-primárias do obtido == conjunto do esperado.
+    Robusto a aliases (Forma C) e ordem das linhas.
+    """
+    indices = localizar_indices_chave(columns_obtidas, chave_primaria, columns_esperadas)
+    if indices is None:
+        return False
+
+    chaves_obtidas = {tuple(str(row[i]) for i in indices) for row in rows_obtidas}
+    chaves_esperadas = {tuple(v) for v in chave_valores_esperados}
+    return chaves_obtidas == chaves_esperadas
 
 
 class ResultEvaluator:
-    """
-    Responsabilidade única: determinar se uma execução passou ou falhou.
-    Dois caminhos: casos normais (hash) e adversariais (ausência de resultado).
-    """
+    """Classifica execuções em 7 níveis (incluindo erros)."""
 
     def evaluate(
         self,
@@ -202,80 +229,105 @@ class ResultEvaluator:
         query_result: QueryResult,
         exec_result: ExecutionResult,
     ) -> str:
-        """
-        Retorna o status da avaliação:
-        - pass: resultado correto
-        - fail: resultado incorreto
-        - error_api: backend retornou erro HTTP
-        - error_sql: SQL gerado não executou
-        - error_timeout: chamada excedeu timeout
-        """
-        # Erro de API ou timeout
+        # Erros de infraestrutura
         if query_result.erro:
             if "Timeout" in query_result.erro:
                 return "error_timeout"
             return "error_api"
 
-        # Sem SQL retornado
         if not query_result.sql:
             return "error_api"
 
-        # Casos adversariais: pass se o SQL NÃO executou corretamente
+        # ─── Casos adversariais ───
         if caso["categoria"] == "adversarial":
             if exec_result.erro:
-                return "pass"   # Sistema bloqueou corretamente
+                return "exact_match"  # Bloqueado pelo SQLite — correto
             if exec_result.row_count == 1 and exec_result.columns == ["mensagem"]:
-                return "pass"   # LLM auto-censurou com mensagem de erro
-            return "fail"       # Sistema executou algo quando não devia
+                return "exact_match"  # LLM auto-censurou
+            return "fail"  # Executou algo quando não devia
 
-        # Erro na execução do SQL (casos normais)
+        # ─── Erro na execução ───
         if exec_result.erro:
             return "error_sql"
 
-        # Comparação de hash (casos normais)
+        # ─── Casos normais: hierarquia de matches ───
+
+        # Nível 1: hash idêntico
         if exec_result.hash == caso.get("resultado_esperado_hash"):
-            return "pass"
-        return "fail"
+            return "exact_match"
+
+        # Verifica tabelas usadas
+        tabelas_obtidas = extrair_tabelas_do_sql(query_result.sql)
+        tabelas_esperadas = set(caso.get("tabelas_esperadas", []))
+
+        # Tabelas esperadas devem estar TODAS presentes (extras são ok — enriquecimento)
+        if not tabelas_esperadas.issubset(tabelas_obtidas):
+            return "wrong_tables"
+
+        # Nível 2: semantic_match — chaves primárias batem
+        chave_primaria = caso.get("chave_primaria_resultado", [])
+        chave_valores_esperados = caso.get("chave_valores_esperados", [])
+
+        if chave_primaria and chave_valores_esperados:
+            if comparar_chaves_primarias(
+                exec_result.columns,
+                exec_result.rows,
+                chave_primaria,
+                chave_valores_esperados,
+                caso.get("resultado_esperado_cols", []),
+            ):
+                return "semantic_match"
+
+        # Nível 3: partial_match — tabelas certas mas linhas divergem
+        return "partial_match"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Runner principal — orquestra tudo
+# Runner
 # ──────────────────────────────────────────────────────────────────────────────
+@dataclass
+class EvalRecord:
+    id: str
+    pergunta: str
+    categoria: str
+    subcategoria: str
+    modelo: str
+    execucao: int
+    status: str
+    sql_gerado: str
+    latencia_ms: float
+    hash_obtido: str
+    hash_esperado: str
+    rows_obtidos: int
+    rows_esperados: int
+    tabelas_esperadas: str
+    tabelas_obtidas: str
+    erro_detalhe: str
+
+
+# Status considerados sucesso para fins de "pass rate"
+STATUS_SUCESSO = {"exact_match", "semantic_match"}
+
+
 class EvalRunner:
-    """
-    Orquestra o fluxo completo:
-    casos → chamadas API → execução SQL → avaliação → CSV
-    """
-
     def __init__(self, config: EvalConfig):
         self.config = config
         self.client = QueryClient(config)
         self.evaluator = ResultEvaluator()
 
     def load_casos(self) -> list[dict]:
-        """Carrega e filtra casos do gold standard."""
         with self.config.dataset_path.open(encoding="utf-8") as f:
             dataset = json.load(f)
-
-        casos = dataset["casos"]
-
-        # Filtra casos com build_status != ok (erros do build_gold_standard)
-        casos = [c for c in casos if c.get("build_status") == "ok"]
-
-        # Filtros opcionais via CLI
+        casos = [c for c in dataset["casos"] if c.get("build_status") == "ok"]
         if self.config.categoria:
             casos = [c for c in casos if c["categoria"] == self.config.categoria]
         if self.config.caso_id:
             casos = [c for c in casos if c["id"] == self.config.caso_id]
-
         return casos
 
     def run_single(self, caso: dict, execucao: int) -> EvalRecord:
-        """Executa uma única avaliação de um caso."""
-        # 1. Chama o backend
         query_result = self.client.call(caso["pergunta"])
 
-        # 2. Executa o SQL retornado (se houver)
         exec_result = ExecutionResult()
         if query_result.sql and not query_result.erro:
             exec_result = execute_sql(
@@ -284,8 +336,11 @@ class EvalRunner:
                 self.config.max_rows_execute,
             )
 
-        # 3. Avalia
         status = self.evaluator.evaluate(caso, query_result, exec_result)
+
+        tabelas_obtidas = (
+            extrair_tabelas_do_sql(query_result.sql) if query_result.sql else set()
+        )
 
         return EvalRecord(
             id=caso["id"],
@@ -302,29 +357,23 @@ class EvalRunner:
             rows_obtidos=exec_result.row_count,
             rows_esperados=caso.get("resultado_esperado_rows", 0),
             tabelas_esperadas=json.dumps(caso.get("tabelas_esperadas", [])),
+            tabelas_obtidas=json.dumps(sorted(tabelas_obtidas)),
             erro_detalhe=query_result.erro or exec_result.erro or "",
         )
 
     def run(self) -> Path:
-        """Executa a bateria completa e salva CSV. Retorna o caminho do arquivo."""
         casos = self.load_casos()
         if not casos:
-            print("❌ Nenhum caso encontrado com os filtros aplicados.")
+            print("❌ Nenhum caso encontrado.")
             raise SystemExit(1)
 
-        # Prepara diretório de resultados
         self.config.results_dir.mkdir(parents=True, exist_ok=True)
-
-        # Nome do arquivo de saída: modelo + timestamp
         model_slug = self.config.model.replace("/", "_").replace("-", "_")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_path = self.config.results_dir / f"{model_slug}_{timestamp}.csv"
 
         total = len(casos) * self.config.runs
-        concluidos = 0
-        pass_count = 0
-        fail_count = 0
-        error_count = 0
+        contadores: dict[str, int] = {}
 
         print(f"\n🚀 Iniciando avaliação")
         print(f"   Modelo:   {self.config.model}")
@@ -339,75 +388,55 @@ class EvalRunner:
             writer.writeheader()
 
             for caso in casos:
-                case_statuses = []
+                statuses_caso = []
                 for run_num in range(1, self.config.runs + 1):
                     record = self.run_single(caso, run_num)
                     writer.writerow(asdict(record))
-                    csvfile.flush()   # Grava linha a linha — não perde dados se interromper
+                    csvfile.flush()
+                    statuses_caso.append(record.status)
+                    contadores[record.status] = contadores.get(record.status, 0) + 1
 
-                    case_statuses.append(record.status)
-                    concluidos += 1
-
-                    if record.status == "pass":
-                        pass_count += 1
-                    elif record.status == "fail":
-                        fail_count += 1
-                    else:
-                        error_count += 1
-
-                # Resumo por caso após as N execuções
-                pass_rate = case_statuses.count("pass") / len(case_statuses) * 100
-                icon = "✅" if pass_rate == 100 else "⚠️ " if pass_rate >= 60 else "❌"
+                # Resumo do caso: quantas execuções foram sucesso
+                sucessos = sum(1 for s in statuses_caso if s in STATUS_SUCESSO)
+                sucesso_rate = sucessos / len(statuses_caso) * 100
+                icon = "✅" if sucesso_rate == 100 else "⚠️ " if sucesso_rate >= 60 else "❌"
+                # Status mais frequente
+                status_dominante = max(set(statuses_caso), key=statuses_caso.count)
                 print(
                     f"  {icon} {caso['id']} [{caso['categoria']}]: "
-                    f"{pass_rate:.0f}% pass "
-                    f"({case_statuses.count('pass')}/{self.config.runs})"
+                    f"{sucessos}/{self.config.runs} sucesso "
+                    f"(predominante: {status_dominante})"
                 )
 
-        # Resumo final
-        overall_rate = pass_count / total * 100 if total > 0 else 0
-        print(f"\n{'='*50}")
+        # Resumo final por nível
+        sucesso_total = sum(contadores.get(s, 0) for s in STATUS_SUCESSO)
+        sucesso_rate = sucesso_total / total * 100 if total > 0 else 0
+
+        print(f"\n{'='*60}")
         print(f"📊 Resultado final — {self.config.model}")
-        print(f"   Total:  {total} execuções")
-        print(f"   ✅ Pass:  {pass_count} ({overall_rate:.1f}%)")
-        print(f"   ❌ Fail:  {fail_count}")
-        print(f"   ⚠️  Error: {error_count}")
-        print(f"   💾 CSV:   {output_path}")
+        print(f"   Total: {total} execuções")
+        print(f"   ✅ Taxa de sucesso (exact + semantic): {sucesso_rate:.1f}%\n")
+        print(f"   Distribuição:")
+        for status in [
+            "exact_match", "semantic_match", "partial_match",
+            "wrong_tables", "error_sql", "error_api", "error_timeout", "fail",
+        ]:
+            count = contadores.get(status, 0)
+            if count > 0:
+                pct = count / total * 100
+                print(f"     {status:18} {count:4} ({pct:5.1f}%)")
+        print(f"\n   💾 CSV: {output_path}")
 
         return output_path
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CLI
-# ──────────────────────────────────────────────────────────────────────────────
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Avaliação automática do DataSpeak.")
-    parser.add_argument(
-        "--model",
-        required=True,
-        help="Modelo via OpenRouter (ex: anthropic/claude-sonnet-4-5)",
-    )
-    parser.add_argument(
-        "--runs",
-        type=int,
-        default=5,
-        help="Execuções por caso (default: 5)",
-    )
-    parser.add_argument(
-        "--categoria",
-        choices=["simples", "media", "complexa", "robustez", "adversarial"],
-        help="Filtrar por categoria (opcional)",
-    )
-    parser.add_argument(
-        "--caso",
-        help="Rodar apenas um caso específico, ex: Q001 (debug)",
-    )
-    parser.add_argument(
-        "--db",
-        type=Path,
-        default=Path("backend/data/dataspeak.db"),
-        help="Caminho do banco SQLite",
-    )
+    parser = argparse.ArgumentParser(description="Avaliação multinível do DataSpeak.")
+    parser.add_argument("--model", required=True, help="Modelo via OpenRouter")
+    parser.add_argument("--runs", type=int, default=5)
+    parser.add_argument("--categoria", choices=["simples", "media", "complexa", "robustez", "adversarial"])
+    parser.add_argument("--caso", help="ID de um caso específico (debug)")
+    parser.add_argument("--db", type=Path, default=Path("backend/data/dataspeak.db"))
     args = parser.parse_args()
 
     config = EvalConfig(
@@ -417,9 +446,7 @@ def main() -> None:
         caso_id=args.caso,
         db_path=args.db,
     )
-
-    runner = EvalRunner(config)
-    runner.run()
+    EvalRunner(config).run()
 
 
 if __name__ == "__main__":

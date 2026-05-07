@@ -1,0 +1,13 @@
+id,pergunta,categoria,subcategoria,modelo,execucao,status,sql_gerado,latencia_ms,hash_obtido,hash_esperado,rows_obtidos,rows_esperados,tabelas_esperadas,erro_detalhe
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,anthropic/claude-sonnet-4-5,1,pass,"-- Consulta materiais do tipo produto acabado (FERT)
+-- Tabela MARA contém dados mestres de materiais
+SELECT 
+    MATNR AS numero_material,
+    MTART AS tipo_material,
+    MATKL AS grupo_mercadorias,
+    MEINS AS unidade_medida
+FROM MARA
+-- Filtro para tipo FERT (produto acabado)
+WHERE MTART = 'FERT'
+-- Ordenação por número do material
+ORDER BY MATNR;",11392.3,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]",
