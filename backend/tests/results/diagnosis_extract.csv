@@ -1,0 +1,45 @@
+id,pergunta,modelo,categoria,tabelas_esperadas,tabelas_obtidas,status,sql_gerado,erro_detalhe
+Q004,Liste todos os pedidos de compra cadastrados,anthropic/claude-sonnet-4-5,simples,"[""EKKO""]","[""EKPO""]",wrong_tables,"-- Lista todos os pedidos de compra com seus itens
+-- Retorna informações básicas de cada item do pedido
+SELECT 
+    p.EBELN AS numero_pedido,
+    p.EBELP AS item_pedido,
+    p.MATNR AS codigo_ma",
+Q004,Liste todos os pedidos de compra cadastrados,google/gemini-2.0-flash-001,simples,"[""EKKO""]","[""EKPO""]",wrong_tables,SELECT EBELN FROM EKPO GROUP BY EBELN;,
+Q004,Liste todos os pedidos de compra cadastrados,openai/gpt-4o,simples,"[""EKKO""]","[""EKPO""]",wrong_tables,SELECT EBELN FROM EKPO GROUP BY EBELN;,
+Q016,Quantas notas fiscais foram emitidas por mês em 2025?,anthropic/claude-sonnet-4-5,media,"[""VBRK""]","[""EKPO"", ""MARD"", ""MSEG""]",wrong_tables,"-- CONSULTA NÃO PODE SER GERADA: Tabela de notas fiscais não disponível no contexto fornecido
+-- As tabelas disponíveis são:
+-- EKPO: Itens de pedido de compra
+-- MARD: Estoque por depósito
+-- MSE",
+Q016,Quantas notas fiscais foram emitidas por mês em 2025?,google/gemini-2.0-flash-001,media,"[""VBRK""]","[""MKPF"", ""MSEG""]",wrong_tables,"SELECT strftime('%Y-%m', h.BUDAT) AS mes, COUNT(DISTINCT h.MBLNR) AS quantidade_notas_fiscais FROM MSEG s JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR WHERE strftime('%Y', h.BUDAT) = '2025' ",
+Q016,Quantas notas fiscais foram emitidas por mês em 2025?,openai/gpt-4o,media,"[""VBRK""]","[""MKPF""]",wrong_tables,"SELECT strftime('%Y-%m', h.BUDAT) AS mes, COUNT(DISTINCT h.MBLNR) AS notas_fiscais_emitidas FROM MKPF h WHERE strftime('%Y', h.BUDAT) = '2025' GROUP BY mes ORDER BY mes;",
+Q022,Qual o volume total produzido por material em ordens de produção concluídas?,anthropic/claude-sonnet-4-5,media,"[""AFPO""]","[""AFKO"", ""MARA""]",wrong_tables,"-- Consulta volume total produzido por material em ordens concluídas
+-- Considera apenas ordens com quantidade confirmada (IGMNG) preenchida
+SELECT 
+    a.MATNR AS codigo_material,
+    m.MTART AS ",
+Q022,Qual o volume total produzido por material em ordens de produção concluídas?,google/gemini-2.0-flash-001,media,"[""AFPO""]","[""AFKO""]",wrong_tables,"SELECT AFKO.MATNR, SUM(AFKO.IGMNG) AS VolumeProduzido FROM AFKO WHERE AFKO.STSTPS LIKE '%CNF%' GROUP BY AFKO.MATNR ORDER BY SUM(AFKO.IGMNG) DESC;",
+Q022,Qual o volume total produzido por material em ordens de produção concluídas?,openai/gpt-4o,media,"[""AFPO""]","[""AFKO""]",wrong_tables,"SELECT MATNR, SUM(IGMNG) AS volume_total_produzido FROM AFKO WHERE FTRMI IS NOT NULL GROUP BY MATNR;",
+Q024,Qual o faturamento total por organização de vendas em 2025?,anthropic/claude-sonnet-4-5,media,"[""VBAK""]","[""VBRK""]",wrong_tables,"-- Faturamento total por organização de vendas em 2025
+-- Agrupa receita líquida de notas fiscais válidas por VKORG
+SELECT 
+    h.VKORG AS organizacao_vendas,
+    h.WAERK AS moeda,
+    SUM(h.NETW",
+Q024,Qual o faturamento total por organização de vendas em 2025?,google/gemini-2.0-flash-001,media,"[""VBAK""]","[""VBRK""]",wrong_tables,"SELECT VBRK.VKORG, SUM(VBRK.NETWR) AS Faturamento_Total FROM VBRK WHERE strftime('%Y', VBRK.FKDAT) = '2025' GROUP BY VBRK.VKORG ORDER BY Faturamento_Total DESC;",
+Q024,Qual o faturamento total por organização de vendas em 2025?,openai/gpt-4o,media,"[""VBAK""]","[""VBRK"", ""VBRP""]",wrong_tables,"SELECT h.VKORG AS organizacao_vendas, SUM(p.NETWR) AS faturamento_total FROM VBRP p JOIN VBRK h ON p.VBELN = h.VBELN WHERE h.FKDAT BETWEEN '20250101' AND '20251231' GROUP BY h.VKORG ORDER BY faturamen",
+Q026,Quais materiais foram movimentados e qual o volume total por planta em 2025?,anthropic/claude-sonnet-4-5,media,"[""MSEG""]","[""MARA"", ""MARC"", ""MARD"", ""MSEG""]",partial_match,"-- Consulta de movimentações de materiais por planta em 2025
+-- Nota: A tabela MSEG (documento de material) não está disponível no contexto fornecido.
+-- Com as tabelas disponíveis (MARA, MARC, MARD",
+Q026,Quais materiais foram movimentados e qual o volume total por planta em 2025?,google/gemini-2.0-flash-001,media,"[""MSEG""]","[""MARD""]",wrong_tables,"SELECT
+  MARD.MATNR,
+  MARD.WERKS,
+  SUM(MARD.LABST) AS VolumeTotalMovimentado
+FROM
+  MARD
+WHERE
+  STRFTIME('%Y', '2025-01-01') = '2025' -- Filtra os dados para o ano de 2025.
+GROUP BY
+  MARD",
+Q026,Quais materiais foram movimentados e qual o volume total por planta em 2025?,openai/gpt-4o,media,"[""MSEG""]","[""MARD""]",wrong_tables,"SELECT m.MATNR, m.WERKS, SUM(m.LABST) AS volume_total FROM MARD m WHERE m.LABST > 0 GROUP BY m.MATNR, m.WERKS;",
