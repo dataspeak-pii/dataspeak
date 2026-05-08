@@ -12,7 +12,7 @@ import json
 import logging
 import time
 from hashlib import sha256
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,6 +56,11 @@ executor = SqliteExecutor(database_path=settings.database_path)
 
 # -------------------- Schemas --------------------
 
+class Refusal(BaseModel):
+    reason: Literal["out_of_catalog", "write_operation", "ambiguous", "nonsense"]
+    message: str
+    
+    
 class QueryRequest(BaseModel):
     """Payload de entrada do endpoint /query."""
     question: str = Field(..., min_length=1, description="Pergunta em linguagem natural")
@@ -69,17 +74,18 @@ class QueryResponse(BaseModel):
 
     # Bloco A — geração de SQL
     question: str
-    sql: str
-    explanation: str
-    tables_used: list[str]
-    retrieved_tables: list[str]
-    confidence: str
-    assumptions: list[str]
+    sql: Optional[str] = None
+    explanation: Optional[str] = None
+    tables_used: list[str] = []
+    retrieved_tables: list[str] = []
+    confidence: str = "low"
+    assumptions: list[str] = []
 
     # Bloco B — interpretação enriquecida (Optional para Graceful Degradation)
     intent: Optional[str] = None
     category: Optional[str] = None
     period: Optional[str] = None
+    refusal: Optional[Refusal] = None
 
     # Metadados
     model_used: str
@@ -137,6 +143,33 @@ async def query(req: QueryRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Erro ao gerar SQL: {type(e).__name__}: {e}",
+        )
+        
+    # Etapa 1.5: motor pode recusar antes da execução
+    if result.get("refusal"):
+        duration_ms = int((time.monotonic() - start) * 1000)
+        logger.info(
+            "query.refused",
+            extra={
+                "request_id": ctx.request_id,
+                "refusal_reason": result["refusal"]["reason"],
+            },
+        )
+        return QueryResponse(
+            query_id=ctx.request_id,
+            question=result["question"],
+            sql=result.get("sql", ""),
+            explanation=result.get("explanation", ""),
+            tables_used=result.get("tables_used", []),
+            retrieved_tables=result.get("retrieved_tables", []),
+            confidence=result.get("confidence", "low"),
+            assumptions=result.get("assumptions", []),
+            intent=result.get("intent"),
+            category=result.get("category"),
+            period=result.get("period"),
+            refusal=Refusal(**result["refusal"]),
+            model_used=result["model_used"],
+            duration_ms=duration_ms,
         )
 
     # --- Etapa 2: executar SQL no banco simulado ---

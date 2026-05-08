@@ -1,6 +1,6 @@
 """
 Monta o prompt com metadados SAP e chama o OpenRouter para gerar
-SQL + explicação + interpretação analítica (intent, category, period).
+SQL + explicação + interpretação analítica + recusa estruturada.
 """
 
 import os
@@ -14,29 +14,99 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
 
+# NOVO: lista oficial das 15 tabelas catalogadas, usada nas mensagens de recusa
+CATALOG_TABLES = [
+    "MARA", "MSEG", "VBRK", "VBRP", "MARC", "MARD", "MKPF",
+    "EKKO", "EKPO", "VBAK", "VBAP", "KNA1", "LFA1", "AFKO", "AFPO",
+]
+
 
 def build_system_prompt() -> str:
-    return """Você é um especialista em SAP e SQL, responsável por transformar
-perguntas de negócio em linguagem natural em queries SQL precisas.
+    catalog_list = ", ".join(CATALOG_TABLES)
 
-Regras obrigatórias:
-1. Gere APENAS SQL compatível com SQLite (sem funções exclusivas de SAP HANA ou Oracle).
-2. Use SOMENTE as tabelas e campos fornecidos no contexto. Nunca invente tabelas.
-3. Inclua comentários no SQL explicando cada cláusula principal.
-4. Se a pergunta for ambígua, escolha a interpretação mais conservadora.
-5. Após o SQL, forneça uma explicação em português simples do que a query faz.
+    return f"""Você é um especialista em SAP e SQL, responsável por transformar
+perguntas de negócio em linguagem natural em queries SQL precisas, OU recusar
+perguntas que estão fora do escopo do sistema.
 
-Formato de resposta OBRIGATÓRIO (JSON puro, sem blocos markdown):
-{
-  "intent": "Frase curta descrevendo o objetivo analítico da pergunta. Ex: Analisar volume de entradas de estoque por material.",
-  "category": "Uma das opções: Produção | Vendas | Estoque | Financeiro | Compras | Cadastro",
-  "period": "Período extraído ou inferido da pergunta. Ex: Março 2026 | Últimos 90 dias | 1º trimestre 2026 | Não especificado",
+# Regras de Recusa (PRIORIDADE MÁXIMA — verifique ANTES de gerar SQL)
+
+Antes de gerar SQL, avalie se a pergunta atende aos critérios. Se NÃO atender,
+retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
+(ex: SELECT 'ERRO...' AS mensagem). Recusa estruturada SEMPRE.
+
+## Recuse com `reason="write_operation"` se a pergunta pedir:
+- Apagar, deletar, remover dados (DELETE, DROP, TRUNCATE)
+- Modificar, atualizar, alterar dados (UPDATE, ALTER)
+- Inserir, criar registros (INSERT, CREATE)
+- Mensagem padrão: "O DataSpeak é um sistema de consulta apenas. Operações de escrita não são permitidas."
+
+## Recuse com `reason="out_of_catalog"` SOMENTE se:
+- A pergunta não tiver nenhuma relação com as tabelas fornecidas no contexto acima
+- As tabelas do contexto RAG (seção "Contexto das Tabelas SAP Disponíveis") não
+  contêm campos capazes de responder à pergunta
+- ATENÇÃO: se qualquer tabela do contexto for relevante para a pergunta,
+  gere SQL — não recuse. O RAG já fez a triagem por você.
+- Exemplos do que está FORA: funcionários, RH, folha de pagamento,
+  contabilidade (BKPF/BSEG), ativos fixos, projetos
+- Mensagem padrão: "Os dados solicitados não estão no catálogo do DataSpeak. Tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."
+
+## Recuse com `reason="ambiguous"` se a pergunta:
+- For genérica demais ("me mostra tudo", "lista as informações")
+- Tiver múltiplas interpretações sem contexto suficiente para escolher uma
+- Mensagem padrão: "A pergunta é ambígua. Pode especificar qual área deseja consultar?"
+
+## Recuse com `reason="nonsense"` se a pergunta:
+- For incoerente ou sem nenhuma relação com dados empresariais
+- Mensagem padrão: "A pergunta não parece relacionada a dados SAP do DataSpeak."
+
+# Regras para gerar SQL (apenas se NÃO for caso de recusa)
+1. Gere APENAS SQL compatível com SQLite.
+2. Use SOMENTE as tabelas e campos fornecidos no contexto do RAG. Nunca invente.
+3. Inclua comentários no SQL explicando cláusulas principais.
+4. Se a pergunta for ambígua mas resolvível com premissa razoável, gere SQL e
+   registre a premissa em `assumptions` — não recuse.
+
+# Formato de resposta OBRIGATÓRIO (JSON puro, sem markdown)
+
+Resposta normal (gerou SQL):
+{{
+  "intent": "Frase curta sobre objetivo analítico",
+  "category": "Produção | Vendas | Estoque | Financeiro | Compras | Cadastro",
+  "period": "Período extraído ou inferido. Ex: Março 2026 | Não especificado",
   "sql": "SELECT ... FROM ... WHERE ...",
   "explanation": "Esta consulta busca...",
   "tables_used": ["TABELA1", "TABELA2"],
   "confidence": "high | medium | low",
-  "assumptions": ["lista de premissas feitas, se houver"]
-}"""
+  "assumptions": ["premissas, se houver"],
+  "refusal": null
+}}
+
+Resposta de recusa:
+{{
+  "intent": "Frase descrevendo o que o usuário pediu",
+  "category": null,
+  "period": null,
+  "sql": null,
+  "explanation": null,
+  "tables_used": [],
+  "confidence": "high",
+  "assumptions": [],
+  "refusal": {{
+    "reason": "out_of_catalog | write_operation | ambiguous | nonsense",
+    "message": "Mensagem amigável em português para o usuário"
+  }}
+}}
+
+# Exemplos de recusa (siga este padrão)
+
+Pergunta: "Liste os funcionários cadastrados no sistema"
+Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
+
+Pergunta: "Delete todos os pedidos de compra antigos"
+Resposta: {{"intent":"Deletar pedidos de compra antigos","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"write_operation","message":"O DataSpeak é um sistema de consulta apenas. Operações de exclusão não são permitidas."}}}}
+
+Pergunta: "Me mostra tudo"
+Resposta: {{"intent":"Solicitação genérica não específica","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"ambiguous","message":"A pergunta é genérica demais. Você quer ver dados sobre vendas, compras, estoque ou produção?"}}}}"""
 
 
 def build_user_prompt(question: str, tables: list[dict]) -> str:
@@ -77,28 +147,76 @@ def build_user_prompt(question: str, tables: list[dict]) -> str:
 
 {question}
 
-Gere o JSON completo conforme as regras e formato definidos. Responda APENAS com o JSON, sem texto adicional."""
+Avalie primeiro se é caso de recusa. Só recuse com "out_of_catalog" se as tabelas
+acima NÃO forem capazes de responder à pergunta. Se qualquer tabela do contexto
+for relevante, gere SQL. Responda APENAS com JSON, sem texto adicional."""
 
 
 def extract_json(raw: str) -> dict:
-    """
-    Extrai JSON da resposta do LLM com 3 estratégias em cascata:
-    1. Bloco markdown ```json ... ```
-    2. Primeiro { ao último }
-    3. Re-raise se nenhuma funcionar
-    """
-    # Estratégia 1: bloco markdown
     match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
     if match:
         return json.loads(match.group(1))
 
-    # Estratégia 2: primeiro { ao último }
     start = raw.find("{")
     end = raw.rfind("}") + 1
     if start != -1 and end > start:
         return json.loads(raw[start:end])
 
     raise ValueError(f"Não foi possível extrair JSON da resposta: {raw[:200]}")
+
+
+# NOVO: detecção defensiva de SELECT falso de erro
+def is_fake_error_sql(sql: str | None) -> bool:
+    """
+    Detecta SQL falso que o LLM gera quando deveria recusar.
+    Padrões: SELECT 'literal' AS coluna sem FROM, ou SELECT começando com 'ERRO'.
+    """
+    if not sql:
+        return False
+
+    sql_clean = sql.strip().upper()
+
+    # Sem FROM = SELECT só de literais — não é query real
+    if "FROM" not in sql_clean:
+        return True
+
+    # Começa com SELECT 'ERRO' ou 'ERRO:' no primeiro literal
+    if re.search(r"SELECT\s+'(ERRO|ERROR|FALHA|N[AÃ]O\s+POSS)", sql_clean):
+        return True
+
+    return False
+
+
+# NOVO: garante invariante refusal/sql mutuamente exclusivos
+def normalize_refusal(result: dict) -> dict:
+    """
+    Garante que se refusal está preenchido, sql é null. E vice-versa.
+    Se detectar SQL falso de erro, converte em refusal.
+    """
+    refusal = result.get("refusal")
+    sql = result.get("sql")
+
+    # Caso 1: LLM gerou refusal corretamente
+    if refusal and isinstance(refusal, dict) and refusal.get("reason"):
+        result["sql"] = None
+        result["explanation"] = None
+        result["tables_used"] = []
+        return result
+
+    # Caso 2: LLM gerou SQL falso de erro — converte em refusal
+    if is_fake_error_sql(sql):
+        result["refusal"] = {
+            "reason": "out_of_catalog",
+            "message": "Os dados solicitados não estão no catálogo do DataSpeak.",
+        }
+        result["sql"] = None
+        result["explanation"] = None
+        result["tables_used"] = []
+        return result
+
+    # Caso 3: SQL normal, sem refusal
+    result["refusal"] = None
+    return result
 
 
 async def call_openrouter(
@@ -137,30 +255,27 @@ async def generate_sql(
 ) -> dict:
     """
     Recebe pergunta → recupera tabelas → monta prompt → chama LLM → retorna resultado.
-    Retorna todos os campos do Bloco A (sql, explanation, tables_used, confidence, assumptions)
-    e Bloco B (intent, category, period).
+    Inclui refusal estruturado para casos fora de escopo.
     """
-    # 1. RAG — recupera tabelas relevantes
     relevant_tables = retrieve_relevant_tables(question, n_results=n_tables)
 
-    # 2. Monta prompts
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(question, relevant_tables)
 
-    # 3. Chama OpenRouter
     raw_response = await call_openrouter(system_prompt, user_prompt, model)
-
-    # 4. Extrai JSON com fallback
     result = extract_json(raw_response)
 
-    # 5. Metadados adicionais
     result["model_used"] = model
     result["question"] = question
     result["retrieved_tables"] = [t["name"] for t in relevant_tables]
 
-    # 6. Garante que os campos do Bloco B existem (defensivo)
+    # Defensivos
     result.setdefault("intent", None)
     result.setdefault("category", None)
     result.setdefault("period", None)
+    result.setdefault("refusal", None)
+
+    # NOVO: normaliza invariante refusal/sql
+    result = normalize_refusal(result)
 
     return result
