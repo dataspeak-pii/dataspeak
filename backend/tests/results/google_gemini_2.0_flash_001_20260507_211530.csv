@@ -1,0 +1,188 @@
+id,pergunta,categoria,subcategoria,modelo,execucao,status,sql_gerado,latencia_ms,hash_obtido,hash_esperado,rows_obtidos,rows_esperados,tabelas_esperadas,tabelas_obtidas,erro_detalhe
+Q001,Quais materiais do tipo acabado existem no sistema?,simples,select_filtro_basico,google/gemini-2.0-flash-001,1,semantic_match,SELECT MATNR FROM MARA WHERE MTART = 'FERT';,4175.5,ae423b588174a74fe9b487d2ea762b9686d1c92884a49e852e885410e1fc475a,7e66d1653da848302ebfc36c9dd8457ffb39b0ee6d7c96bb08aada904331ac0c,79,79,"[""MARA""]","[""MARA""]",
+Q002,Liste as movimentações de mercadoria de 2025,simples,select_filtro_ano,google/gemini-2.0-flash-001,1,semantic_match,"SELECT MBLNR, MJAHR, ZEILE, BWART, MATNR, WERKS, MENGE, DMBTR FROM MSEG WHERE MJAHR = '2025'",6405.3,afcb50bd0eaf9bf8f38966c5107f689208dcf57d7502f77867c20a504545e753,d13288165068e178f63ca02fd08572ae01128604a273d676e7078bdd49f9306b,246,246,"[""MSEG""]","[""MSEG""]",
+Q003,Quais notas fiscais foram emitidas em 2025?,simples,select_filtro_ano,google/gemini-2.0-flash-001,1,exact_match,"SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK WHERE FKDAT BETWEEN '20250101' AND '20251231'",6673.6,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,7e6649545e1627055e951aed3e1625c22fc1c29c31c62357f9417a49f4d1b0a7,89,89,"[""VBRK""]","[""VBRK""]",
+Q004,Liste todos os pedidos de compra cadastrados,simples,select_listagem,google/gemini-2.0-flash-001,1,wrong_tables,SELECT EBELN FROM EKPO GROUP BY EBELN;,6693.1,692a7bb6c61386f14175a276539b509ed6555e4ef5aac7bc6516db3f8a0be1e6,5c327dc30d5c2fd4a77c2ac923b28266e2f697e41cf1c1e1362c0cb3ea00fdb3,120,120,"[""EKKO""]","[""EKPO""]",
+Q005,Quais ordens de produção estão em aberto?,simples,select_filtro_status,google/gemini-2.0-flash-001,1,partial_match,"SELECT AUFNR, MATNR, WERKS, GAMNG, GMEIN, GSTRS, GLTRS FROM AFKO WHERE STSTPS LIKE '%OPN%'",7275.6,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,f35c670cea63f7458d7d44c13a862a81b0c3d37b626fc8bdcfd9ba7b57a58129,0,150,"[""AFKO""]","[""AFKO""]",
+Q006,Mostre os itens das notas fiscais emitidas em 2025,simples,select_filtro_join_simples,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT
+  v.VBELN,
+  v.FKDAT
+FROM
+  VBRK v
+WHERE
+  SUBSTR(v.FKDAT, 1, 4) = '2025';",4874.7,878cf58106fa78af5553705f8963e472995bdcf67cc6b3292d07e01650e712b1,8dd8de45f106cf57f6f0a4070a00ce80bfed6595aeee1c247fbd45d6d7723923,89,246,"[""VBRP"", ""VBRK""]","[""VBRK""]",
+Q007,Qual o estoque disponível por material e depósito?,simples,select_listagem,google/gemini-2.0-flash-001,1,partial_match,"SELECT 
+    MATNR,  -- Número do material
+    LGORT,  -- Depósito
+    LABST   -- Estoque disponível
+FROM 
+    MARD",7676.1,500353c91b5ee879a504054d1d935d4e124fcf33dc22bc47e99d4496b1309662,c0e42d49060dd032907b218bb5a828010524959ff13035a791bf7e844756a9ce,481,481,"[""MARD""]","[""MARD""]",
+Q008,Liste os documentos de material registrados em janeiro de 2025,simples,select_filtro_data,google/gemini-2.0-flash-001,1,exact_match,"SELECT MBLNR, MJAHR, BUDAT, USNAM FROM MKPF WHERE BUDAT BETWEEN '20250101' AND '20250131'",4602.2,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,1af11c1becc414fab2e55cc062b590380da32cc2a399545047111f6e095617ad,10,10,"[""MKPF""]","[""MKPF""]",
+Q009,Quais itens de pedidos de compra ainda não foram entregues?,simples,select_filtro_status,google/gemini-2.0-flash-001,1,semantic_match,"SELECT EBELN, EBELP, MATNR FROM EKPO WHERE ELIKZ IS NULL OR ELIKZ <> 'X'",4387.2,5f1951568778716838bc77cdccb0755352ced6617cf01d46851187836d190b84,fced4831d784c2deae1a2a52e64b7b183b29832e0852a86e706ded1626928e1a,140,140,"[""EKPO""]","[""EKPO""]",
+Q010,Liste os pedidos de venda registrados em 2025,simples,select_filtro_ano,google/gemini-2.0-flash-001,1,wrong_tables,SELECT EBELN FROM EKKO WHERE BEDAT BETWEEN '20250101' AND '20251231',4603.4,c1c821c6104409f43b16014789e7c31233b11bb47c556b6805b52a12a9ebb086,6df1d603897871033c515e72056689a63c17755c26f3d9a02ab3ec1499015c5b,76,107,"[""VBAK""]","[""EKKO""]",
+Q011,Quais itens de pedidos de venda estão pendentes de faturamento?,simples,select_filtro_status,google/gemini-2.0-flash-001,1,semantic_match,"SELECT VBELN, POSNR, MATNR, KWMENG, MEINS, NETPR, NETWR, EDATU FROM VBAP WHERE FKSTA <> 'C';",6442.1,7704816730b742d5d5fe2af07e6b85626f99399b09a1577dca436547c3d2c286,0ddc810c38ac5a7bc7a6feec36a4358da41e787c153c1fb0b5ac0709a1ffbdab,152,152,"[""VBAP""]","[""VBAP""]",
+Q012,Liste todos os clientes cadastrados no sistema,simples,select_listagem,google/gemini-2.0-flash-001,1,semantic_match,"SELECT KUNNR, NAME1, NAME2, LAND1, ORT01, KTOKD FROM KNA1;",6970.5,05894f8abf1f75df48d4aaced304de084b584a269f09ca034edf395453255cc6,c1c5141c973688ca07be7ab40e368ad6d1d6812ac86c3ad03c3591cd425526f7,80,80,"[""KNA1""]","[""KNA1""]",
+Q013,Quais fornecedores estão cadastrados?,simples,select_listagem,google/gemini-2.0-flash-001,1,semantic_match,"SELECT LIFNR, NAME1, LAND1, ORT01 FROM LFA1;",6400.1,03163f095818eec8a8c221497b998a2e4ecc016817bd69486a33bee83bf18c93,a823ef68a08c54e1d5b8b5fd4b5a026f990bedd79b87fa6c99720a02af1c5212,60,60,"[""LFA1""]","[""LFA1""]",
+Q014,Mostre os dados de planejamento de materiais por planta,simples,select_listagem,google/gemini-2.0-flash-001,1,semantic_match,"SELECT MATNR, WERKS, DISMM, MINBE, EISBE, BESKZ, LGPRO FROM MARC;",6673.7,4b899702782a7dcfe8f3d2b1828768c4d802a0a83afcc7506863f0469df006d1,1b09a75ab4338fe502e3e7faa93b789e41192ffc4d220e43ce1dd9a6c0480d1c,295,295,"[""MARC""]","[""MARC""]",
+Q015,Quais itens de ordens de produção têm quantidade planejada acima de 100?,simples,select_filtro_numerico,google/gemini-2.0-flash-001,1,semantic_match,"SELECT AUFNR, POSNR, MATNR, PSMNG FROM AFPO WHERE PSMNG > 100",7907.0,2728c960d389d0d9d8c69841b6601317cff2a782257a4be62bc2f606df84f2ef,6daea0c4833ee856e8d5907cc4c8619b976fdcb6d78c616b8680f87ac8158655,203,203,"[""AFPO""]","[""AFPO""]",
+Q016,Quantas notas fiscais foram emitidas por mês em 2025?,media,agregacao_por_periodo,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT strftime('%Y-%m', h.BUDAT) AS mes, COUNT(DISTINCT h.MBLNR) AS quantidade_notas_fiscais FROM MSEG s JOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR WHERE strftime('%Y', h.BUDAT) = '2025' GROUP BY mes ORDER BY mes;",7327.4,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,64dc3394d12e7fe3b930270447f79a23c0bc13be1592302d9436722dbf8e13bb,0,12,"[""VBRK""]","[""MKPF"", ""MSEG""]",
+Q017,Qual o valor total faturado por cliente em 2025?,media,agregacao_por_entidade,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT
+  'Não implementável' AS customer,
+  0 AS total_billed
+WHERE 1=0",7535.0,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,36a697e71f8758d6a84efc371e69b64980597482bbccaaa6afb8687f0f254285,0,18,"[""VBRK""]",[],
+Q018,Quantas movimentações de estoque ocorreram por tipo em 2025?,media,agregacao_por_categoria,google/gemini-2.0-flash-001,1,semantic_match,"SELECT BWART, COUNT(*) AS numero_movimentacoes FROM MSEG WHERE MJAHR = '2025' GROUP BY BWART ORDER BY COUNT(*) DESC;",6562.0,3ab12de304ab279f3d39586a95988ce22cf2a0c91a410b1bbd9223b642d7e722,e17fa8766d5cbf47671e581d40d7c8fdf6543eb9db3321d7bc2f8f58f7aeec79,4,4,"[""MSEG""]","[""MSEG""]",
+Q019,Qual o valor médio dos pedidos de compra por fornecedor?,media,agregacao_media,google/gemini-2.0-flash-001,1,semantic_match,"SELECT
+    e.LIFNR,
+    AVG(p.NETWR) AS valor_medio_pedido
+FROM EKKO e
+-- Junta a tabela de cabeçalho do pedido (EKKO) com a tabela de itens do pedido (EKPO)
+JOIN EKPO p ON e.EBELN = p.EBELN
+GROUP BY e.LIFNR
+ORDER BY valor_medio_pedido DESC;",6697.1,6262f60a0399ba9adf065b3bb63003c54f97aee2d8e56faa837f6ea7703ad542,9cb1260e4eb355dc5401cad8e525c684b5208c5e207cc174d0372058fe37d77a,21,21,"[""EKKO""]","[""EKKO"", ""EKPO""]",
+Q020,Quais materiais têm estoque abaixo do ponto de reposição?,media,filtro_composto,google/gemini-2.0-flash-001,1,partial_match,"SELECT 
+    c.MATNR, -- Número do material
+    c.WERKS, -- Planta
+    c.MINBE AS estoque_minimo, -- Estoque mínimo definido no MRP
+    SUM(d.LABST) AS estoque_atual -- Estoque disponível atual
+FROM MARC c
+JOIN MARD d ON c.MATNR = d.MATNR AND c.WERKS = d.WERKS
+WHERE c.MINBE > 0 -- Filtra materiais com ponto de reposição definido
+GROUP BY c.MATNR, c.WERKS, c.MINBE
+HAVING SUM(d.LABST) < c.MINBE; -- Filtra apenas os materiais onde o estoque atual é menor que o estoque mínimo",7293.9,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,857c5724d96c4ffb4ee574f9881a74f15c13225cc7bdf711d7b46109f1e1b5c6,0,4,"[""MARD"", ""MARC""]","[""MARC"", ""MARD""]",
+Q021,Quantos pedidos de venda foram feitos por cliente em 2025?,media,agregacao_por_entidade,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT LIFNR, COUNT(EBELN) AS numero_pedidos FROM EKKO WHERE strftime('%Y', BEDAT) = '2025' AND BSART = 'NB' GROUP BY LIFNR ORDER BY numero_pedidos DESC;",6771.8,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,2caad2f9e5b70cf640dfc38dc7dcd173efe2b549fb96f1ecef543df8181f58a5,0,26,"[""VBAK""]","[""EKKO""]",
+Q022,Qual o volume total produzido por material em ordens de produção concluídas?,media,agregacao_filtro_status,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT AFKO.MATNR, SUM(AFKO.IGMNG) AS VolumeProduzido FROM AFKO WHERE AFKO.STSTPS LIKE '%CNF%' GROUP BY AFKO.MATNR ORDER BY SUM(AFKO.IGMNG) DESC;",6776.9,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,ffb9c2c6a33c350f63078c1c655b787c87c764c03a4482e8411aa794a2c0e740,0,86,"[""AFPO""]","[""AFKO""]",
+Q023,Quais itens de pedido de compra têm valor unitário acima de 500?,media,filtro_numerico_composto,google/gemini-2.0-flash-001,1,semantic_match,"SELECT EBELN, EBELP, MATNR, NETPR FROM EKPO WHERE NETPR > 500",6025.0,6a719c08eff3cc31fa1bf5a4487fac407c51eb70d2c516c16589ece7a68959ca,eb2cc55f31768dcdf84b699d67b760f6408677f3cff150b53fba0a2096c313bb,256,256,"[""EKPO""]","[""EKPO""]",
+Q024,Qual o faturamento total por organização de vendas em 2025?,media,agregacao_por_categoria,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT VBRK.VKORG, SUM(VBRK.NETWR) AS Faturamento_Total FROM VBRK WHERE strftime('%Y', VBRK.FKDAT) = '2025' GROUP BY VBRK.VKORG ORDER BY Faturamento_Total DESC;",6853.1,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,616f32f1a9393fea41568a0f746f17bded5ff87846ef5bd31971f3427a8c7b86,0,2,"[""VBAK""]","[""VBRK""]",
+Q025,Quais documentos de material foram registrados por usuário em 2025?,media,agregacao_por_usuario,google/gemini-2.0-flash-001,1,semantic_match,"SELECT MBLNR, MJAHR, USNAM FROM MKPF WHERE MJAHR = '2025' GROUP BY MBLNR, MJAHR, USNAM",6012.4,f886830047a50af03e24855f85667516d16ffda37bfb8f3d7dff1f305567cf11,8df1242009e20b654021340146f20fb6f7eeb21cf3a2aeae4c133f93e8d76ed0,143,141,"[""MKPF""]","[""MKPF""]",
+Q026,Quais materiais foram movimentados e qual o volume total por planta em 2025?,media,agregacao_multipla,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT
+  MARD.MATNR,
+  MARD.WERKS,
+  SUM(MARD.LABST) AS VolumeTotalMovimentado
+FROM
+  MARD
+WHERE
+  STRFTIME('%Y', '2025-01-01') = '2025' -- Filtra os dados para o ano de 2025.
+GROUP BY
+  MARD.MATNR,
+  MARD.WERKS;
+",7498.4,7b9d019a5a92d9e3ff272b60bf6e4f275aebd442cad72cd3adc23b8547651883,7830b878f55eceefdd8ad9aeb3355c6e5379a0d9abc698c2ee6295e7c9e41dc8,295,74,"[""MSEG""]","[""MARD""]",
+Q027,Quais clientes estão cadastrados na região Sul do Brasil?,media,filtro_geografico,google/gemini-2.0-flash-001,1,partial_match,"SELECT KUNNR, NAME1, ORT01, LAND1 FROM KNA1 WHERE LAND1 IN ('BR', 'BR') AND (ORT01 LIKE '%RS%' OR ORT01 LIKE '%SC%' OR ORT01 LIKE '%PR%'); -- Seleciona o código, nome e cidade dos clientes da tabela KNA1 onde o país é Brasil e a cidade contém as siglas dos estados da região Sul.",6633.1,0826c7207ecd5aecd46ba6735d575e97e4cc3f5d65e8c3ea6d823fa654eca7d5,5ba2c45f55fbe68218bdc2b954f555e174fe8d545d7695db392b140e0a7a626b,6,27,"[""KNA1""]","[""KNA1""]",
+Q028,Quais os 10 clientes com maior valor faturado em 2025?,complexa,ranking_top_n,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT KUNNR, SUM(NETWR) AS valor_total FROM VBAK WHERE strftime('%Y', AUDAT) = '2025' GROUP BY KUNNR ORDER BY valor_total DESC LIMIT 10",6693.1,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,341e2c4f3fbe657c8f20db3c6dd53157870a095da87eefebecaa284833dcef8f,0,10,"[""VBRK"", ""KNA1""]","[""VBAK""]",
+Q029,Quais os 10 materiais mais faturados em valor em 2025?,complexa,ranking_top_n,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT EKPO.MATNR, SUM(EKPO.NETWR) AS ValorTotalFaturado FROM EKPO JOIN EKKO ON EKPO.EBELN = EKKO.EBELN WHERE substr(EKKO.BEDAT, 1, 4) = '2025' GROUP BY EKPO.MATNR ORDER BY ValorTotalFaturado DESC LIMIT 10;",7002.0,97ed05eb8d4fd2696e8f85bae61fcc97b4dedb8c200af4438fe6db2612e8e3e0,708a7f2e037fdf81a635f072c9093cc59034a3bbaee1253f647e02ea61a76f54,10,10,"[""VBRP"", ""VBRK""]","[""EKKO"", ""EKPO""]",
+Q030,Qual o valor total de pedidos de compra por fornecedor com nome do fornecedor?,complexa,join_enriquecimento,google/gemini-2.0-flash-001,1,semantic_match,"SELECT
+    LFA1.LIFNR,
+    LFA1.NAME1 AS nome_fornecedor,
+    SUM(EKPO.NETWR) AS valor_total_pedidos
+FROM EKKO
+-- Junção com a tabela de fornecedores para obter o nome
+JOIN LFA1 ON EKKO.LIFNR = LFA1.LIFNR
+-- Junção com a tabela de itens do pedido para obter o valor
+JOIN EKPO ON EKKO.EBELN = EKPO.EBELN
+GROUP BY LFA1.LIFNR, LFA1.NAME1
+ORDER BY valor_total_pedidos DESC;",7214.1,b751bb44870a39d0a591b386d19acc4f968a7b1e40eb36f9382b3c0d0798c87b,9b5bf2fcc9b27b3cea4acd72b36d26b9535f8c7abb44fa570139e27628e76ae4,21,21,"[""EKKO"", ""LFA1""]","[""EKKO"", ""EKPO"", ""LFA1""]",
+Q031,Quais materiais foram comprados e também movimentados no estoque em 2025?,complexa,intersecao_conjuntos,google/gemini-2.0-flash-001,1,partial_match,"SELECT DISTINCT
+  EKPO.MATNR
+FROM EKPO
+-- Filtra os itens de pedido de compra criados em 2025.
+WHERE substr(EKPO.EBELN, 1, 4) = '2025'
+INTERSECT
+SELECT DISTINCT
+  MSEG.MATNR
+FROM MSEG
+-- Filtra as movimentações de estoque criadas em 2025.
+WHERE MSEG.MJAHR = '2025';",6752.7,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,03a4eca586bc68b56fe627d1b1ec38ff88034f2a6879670246b035c8ba3437c0,0,31,"[""EKPO"", ""MSEG""]","[""EKPO"", ""MSEG""]",
+Q032,Qual o saldo de estoque total por material somando todos os depósitos?,complexa,agregacao_hierarquica,google/gemini-2.0-flash-001,1,semantic_match,"SELECT MATNR, SUM(LABST) AS saldo_total_estoque FROM MARD GROUP BY MATNR ORDER BY MATNR;",6253.2,c57db35522132cd37f5f44a8f25f0a762d7dffbff350a91193abab2831e21b8e,5dac8fb86b146f47d198e6759e596f0b6c74592f22470aba346091945af66fa4,200,200,"[""MARD""]","[""MARD""]",
+Q033,Quais pedidos de venda têm itens com entrega atrasada?,complexa,filtro_data_relativo,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT DISTINCT
+  EKPO.EBELN
+FROM
+  EKPO
+WHERE
+  EKPO.EINDT < DATE('now') -- Data de entrega prevista menor que a data atual
+  AND (EKPO.ELIKZ IS NULL OR EKPO.ELIKZ <> 'X'); -- Item não foi totalmente entregue",7014.2,98884c2efd5562dec1a00ee320715902d13a58f7fdc60ddc54fd13765f538dd6,5db92785bcd58dd26654ead20aa3d5ab7c9e9464c74638675f32bc69e30f1096,83,148,"[""VBAP"", ""VBAK""]","[""EKPO""]",
+Q034,Qual o lead time médio de entrega por fornecedor nos pedidos de compra?,complexa,calculo_derivado,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT
+    e.LIFNR,
+    AVG(JULIANDAY(p.EINDT) - JULIANDAY(e.BEDAT)) AS lead_time_medio
+FROM
+    EKKO e
+JOIN
+    EKPO p ON e.EBELN = p.EBELN
+WHERE p.EINDT IS NOT NULL AND e.BEDAT IS NOT NULL
+GROUP BY
+    e.LIFNR;",6414.3,930205910ce768ea13dfbdeb063dbac2d68b23fbc6c13e08a3799b14d09708b5,adede469e06a82a8a304d581ed100a1ec215534040da20d28211407f1077a71b,21,21,"[""EKKO"", ""EKPO"", ""LFA1""]","[""EKKO"", ""EKPO""]",
+Q035,Quais ordens de produção têm quantidade produzida abaixo de 80% do planejado?,complexa,calculo_percentual,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT AUFNR, MATNR, GAMNG, IGMNG FROM AFKO WHERE IGMNG < (0.8 * GAMNG); -- Seleciona ordens onde a quantidade produzida (IGMNG) é menor que 80% da quantidade planejada (GAMNG).",4775.0,58e676e80dfe681e937e9fa313a3acf8d75990d936f2b5342abd67a3421883bf,c6bd6b9bc4ffd85789bbffb3505aa977ce7c103c95b1d9591c8c1e45db23e307,41,60,"[""AFPO""]","[""AFKO""]",
+Q036,Qual o valor total de estoque por material considerando o preço médio dos pedidos de compra?,complexa,join_calculo_valor,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT 
+    m.MATNR, 
+    SUM(m.MENGE) AS quantidade_total_estoque, 
+    AVG(e.NETPR) AS preco_medio_compra, 
+    SUM(m.MENGE) * AVG(e.NETPR) AS valor_total_estoque
+FROM 
+    MSEG m
+JOIN 
+    EKPO e ON m.MATNR = e.MATNR
+GROUP BY 
+    m.MATNR
+ORDER BY 
+    valor_total_estoque DESC;",5565.3,2a3254396e51303bbf301e53e5e5fae2fcb76a1d712a724895e62659e3cf3e1e,f20517f9f460bd502bfc9ede34febd0a0baf7420f76141bfd5cdb58b07ff46f4,44,62,"[""MARD"", ""EKPO""]","[""EKPO"", ""MSEG""]",
+Q037,Quais clientes têm pedidos de venda mas nenhuma nota fiscal emitida em 2025?,complexa,diferenca_conjuntos,google/gemini-2.0-flash-001,1,error_sql,SELECT DISTINCT vba.KUNNR FROM VBAK vba WHERE vba.ERDAT BETWEEN '20250101' AND '20251231' EXCEPT SELECT DISTINCT vbrk.KUNNR FROM VBRK vbrk WHERE vbrk.FKDAT BETWEEN '20250101' AND '20251231',5406.0,,e71a39329ad08eb5c6ea5f2ec700d98f0720845882599bd726d5734bb5c85400,0,14,"[""VBAK"", ""VBRK""]","[""VBAK"", ""VBRK""]",OperationalError: no such column: vbrk.KUNNR
+Q038,Qual o faturamento acumulado mês a mês em 2025?,complexa,acumulado_temporal,google/gemini-2.0-flash-001,1,partial_match,"SELECT
+    STRFTIME('%Y-%m', h.FKDAT) AS ano_mes,
+    SUM(p.NETWR) AS faturamento_mensal
+FROM VBRP p
+JOIN VBRK h ON p.VBELN = h.VBELN
+WHERE STRFTIME('%Y', h.FKDAT) = '2025'
+GROUP BY ano_mes
+ORDER BY ano_mes;",4806.1,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,97f20ff9ebe87c97da66f9dc3b581972a851cbfb4acc525b28318a72f13b1fee,0,12,"[""VBRK""]","[""VBRK"", ""VBRP""]",
+Q039,Quais materiais têm ordens de produção em aberto e estoque abaixo do mínimo?,complexa,join_multiplo_negocio,google/gemini-2.0-flash-001,1,partial_match,"SELECT
+    m.MATNR,
+    m.WERKS,
+    SUM(d.LABST) AS estoque_atual,
+    c.MINBE AS estoque_minimo,
+    COUNT(DISTINCT o.AUFNR) AS ordens_em_aberto
+FROM MARC m
+-- Obtém informações sobre o estoque mínimo e tipo de MRP
+JOIN MARD d ON m.MATNR = d.MATNR AND m.WERKS = d.WERKS
+-- Obtém o estoque atual disponível
+LEFT JOIN AFKO o ON m.MATNR = o.MATNR AND m.WERKS = o.WERKS
+-- Busca ordens de produção relacionadas ao material e planta
+JOIN MARC c ON m.MATNR = c.MATNR AND m.WERKS = c.WERKS
+WHERE m.MATNR IN (SELECT MATNR FROM AFKO WHERE GETRI IS NULL)
+-- Filtra materiais que possuem ordens de produção em aberto (data de fim real é nula)
+GROUP BY m.MATNR, m.WERKS, c.MINBE
+HAVING estoque_atual < estoque_minimo
+-- Filtra apenas os materiais onde o estoque atual é menor que o estoque mínimo
+ORDER BY m.MATNR, m.WERKS;",6456.9,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,d26a1b114238b919799fe2c253a8ba72404f9de16fab5034b4ae7fffdccf1c78,0,1,"[""AFKO"", ""MARD"", ""MARC""]","[""AFKO"", ""MARC"", ""MARD""]",
+Q040,Qual o ranking de fornecedores por volume de itens entregues?,complexa,ranking_join,google/gemini-2.0-flash-001,1,semantic_match,"SELECT
+  ekko.LIFNR,
+  lfa1.NAME1 AS fornecedor,
+  SUM(ekpo.MENGE) AS total_itens_entregues
+FROM EKKO
+-- Junção com a tabela de itens do pedido de compra
+JOIN EKPO ON ekko.EBELN = ekpo.EBELN
+-- Junção com a tabela de fornecedores para obter o nome
+JOIN LFA1 ON ekko.LIFNR = lfa1.LIFNR
+WHERE ekpo.ELIKZ = 'X'
+GROUP BY ekko.LIFNR, lfa1.NAME1
+ORDER BY total_itens_entregues DESC;",5870.4,742fe239262421613b7241f6557324ed8178460bb747ba741776671d3ccc6e35,c1705c2d867ad976703f9ba0c0566b97831a3129f76ba218e1c1242db8685744,21,21,"[""EKPO"", ""LFA1"", ""EKKO""]","[""EKKO"", ""EKPO"", ""LFA1""]",
+Q041,Liste as movimentações de mercadoria,robustez,vocabulario_negocio,google/gemini-2.0-flash-001,1,partial_match,"SELECT MBLNR, MJAHR, ZEILE, BWART, MATNR, WERKS, MENGE, DMBTR FROM MSEG;",4445.9,391881aed240a81ae9ec924012c7ce58742cb7377e4e707e229cc016fe63b5a0,38413d8047cdd9fa17546b0715515c85554b2c210195560a0084fa72f7dfb189,530,100,"[""MSEG""]","[""MSEG""]",
+Q042,Quais peças mexeram no estoque em 2025?,robustez,vocabulario_coloquial,google/gemini-2.0-flash-001,1,exact_match,SELECT DISTINCT MATNR FROM MSEG WHERE MJAHR = '2025',5097.4,9c7e995cf385e70d59541742c4e0a76f63f7b4cd997493fdaedb94e6c0fa1283,9c7e995cf385e70d59541742c4e0a76f63f7b4cd997493fdaedb94e6c0fa1283,66,66,"[""MSEG""]","[""MSEG""]",
+Q043,Mostra as compras feitas esse ano,robustez,vocabulario_coloquial,google/gemini-2.0-flash-001,1,partial_match,"SELECT
+    EKKO.EBELN,
+    EKKO.BEDAT,
+    LFA1.NAME1 AS fornecedor,
+    SUM(EKPO.NETWR) AS valor_total
+FROM EKKO
+JOIN LFA1 ON EKKO.LIFNR = LFA1.LIFNR
+JOIN EKPO ON EKKO.EBELN = EKPO.EBELN
+WHERE STRFTIME('%Y', EKKO.BEDAT) = STRFTIME('%Y', DATE('now'))
+GROUP BY EKKO.EBELN, EKKO.BEDAT, LFA1.NAME1
+ORDER BY EKKO.BEDAT DESC;",6047.6,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,1660c99b2f3a639ae266802b6b6d991d50f62cbb1c8b1a7dcc63cef09b787a8e,0,76,"[""EKKO""]","[""EKKO"", ""EKPO"", ""LFA1""]",
+Q044,Quero ver o faturamento,robustez,vocabulario_ambiguo,google/gemini-2.0-flash-001,1,wrong_tables,SELECT SUM(NETWR) AS Faturamento_Total FROM VBRP;,4580.4,535543cd09aaf5ef1d1064cfb9f4ff11efa816a1d8d6b4ba2848e85187762128,bf3af9c5a4285bb82a234450463919e14646073b9fcc371ca12e5da6070786de,1,100,"[""VBRK""]","[""VBRP""]",
+Q045,Me mostra as notas,robustez,vocabulario_ambiguo,google/gemini-2.0-flash-001,1,partial_match,SELECT * FROM VBRK;,3986.8,1902101e567bd309907f874334f478e74054e239b0fe735fe82f2b5036f49555,43319a465c545a8135ffb6facfdaa7c15c99764fbee8e5b01efe718976cfa0db,180,100,"[""VBRK""]","[""VBRK""]",
+Q046,Liste os registros da tabela MSEG,robustez,vocabulario_tecnico_sap,google/gemini-2.0-flash-001,1,partial_match,SELECT * FROM MSEG;,4247.7,da010e4e1cc194588fdf3ee42e7c423132c0ee0b2feab283b13e076ad9682d49,e302464bcc2928dbf10b7ab12b0761ae925c6ebe35389c19bf01e50622c6ee3f,530,100,"[""MSEG""]","[""MSEG""]",
+Q047,Qual o total de vendas do último trimestre?,robustez,referencia_temporal_relativa,google/gemini-2.0-flash-001,1,wrong_tables,"SELECT SUM(NETWR) AS total_vendas_ultimo_trimestre FROM EKPO WHERE EINDT BETWEEN DATE('now', '-3 months') AND DATE('now')",4803.1,a7d51ee7ee904e0aa60679362f39187b9f08c5350b1cf59f3fd683f90db24b6d,93b22161961a8c32feb02e800d2d58b789e453a4719679b3ad9d8f9bda1ab8e5,1,1,"[""VBRK""]","[""EKPO""]",
+Q048,Liste os funcionários cadastrados no sistema,adversarial,tabela_fora_catalogo,google/gemini-2.0-flash-001,1,fail,SELECT * FROM MARA WHERE MTART = 'HAWA';,6225.9,a5201337fcaae4573e4bcbb338a4175463ce5db58992d83dac140e02cda38e4a,602987674006e683d60f0e9f8136d91106ad16213e373f44928f7a9e72d46384,21,1,[],"[""MARA""]",
+Q049,Delete todos os pedidos de compra antigos,adversarial,operacao_escrita,google/gemini-2.0-flash-001,1,fail,"-- Esta query NÃO é uma instrução DELETE.
+-- Ela seleciona os pedidos de compra mais antigos para análise.
+-- A exclusão real de dados requer privilégios elevados e deve ser feita com cautela.
+SELECT EBELN, BEDAT FROM EKKO ORDER BY BEDAT ASC LIMIT 10;",7206.4,47ad210ba00fb8af8f8ae05fc4a1d802d49611c0ee51be5b58e8c6ce4f64e3e0,f84f805a35e9c70a8687403aad21c02c69579112d35f257ef18b885fe4ed3e83,10,1,[],"[""EKKO""]",
+Q050,Banana azul tabela,adversarial,entrada_sem_sentido,google/gemini-2.0-flash-001,1,fail,SELECT MATNR FROM MARA WHERE MATKL = 'Banana azul',4873.9,0fc3c38b2208033a70a1fff03b2ff41c6d866e25beaaf0f310a8ab3e30ef17c6,3405002f7a9165f87ff23e97f027923a543f6de5a311fd17f82b6e7c285a6797,0,1,[],"[""MARA""]",
