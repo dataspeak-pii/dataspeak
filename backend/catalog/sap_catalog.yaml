@@ -52,9 +52,11 @@ tables:
 - name: MSEG
   module: MM
   category: transaction_data
-  description: 'Tabela de movimentações de material. Cada linha representa um item
-    de um documento de movimentação — entrada, saída, transferência. O cabeçalho fica
-    em MKPF.
+  description: 'Tabela de movimentações de material — registra todos os materiais
+    movimentados (entradas, saídas, transferências, consumos) por planta e período.
+    Para volume movimentado, materiais movimentados ou movimentos por planta, esta
+    é a tabela primária. Cada linha representa um item de um documento de movimentação.
+    O cabeçalho fica em MKPF.
 
     '
   business_context: 'Use quando a pergunta envolve entradas de mercadoria, saídas
@@ -110,6 +112,8 @@ tables:
   - Qual o volume total de entradas de material no último mês?
   - Quais materiais tiveram saída para produção na semana passada?
   - Qual o valor total de mercadorias recebidas por planta em 2026?
+  - Quais materiais foram movimentados e qual o volume total por planta em 2025?
+  - Qual o volume total movimentado por material e por planta no ano?
   example_sql: "SELECT s.MATNR, SUM(s.MENGE) AS quantidade_total, SUM(s.DMBTR) AS\
     \ valor_total\nFROM MSEG s\nJOIN MKPF h ON s.MBLNR = h.MBLNR AND s.MJAHR = h.MJAHR\n\
     WHERE s.BWART = '101'\n  AND h.BUDAT BETWEEN '20260301' AND '20260331'\nGROUP\
@@ -118,8 +122,9 @@ tables:
   module: SD
   category: transaction_data
   description: 'Cabeçalho dos documentos de faturamento — notas fiscais de saída,
-    faturas, créditos e débitos. Cada linha é uma nota fiscal completa. Os itens ficam
-    em VBRP.
+    faturas, créditos e débitos. Tabela principal para análise de faturamento total,
+    receita realizada e volume de vendas por organização de vendas, cliente ou período.
+    Cada linha é uma nota fiscal completa. Os itens ficam em VBRP.
 
     '
   business_context: 'Use quando a pergunta envolve faturamento por período, notas
@@ -171,6 +176,8 @@ tables:
   - Qual o faturamento total por cliente no primeiro trimestre?
   - Qual o faturamento mensal da organização de vendas 1000?
   - Quantas notas fiscais foram canceladas no último mês?
+  - Qual o faturamento total por organização de vendas em 2025?
+  - Qual a receita total faturada por organização de vendas no ano?
   example_sql: "SELECT VKORG, SUBSTR(FKDAT, 1, 6) AS ano_mes,\n       COUNT(VBELN)\
     \ AS qtd_notas, SUM(NETWR) AS faturamento_total\nFROM VBRK\nWHERE FKDAT BETWEEN\
     \ '20260101' AND '20261231'\n  AND FKART = 'F2'\n  AND (FKSTO IS NULL OR FKSTO\

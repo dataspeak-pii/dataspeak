@@ -51,7 +51,7 @@ print("-" * 80)
 
 for case_id, question in CASES:
     try:
-        retrieved = retrieve_relevant_tables(question, n_results=3)
+        retrieved = retrieve_relevant_tables(question, n_results=5)
     except Exception as e:
         print(f"{case_id:<6} ERRO: {e}")
         continue

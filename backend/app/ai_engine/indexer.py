@@ -6,6 +6,7 @@ Execute novamente sempre que o catálogo for atualizado.
 
 import yaml
 import chromadb
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from pathlib import Path
 
 # Caminho para o catálogo SAP
@@ -47,8 +48,8 @@ def build_document_text(table: dict) -> str:
         parts.append("Perguntas típicas: " + " | ".join(table["example_questions"]))
 
     # Relacionamentos com outras tabelas
-    if table.get("common_joins"):
-        joins = [j.get("table", "") for j in table["common_joins"]]
+    if table.get("relationships"):
+        joins = [j.get("table", "") for j in table["relationships"]]
         parts.append(f"Tabelas relacionadas: {', '.join(joins)}")
 
     return "\n".join(parts)
@@ -75,8 +76,13 @@ def index_catalog():
     except Exception:
         pass
 
+    embedding_fn = SentenceTransformerEmbeddingFunction(
+        model_name="paraphrase-multilingual-MiniLM-L12-v2"
+    )
+
     collection = client.create_collection(
         name="sap_tables",
+        embedding_function=embedding_fn,
         metadata={"hnsw:space": "cosine"},  # distância cosseno — padrão para texto
     )
 

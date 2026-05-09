@@ -5,6 +5,7 @@ das tabelas SAP mais relevantes, buscando semanticamente no ChromaDB.
 
 import yaml
 import chromadb
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from pathlib import Path
 
 CATALOG_PATH = Path(__file__).parent.parent.parent / "catalog" / "sap_catalog.yaml"
@@ -18,7 +19,7 @@ def load_full_catalog() -> dict:
     return {table["name"]: table for table in catalog.get("tables", [])}
 
 
-def retrieve_relevant_tables(question: str, n_results: int = 3) -> list[dict]:
+def retrieve_relevant_tables(question: str, n_results: int = 5) -> list[dict]:
     """
     Busca semanticamente no ChromaDB as tabelas SAP mais relevantes
     para a pergunta recebida.
@@ -31,7 +32,10 @@ def retrieve_relevant_tables(question: str, n_results: int = 3) -> list[dict]:
         Lista de dicts com metadados completos das tabelas encontradas
     """
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-    collection = client.get_collection("sap_tables")
+    embedding_fn = SentenceTransformerEmbeddingFunction(
+        model_name="paraphrase-multilingual-MiniLM-L12-v2"
+    )
+    collection = client.get_collection("sap_tables", embedding_function=embedding_fn)
 
     # Busca semântica — ChromaDB vetoriza a pergunta e calcula similaridade
     results = collection.query(
