@@ -52,12 +52,12 @@ tables:
 - name: MSEG
   module: MM
   category: transaction_data
-  description: 'Tabela de movimentações de material — registra todos os materiais
-    movimentados (entradas, saídas, transferências, consumos) por planta e período.
-    Para volume movimentado, materiais movimentados ou movimentos por planta, esta
-    é a tabela primária. Cada linha representa um item de um documento de movimentação.
-    O cabeçalho fica em MKPF.
-
+  description: 'Tabela de movimentações de material — registra toda movimentação 
+    de mercadoria: entradas, saídas, transferências, consumos de produção e 
+    devoluções. Cada linha representa um item de um documento de movimentação de 
+    estoque. Para volume movimentado, materiais movimentados ou movimentos por 
+    planta e período, esta é a tabela primária. O cabeçalho do documento fica em 
+    MKPF.
     '
   business_context: 'Use quando a pergunta envolve entradas de mercadoria, saídas
     de estoque, transferências, consumos de produção, devoluções, ou rastreabilidade
