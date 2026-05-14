@@ -7,8 +7,12 @@
       "pergunta": "Quais materiais do tipo acabado existem no sistema?",
       "categoria": "simples",
       "subcategoria": "select_filtro_basico",
-      "tabelas_esperadas": ["MARA"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "MARA"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT MATNR, MTART, MATKL, MEINS FROM MARA WHERE MTART = 'FERT' ORDER BY MATNR",
       "notas": "Cobertura Eixo B: MARA. Filtro simples por tipo de material."
     },
@@ -17,8 +21,13 @@
       "pergunta": "Liste as movimentações de mercadoria de 2025",
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MBLNR",
+        "MJAHR"
+      ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG WHERE MJAHR = '2025' ORDER BY MBLNR",
       "notas": "Cobertura Eixo B: MSEG. MSEG não tem BUDAT — filtro por MJAHR."
     },
@@ -27,8 +36,12 @@
       "pergunta": "Quais notas fiscais foram emitidas em 2025?",
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["VBELN"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN"
+      ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' ORDER BY FKDAT DESC",
       "notas": "Cobertura Eixo B: VBRK. SUBSTR para filtro de ano em data SAP."
     },
@@ -37,8 +50,12 @@
       "pergunta": "Liste todos os pedidos de compra cadastrados",
       "categoria": "simples",
       "subcategoria": "select_listagem",
-      "tabelas_esperadas": ["EKKO"],
-      "chave_primaria_resultado": ["EBELN"],
+      "tabelas_esperadas": [
+        "EKKO"
+      ],
+      "chave_primaria_resultado": [
+        "EBELN"
+      ],
       "sql_referencia": "SELECT EBELN, BUKRS, LIFNR, BSART, BEDAT, WAERS FROM EKKO ORDER BY BEDAT DESC",
       "notas": "Cobertura Eixo B: EKKO. Listagem básica."
     },
@@ -47,8 +64,12 @@
       "pergunta": "Quais ordens de produção estão em aberto?",
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
-      "tabelas_esperadas": ["AFKO"],
-      "chave_primaria_resultado": ["AUFNR"],
+      "tabelas_esperadas": [
+        "AFKO"
+      ],
+      "chave_primaria_resultado": [
+        "AUFNR"
+      ],
       "sql_referencia": "SELECT AUFNR, GSTRS, GLTRS, GAMNG, WERKS FROM AFKO WHERE STSTPS NOT IN ('TECO', 'CLSD') OR STSTPS IS NULL ORDER BY GSTRS",
       "notas": "Cobertura Eixo B: AFKO. Status em aberto via STSTPS."
     },
@@ -57,8 +78,14 @@
       "pergunta": "Mostre os itens das notas fiscais emitidas em 2025",
       "categoria": "simples",
       "subcategoria": "select_filtro_join_simples",
-      "tabelas_esperadas": ["VBRP", "VBRK"],
-      "chave_primaria_resultado": ["VBELN", "POSNR"],
+      "tabelas_esperadas": [
+        "VBRP",
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN",
+        "POSNR"
+      ],
       "sql_referencia": "SELECT p.VBELN, p.POSNR, p.MATNR, p.FKIMG, p.NETWR FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' ORDER BY p.VBELN, p.POSNR",
       "notas": "Cobertura Eixo B: VBRP. Primeiro JOIN do dataset."
     },
@@ -67,8 +94,14 @@
       "pergunta": "Qual o estoque disponível por material e depósito?",
       "categoria": "simples",
       "subcategoria": "select_listagem",
-      "tabelas_esperadas": ["MARD"],
-      "chave_primaria_resultado": ["MATNR", "WERKS", "LGORT"],
+      "tabelas_esperadas": [
+        "MARD"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR",
+        "WERKS",
+        "LGORT"
+      ],
       "sql_referencia": "SELECT MATNR, WERKS, LGORT, LABST FROM MARD WHERE LABST > 0 ORDER BY MATNR, WERKS",
       "notas": "Cobertura Eixo B: MARD. LABST = estoque livre disponível."
     },
@@ -77,8 +110,13 @@
       "pergunta": "Liste os documentos de material registrados em janeiro de 2025",
       "categoria": "simples",
       "subcategoria": "select_filtro_data",
-      "tabelas_esperadas": ["MKPF"],
-      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
+      "tabelas_esperadas": [
+        "MKPF"
+      ],
+      "chave_primaria_resultado": [
+        "MBLNR",
+        "MJAHR"
+      ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BUDAT, USNAM FROM MKPF WHERE BUDAT BETWEEN '20250101' AND '20250131' ORDER BY BUDAT",
       "notas": "Cobertura Eixo B: MKPF."
     },
@@ -87,8 +125,13 @@
       "pergunta": "Quais itens de pedidos de compra ainda não foram entregues?",
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
-      "tabelas_esperadas": ["EKPO"],
-      "chave_primaria_resultado": ["EBELN", "EBELP"],
+      "tabelas_esperadas": [
+        "EKPO"
+      ],
+      "chave_primaria_resultado": [
+        "EBELN",
+        "EBELP"
+      ],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, WERKS, MENGE, EINDT FROM EKPO WHERE ELIKZ = '' OR ELIKZ IS NULL ORDER BY EINDT",
       "notas": "Cobertura Eixo B: EKPO. ELIKZ = indicador de entrega completa."
     },
@@ -97,8 +140,12 @@
       "pergunta": "Liste os pedidos de venda registrados em 2025",
       "categoria": "simples",
       "subcategoria": "select_filtro_ano",
-      "tabelas_esperadas": ["VBAK"],
-      "chave_primaria_resultado": ["VBELN"],
+      "tabelas_esperadas": [
+        "VBAK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN"
+      ],
       "sql_referencia": "SELECT VBELN, AUART, KUNNR, AUDAT, NETWR, WAERK FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' ORDER BY AUDAT DESC",
       "notas": "Cobertura Eixo B: VBAK."
     },
@@ -107,8 +154,13 @@
       "pergunta": "Quais itens de pedidos de venda estão pendentes de faturamento?",
       "categoria": "simples",
       "subcategoria": "select_filtro_status",
-      "tabelas_esperadas": ["VBAP"],
-      "chave_primaria_resultado": ["VBELN", "POSNR"],
+      "tabelas_esperadas": [
+        "VBAP"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN",
+        "POSNR"
+      ],
       "sql_referencia": "SELECT VBELN, POSNR, MATNR, KWMENG, NETWR FROM VBAP WHERE FKSTA != 'C' ORDER BY VBELN, POSNR",
       "notas": "Cobertura Eixo B: VBAP. FKSTA = status de faturamento."
     },
@@ -117,8 +169,12 @@
       "pergunta": "Liste todos os clientes cadastrados no sistema",
       "categoria": "simples",
       "subcategoria": "select_listagem",
-      "tabelas_esperadas": ["KNA1"],
-      "chave_primaria_resultado": ["KUNNR"],
+      "tabelas_esperadas": [
+        "KNA1"
+      ],
+      "chave_primaria_resultado": [
+        "KUNNR"
+      ],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, LAND1, REGIO FROM KNA1 ORDER BY NAME1",
       "notas": "Cobertura Eixo B: KNA1."
     },
@@ -127,8 +183,12 @@
       "pergunta": "Quais fornecedores estão cadastrados?",
       "categoria": "simples",
       "subcategoria": "select_listagem",
-      "tabelas_esperadas": ["LFA1"],
-      "chave_primaria_resultado": ["LIFNR"],
+      "tabelas_esperadas": [
+        "LFA1"
+      ],
+      "chave_primaria_resultado": [
+        "LIFNR"
+      ],
       "sql_referencia": "SELECT LIFNR, NAME1, ORT01, LAND1 FROM LFA1 ORDER BY NAME1",
       "notas": "Cobertura Eixo B: LFA1."
     },
@@ -137,8 +197,13 @@
       "pergunta": "Mostre os dados de planejamento de materiais por planta",
       "categoria": "simples",
       "subcategoria": "select_listagem",
-      "tabelas_esperadas": ["MARC"],
-      "chave_primaria_resultado": ["MATNR", "WERKS"],
+      "tabelas_esperadas": [
+        "MARC"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR",
+        "WERKS"
+      ],
       "sql_referencia": "SELECT MATNR, WERKS, DISMM, BESKZ, MINBE, EISBE FROM MARC ORDER BY MATNR, WERKS",
       "notas": "Cobertura Eixo B: MARC."
     },
@@ -147,8 +212,13 @@
       "pergunta": "Quais itens de ordens de produção têm quantidade planejada acima de 100?",
       "categoria": "simples",
       "subcategoria": "select_filtro_numerico",
-      "tabelas_esperadas": ["AFPO"],
-      "chave_primaria_resultado": ["AUFNR", "POSNR"],
+      "tabelas_esperadas": [
+        "AFPO"
+      ],
+      "chave_primaria_resultado": [
+        "AUFNR",
+        "POSNR"
+      ],
       "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, MEINS FROM AFPO WHERE PSMNG > 100 ORDER BY PSMNG DESC",
       "notas": "Cobertura Eixo B: AFPO."
     },
@@ -157,8 +227,12 @@
       "pergunta": "Quantas notas fiscais foram emitidas por mês em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_periodo",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["mes"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "mes"
+      ],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, COUNT(*) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
       "notas": "Agregação + GROUP BY. Mês em formato YYYYMM."
     },
@@ -167,8 +241,12 @@
       "pergunta": "Qual o valor total faturado por cliente em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_entidade",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["KUNAG"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "KUNAG"
+      ],
       "sql_referencia": "SELECT KUNAG, SUM(NETWR) AS total_faturado, COUNT(*) AS qtd_notas FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY KUNAG ORDER BY total_faturado DESC",
       "notas": "Agregação de faturamento por cliente."
     },
@@ -177,8 +255,12 @@
       "pergunta": "Quantas movimentações de estoque ocorreram por tipo em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_categoria",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["BWART"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "BWART"
+      ],
       "sql_referencia": "SELECT BWART, COUNT(*) AS total_movimentacoes, SUM(MENGE) AS quantidade_total FROM MSEG WHERE MJAHR = '2025' GROUP BY BWART ORDER BY total_movimentacoes DESC",
       "notas": "Agregação por tipo de movimento."
     },
@@ -187,8 +269,12 @@
       "pergunta": "Qual o valor médio dos pedidos de compra por fornecedor?",
       "categoria": "media",
       "subcategoria": "agregacao_media",
-      "tabelas_esperadas": ["EKKO"],
-      "chave_primaria_resultado": ["LIFNR"],
+      "tabelas_esperadas": [
+        "EKKO"
+      ],
+      "chave_primaria_resultado": [
+        "LIFNR"
+      ],
       "sql_referencia": "SELECT LIFNR, COUNT(*) AS total_pedidos FROM EKKO GROUP BY LIFNR ORDER BY total_pedidos DESC",
       "notas": "Agregação por fornecedor (EKKO sem NETWR no schema)."
     },
@@ -197,8 +283,14 @@
       "pergunta": "Quais materiais têm estoque abaixo do ponto de reposição?",
       "categoria": "media",
       "subcategoria": "filtro_composto",
-      "tabelas_esperadas": ["MARD", "MARC"],
-      "chave_primaria_resultado": ["MATNR", "WERKS"],
+      "tabelas_esperadas": [
+        "MARD",
+        "MARC"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR",
+        "WERKS"
+      ],
       "sql_referencia": "SELECT d.MATNR, d.WERKS, d.LABST, c.MINBE FROM MARD d JOIN MARC c ON d.MATNR = c.MATNR AND d.WERKS = c.WERKS WHERE d.LABST < c.MINBE AND c.MINBE > 0 ORDER BY d.MATNR",
       "notas": "JOIN MARD + MARC."
     },
@@ -207,8 +299,12 @@
       "pergunta": "Quantos pedidos de venda foram feitos por cliente em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_entidade",
-      "tabelas_esperadas": ["VBAK"],
-      "chave_primaria_resultado": ["KUNNR"],
+      "tabelas_esperadas": [
+        "VBAK"
+      ],
+      "chave_primaria_resultado": [
+        "KUNNR"
+      ],
       "sql_referencia": "SELECT KUNNR, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY KUNNR ORDER BY total_pedidos DESC",
       "notas": "Agregação de pedidos de venda por cliente."
     },
@@ -217,8 +313,12 @@
       "pergunta": "Qual o volume total produzido por material em ordens de produção concluídas?",
       "categoria": "media",
       "subcategoria": "agregacao_filtro_status",
-      "tabelas_esperadas": ["AFPO"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "AFPO"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT MATNR, SUM(WEMNG) AS volume_produzido, SUM(PSMNG) AS volume_planejado FROM AFPO WHERE WEMNG > 0 GROUP BY MATNR ORDER BY volume_produzido DESC",
       "notas": "WEMNG = quantidade recebida/produzida."
     },
@@ -227,8 +327,13 @@
       "pergunta": "Quais itens de pedido de compra têm valor unitário acima de 500?",
       "categoria": "media",
       "subcategoria": "filtro_numerico_composto",
-      "tabelas_esperadas": ["EKPO"],
-      "chave_primaria_resultado": ["EBELN", "EBELP"],
+      "tabelas_esperadas": [
+        "EKPO"
+      ],
+      "chave_primaria_resultado": [
+        "EBELN",
+        "EBELP"
+      ],
       "sql_referencia": "SELECT EBELN, EBELP, MATNR, MENGE, NETPR, NETWR FROM EKPO WHERE NETPR > 500 ORDER BY NETPR DESC",
       "notas": "Filtro numérico em item de pedido."
     },
@@ -237,18 +342,26 @@
       "pergunta": "Qual o faturamento total por organização de vendas em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_categoria",
-      "tabelas_esperadas": ["VBAK"],
-      "chave_primaria_resultado": ["VKORG"],
-      "sql_referencia": "SELECT VKORG, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY VKORG ORDER BY valor_total DESC",
-      "notas": "Agregação por organização de vendas."
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "VKORG"
+      ],
+      "sql_referencia": "SELECT VKORG, COUNT(VBELN) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' AND (FKSTO IS NULL OR FKSTO <> 'X') AND FKART = 'F2' GROUP BY VKORG ORDER BY valor_total DESC",
+      "notas": "Faturamento real (VBRK), não valor de pedido (VBAK). FKSTO filtra notas não canceladas; FKART = 'F2' filtra apenas faturas padrão. Correção 08/05/2026: gabarito original usava VBAK indevidamente — caso reportado no artigo como exemplo de validação humana iterativa do gold standard."
     },
     {
       "id": "Q025",
       "pergunta": "Quais documentos de material foram registrados por usuário em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_por_usuario",
-      "tabelas_esperadas": ["MKPF"],
-      "chave_primaria_resultado": ["USNAM"],
+      "tabelas_esperadas": [
+        "MKPF"
+      ],
+      "chave_primaria_resultado": [
+        "USNAM"
+      ],
       "sql_referencia": "SELECT USNAM, COUNT(*) AS total_documentos FROM MKPF WHERE SUBSTR(BUDAT, 1, 4) = '2025' GROUP BY USNAM ORDER BY total_documentos DESC",
       "notas": "Agregação por usuário via MKPF."
     },
@@ -257,8 +370,13 @@
       "pergunta": "Quais materiais foram movimentados e qual o volume total por planta em 2025?",
       "categoria": "media",
       "subcategoria": "agregacao_multipla",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["MATNR", "WERKS"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR",
+        "WERKS"
+      ],
       "sql_referencia": "SELECT MATNR, WERKS, COUNT(*) AS total_movimentos, SUM(MENGE) AS volume_total FROM MSEG WHERE MJAHR = '2025' GROUP BY MATNR, WERKS ORDER BY volume_total DESC",
       "notas": "GROUP BY composto."
     },
@@ -267,8 +385,12 @@
       "pergunta": "Quais clientes estão cadastrados na região Sul do Brasil?",
       "categoria": "media",
       "subcategoria": "filtro_geografico",
-      "tabelas_esperadas": ["KNA1"],
-      "chave_primaria_resultado": ["KUNNR"],
+      "tabelas_esperadas": [
+        "KNA1"
+      ],
+      "chave_primaria_resultado": [
+        "KUNNR"
+      ],
       "sql_referencia": "SELECT KUNNR, NAME1, ORT01, REGIO FROM KNA1 WHERE LAND1 = 'BR' AND REGIO IN ('PR', 'SC', 'RS') ORDER BY NAME1",
       "notas": "Filtro composto país e região."
     },
@@ -277,8 +399,13 @@
       "pergunta": "Quais os 10 clientes com maior valor faturado em 2025?",
       "categoria": "complexa",
       "subcategoria": "ranking_top_n",
-      "tabelas_esperadas": ["VBRK", "KNA1"],
-      "chave_primaria_resultado": ["KUNAG"],
+      "tabelas_esperadas": [
+        "VBRK",
+        "KNA1"
+      ],
+      "chave_primaria_resultado": [
+        "KUNAG"
+      ],
       "sql_referencia": "SELECT k.VBELN, k.KUNAG, c.NAME1, SUM(k.NETWR) AS total_faturado FROM VBRK k LEFT JOIN KNA1 c ON k.KUNAG = c.KUNNR WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY k.KUNAG, c.NAME1 ORDER BY total_faturado DESC LIMIT 10",
       "notas": "JOIN + GROUP BY + ORDER BY + LIMIT."
     },
@@ -287,8 +414,13 @@
       "pergunta": "Quais os 10 materiais mais faturados em valor em 2025?",
       "categoria": "complexa",
       "subcategoria": "ranking_top_n",
-      "tabelas_esperadas": ["VBRP", "VBRK"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "VBRP",
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT p.MATNR, SUM(p.NETWR) AS total_faturado, SUM(p.FKIMG) AS quantidade_total FROM VBRP p JOIN VBRK k ON p.VBELN = k.VBELN WHERE SUBSTR(k.FKDAT, 1, 4) = '2025' GROUP BY p.MATNR ORDER BY total_faturado DESC LIMIT 10",
       "notas": "JOIN VBRP + VBRK."
     },
@@ -297,8 +429,13 @@
       "pergunta": "Qual o valor total de pedidos de compra por fornecedor com nome do fornecedor?",
       "categoria": "complexa",
       "subcategoria": "join_enriquecimento",
-      "tabelas_esperadas": ["EKKO", "LFA1"],
-      "chave_primaria_resultado": ["LIFNR"],
+      "tabelas_esperadas": [
+        "EKKO",
+        "LFA1"
+      ],
+      "chave_primaria_resultado": [
+        "LIFNR"
+      ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(*) AS total_pedidos FROM EKKO e JOIN LFA1 f ON e.LIFNR = f.LIFNR GROUP BY e.LIFNR, f.NAME1 ORDER BY total_pedidos DESC",
       "notas": "JOIN EKKO + LFA1."
     },
@@ -307,8 +444,13 @@
       "pergunta": "Quais materiais foram comprados e também movimentados no estoque em 2025?",
       "categoria": "complexa",
       "subcategoria": "intersecao_conjuntos",
-      "tabelas_esperadas": ["EKPO", "MSEG"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "EKPO",
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT DISTINCT e.MATNR FROM EKPO e WHERE e.MATNR IN (SELECT MATNR FROM MSEG WHERE MJAHR = '2025') ORDER BY e.MATNR",
       "notas": "Subquery com IN."
     },
@@ -317,8 +459,12 @@
       "pergunta": "Qual o saldo de estoque total por material somando todos os depósitos?",
       "categoria": "complexa",
       "subcategoria": "agregacao_hierarquica",
-      "tabelas_esperadas": ["MARD"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "MARD"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT MATNR, SUM(LABST) AS estoque_total, SUM(SPEME) AS estoque_bloqueado, SUM(UMLME) AS em_transferencia FROM MARD GROUP BY MATNR HAVING SUM(LABST) > 0 ORDER BY estoque_total DESC",
       "notas": "HAVING para filtrar pós-agregação."
     },
@@ -327,8 +473,14 @@
       "pergunta": "Quais pedidos de venda têm itens com entrega atrasada?",
       "categoria": "complexa",
       "subcategoria": "filtro_data_relativo",
-      "tabelas_esperadas": ["VBAP", "VBAK"],
-      "chave_primaria_resultado": ["VBELN", "POSNR"],
+      "tabelas_esperadas": [
+        "VBAP",
+        "VBAK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN",
+        "POSNR"
+      ],
       "sql_referencia": "SELECT a.VBELN, a.KUNNR, p.POSNR, p.MATNR, p.EDATU FROM VBAK a JOIN VBAP p ON a.VBELN = p.VBELN WHERE p.EDATU < DATE('now') AND p.FKSTA != 'C' ORDER BY p.EDATU",
       "notas": "Filtro com DATE('now')."
     },
@@ -337,8 +489,14 @@
       "pergunta": "Qual o lead time médio de entrega por fornecedor nos pedidos de compra?",
       "categoria": "complexa",
       "subcategoria": "calculo_derivado",
-      "tabelas_esperadas": ["EKKO", "EKPO", "LFA1"],
-      "chave_primaria_resultado": ["LIFNR"],
+      "tabelas_esperadas": [
+        "EKKO",
+        "EKPO",
+        "LFA1"
+      ],
+      "chave_primaria_resultado": [
+        "LIFNR"
+      ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELN) AS total_itens, AVG(CAST(JULIANDAY(p.EINDT) - JULIANDAY(e.BEDAT) AS REAL)) AS lead_time_medio FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE e.BEDAT IS NOT NULL AND p.EINDT IS NOT NULL GROUP BY e.LIFNR, f.NAME1 ORDER BY lead_time_medio",
       "notas": "Triple JOIN + JULIANDAY."
     },
@@ -347,8 +505,13 @@
       "pergunta": "Quais ordens de produção têm quantidade produzida abaixo de 80% do planejado?",
       "categoria": "complexa",
       "subcategoria": "calculo_percentual",
-      "tabelas_esperadas": ["AFPO"],
-      "chave_primaria_resultado": ["AUFNR", "POSNR"],
+      "tabelas_esperadas": [
+        "AFPO"
+      ],
+      "chave_primaria_resultado": [
+        "AUFNR",
+        "POSNR"
+      ],
       "sql_referencia": "SELECT AUFNR, POSNR, MATNR, PSMNG, WEMNG, ROUND(CAST(WEMNG AS REAL) / PSMNG * 100, 1) AS perc_realizado FROM AFPO WHERE PSMNG > 0 AND WEMNG < PSMNG * 0.8 ORDER BY perc_realizado",
       "notas": "Cálculo percentual."
     },
@@ -357,8 +520,13 @@
       "pergunta": "Qual o valor total de estoque por material considerando o preço médio dos pedidos de compra?",
       "categoria": "complexa",
       "subcategoria": "join_calculo_valor",
-      "tabelas_esperadas": ["MARD", "EKPO"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "MARD",
+        "EKPO"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT d.MATNR, SUM(d.LABST) AS estoque_total, AVG(p.NETPR) AS preco_medio, SUM(d.LABST) * AVG(p.NETPR) AS valor_estoque FROM MARD d JOIN EKPO p ON d.MATNR = p.MATNR WHERE d.LABST > 0 GROUP BY d.MATNR ORDER BY valor_estoque DESC",
       "notas": "JOIN MARD + EKPO."
     },
@@ -367,8 +535,13 @@
       "pergunta": "Quais clientes têm pedidos de venda mas nenhuma nota fiscal emitida em 2025?",
       "categoria": "complexa",
       "subcategoria": "diferenca_conjuntos",
-      "tabelas_esperadas": ["VBAK", "VBRK"],
-      "chave_primaria_resultado": ["KUNNR"],
+      "tabelas_esperadas": [
+        "VBAK",
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "KUNNR"
+      ],
       "sql_referencia": "SELECT DISTINCT a.KUNNR FROM VBAK a WHERE SUBSTR(a.AUDAT, 1, 4) = '2025' AND a.KUNNR NOT IN (SELECT KUNAG FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025') ORDER BY a.KUNNR",
       "notas": "NOT IN com subquery."
     },
@@ -377,8 +550,12 @@
       "pergunta": "Qual o faturamento acumulado mês a mês em 2025?",
       "categoria": "complexa",
       "subcategoria": "acumulado_temporal",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["mes"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "mes"
+      ],
       "sql_referencia": "SELECT SUBSTR(FKDAT, 1, 6) AS mes, SUM(NETWR) AS faturamento_mes, SUM(SUM(NETWR)) OVER (ORDER BY SUBSTR(FKDAT, 1, 6)) AS faturamento_acumulado FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' GROUP BY SUBSTR(FKDAT, 1, 6) ORDER BY mes",
       "notas": "Window function."
     },
@@ -387,8 +564,14 @@
       "pergunta": "Quais materiais têm ordens de produção em aberto e estoque abaixo do mínimo?",
       "categoria": "complexa",
       "subcategoria": "join_multiplo_negocio",
-      "tabelas_esperadas": ["AFKO", "MARD", "MARC"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "AFKO",
+        "MARD",
+        "MARC"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT a.MATNR, a.AUFNR, d.LABST, c.MINBE FROM AFKO a JOIN MARD d ON a.MATNR = d.MATNR AND a.WERKS = d.WERKS JOIN MARC c ON a.MATNR = c.MATNR AND a.WERKS = c.WERKS WHERE (a.STSTPS NOT IN ('TECO', 'CLSD') OR a.STSTPS IS NULL) AND d.LABST < c.MINBE ORDER BY d.LABST",
       "notas": "Triple JOIN."
     },
@@ -397,8 +580,14 @@
       "pergunta": "Qual o ranking de fornecedores por volume de itens entregues?",
       "categoria": "complexa",
       "subcategoria": "ranking_join",
-      "tabelas_esperadas": ["EKPO", "LFA1", "EKKO"],
-      "chave_primaria_resultado": ["LIFNR"],
+      "tabelas_esperadas": [
+        "EKPO",
+        "LFA1",
+        "EKKO"
+      ],
+      "chave_primaria_resultado": [
+        "LIFNR"
+      ],
       "sql_referencia": "SELECT e.LIFNR, f.NAME1, COUNT(p.EBELP) AS total_itens, SUM(p.MENGE) AS volume_total FROM EKKO e JOIN EKPO p ON e.EBELN = p.EBELN JOIN LFA1 f ON e.LIFNR = f.LIFNR WHERE p.ELIKZ = 'X' GROUP BY e.LIFNR, f.NAME1 ORDER BY total_itens DESC",
       "notas": "Triple JOIN."
     },
@@ -407,8 +596,13 @@
       "pergunta": "Liste as movimentações de mercadoria",
       "categoria": "robustez",
       "subcategoria": "vocabulario_negocio",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MBLNR",
+        "MJAHR"
+      ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG ORDER BY MJAHR DESC, MBLNR DESC LIMIT 100",
       "notas": "Vocabulário de negócio."
     },
@@ -417,8 +611,12 @@
       "pergunta": "Quais peças mexeram no estoque em 2025?",
       "categoria": "robustez",
       "subcategoria": "vocabulario_coloquial",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["MATNR"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MATNR"
+      ],
       "sql_referencia": "SELECT DISTINCT MATNR FROM MSEG WHERE MJAHR = '2025' ORDER BY MATNR",
       "notas": "Vocabulário coloquial. Dívida conhecida."
     },
@@ -427,8 +625,12 @@
       "pergunta": "Mostra as compras feitas esse ano",
       "categoria": "robustez",
       "subcategoria": "vocabulario_coloquial",
-      "tabelas_esperadas": ["EKKO"],
-      "chave_primaria_resultado": ["EBELN"],
+      "tabelas_esperadas": [
+        "EKKO"
+      ],
+      "chave_primaria_resultado": [
+        "EBELN"
+      ],
       "sql_referencia": "SELECT EBELN, LIFNR, BEDAT FROM EKKO WHERE SUBSTR(BEDAT, 1, 4) = '2025' ORDER BY BEDAT DESC",
       "notas": "Coloquial + temporal relativo."
     },
@@ -437,8 +639,12 @@
       "pergunta": "Quero ver o faturamento",
       "categoria": "robustez",
       "subcategoria": "vocabulario_ambiguo",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["VBELN"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN"
+      ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR, WAERK FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
       "notas": "Ambíguo sem período."
     },
@@ -447,8 +653,12 @@
       "pergunta": "Me mostra as notas",
       "categoria": "robustez",
       "subcategoria": "vocabulario_ambiguo",
-      "tabelas_esperadas": ["VBRK"],
-      "chave_primaria_resultado": ["VBELN"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
+      "chave_primaria_resultado": [
+        "VBELN"
+      ],
       "sql_referencia": "SELECT VBELN, FKDAT, KUNAG, NETWR FROM VBRK ORDER BY FKDAT DESC LIMIT 100",
       "notas": "Notas é ambíguo."
     },
@@ -457,8 +667,13 @@
       "pergunta": "Liste os registros da tabela MSEG",
       "categoria": "robustez",
       "subcategoria": "vocabulario_tecnico_sap",
-      "tabelas_esperadas": ["MSEG"],
-      "chave_primaria_resultado": ["MBLNR", "MJAHR"],
+      "tabelas_esperadas": [
+        "MSEG"
+      ],
+      "chave_primaria_resultado": [
+        "MBLNR",
+        "MJAHR"
+      ],
       "sql_referencia": "SELECT MBLNR, MJAHR, BWART, MATNR, WERKS, MENGE FROM MSEG LIMIT 100",
       "notas": "Vocabulário técnico SAP direto."
     },
@@ -467,7 +682,9 @@
       "pergunta": "Qual o total de vendas do último trimestre?",
       "categoria": "robustez",
       "subcategoria": "referencia_temporal_relativa",
-      "tabelas_esperadas": ["VBRK"],
+      "tabelas_esperadas": [
+        "VBRK"
+      ],
       "chave_primaria_resultado": [],
       "sql_referencia": "SELECT SUM(NETWR) AS total_vendas, COUNT(*) AS total_notas FROM VBRK WHERE FKDAT >= '20250901' AND FKDAT <= '20251231'",
       "notas": "Referência temporal relativa. Sem PK por ser agregado total."

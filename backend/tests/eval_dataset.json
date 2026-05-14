@@ -11782,18 +11782,18 @@
       "categoria": "media",
       "subcategoria": "agregacao_por_categoria",
       "tabelas_esperadas": [
-        "VBAK"
+        "VBRK"
       ],
       "chave_primaria_resultado": [
         "VKORG"
       ],
-      "sql_referencia": "SELECT VKORG, COUNT(*) AS total_pedidos, SUM(NETWR) AS valor_total FROM VBAK WHERE SUBSTR(AUDAT, 1, 4) = '2025' GROUP BY VKORG ORDER BY valor_total DESC",
-      "notas": "Agregação por organização de vendas.",
-      "resultado_esperado_hash": "616f32f1a9393fea41568a0f746f17bded5ff87846ef5bd31971f3427a8c7b86",
+      "sql_referencia": "SELECT VKORG, COUNT(VBELN) AS total_notas, SUM(NETWR) AS valor_total FROM VBRK WHERE SUBSTR(FKDAT, 1, 4) = '2025' AND (FKSTO IS NULL OR FKSTO <> 'X') AND FKART = 'F2' GROUP BY VKORG ORDER BY valor_total DESC",
+      "notas": "Faturamento real (VBRK), não valor de pedido (VBAK). FKSTO filtra notas não canceladas; FKART = 'F2' filtra apenas faturas padrão. Correção 08/05/2026: gabarito original usava VBAK indevidamente — caso reportado no artigo como exemplo de validação humana iterativa do gold standard.",
+      "resultado_esperado_hash": "20e6c0891f2f06d51653476b5bfe4ee6b92cc76184c2e70288473c878b22e447",
       "resultado_esperado_rows": 2,
       "resultado_esperado_cols": [
         "VKORG",
-        "total_pedidos",
+        "total_notas",
         "valor_total"
       ],
       "chave_valores_esperados": [
