@@ -15,6 +15,7 @@ import logging
 import re
 import sqlite3
 import time
+import yaml
 from pathlib import Path
 from typing import Any
 
@@ -55,6 +56,13 @@ class SqliteExecutor:
 
     def __init__(self, database_path: str):
         self.database_path = database_path
+        self.VALID_TABLES = self._load_valid_tables()
+
+    def _load_valid_tables(self) -> set[str]:
+        catalog_path = Path(__file__).parent.parent / "catalog" / "sap_catalog.yaml"
+        with open(catalog_path, "r", encoding="utf-8") as f:
+            catalog = yaml.safe_load(f)
+        return {table["name"].upper() for table in catalog.get("tables", [])}
 
     # --------------------- API pública ---------------------
 
