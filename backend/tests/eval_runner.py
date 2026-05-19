@@ -420,6 +420,7 @@ class EvalRunner:
                     record = self.run_single(caso, run_num)
                     writer.writerow(asdict(record))
                     csvfile.flush()
+                    time.sleep(2)
                     statuses_caso.append(record.status)
                     contadores[record.status] = contadores.get(record.status, 0) + 1
 
