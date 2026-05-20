@@ -73,7 +73,7 @@ function mapChartData(raw: QueryResponse["chart_data"]): ChartDataPoint[] {
       return point;
     });
   }
-  return raw as ChartDataPoint[];
+  return Array.isArray(raw) ? (raw as ChartDataPoint[]) : [];
 }
 
 function mapApiResultsToTable(res: QueryResponse): DataTable {

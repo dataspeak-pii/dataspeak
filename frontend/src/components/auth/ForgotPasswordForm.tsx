@@ -34,16 +34,16 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   if (success) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-        <div className="w-14 h-14 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-4">
-          <Send size={22} className="text-green-600" />
+        <div className="w-14 h-14 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center mx-auto mb-4">
+          <Send size={22} className="text-brand-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">E-mail enviado!</h2>
-        <p className="text-sm text-gray-500 mb-1">Enviamos as instruções para:</p>
-        <p className="text-sm font-semibold text-gray-800 mb-5">{email}</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">E-mail enviado!</h2>
+        <p className="text-sm text-muted-foreground mb-1">Enviamos as instruções para:</p>
+        <p className="text-sm font-semibold text-foreground mb-5">{email}</p>
         <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 text-xs text-left mb-6">
           Em um sistema real, você receberia o link de redefinição por e-mail.
         </div>
-        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-green-600 hover:text-green-700 mx-auto transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 mx-auto transition-colors">
           <ArrowLeft size={14} /> Voltar ao login
         </button>
       </motion.div>
@@ -52,12 +52,12 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ArrowLeft size={14} /> Voltar ao login
       </button>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Esqueci minha senha</h1>
-        <p className="text-sm text-gray-500">Informe seu e-mail corporativo.</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Esqueci minha senha</h1>
+        <p className="text-sm text-muted-foreground">Informe seu e-mail corporativo.</p>
       </div>
 
       <TenantBadge tenant={tenant} />
@@ -69,16 +69,16 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">E-mail corporativo</label>
+          <label className="block text-sm font-medium text-foreground mb-1.5">E-mail corporativo</label>
           <div className="relative">
-            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="email" placeholder="voce@suaempresa.com" value={email} autoComplete="email"
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
-              className={cn("w-full rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 outline-none py-2.5 pl-9 pr-4 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all")} />
+              className={cn("w-full rounded-xl border border-input bg-background text-sm text-foreground placeholder-gray-400 outline-none py-2.5 pl-9 pr-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all")} />
           </div>
         </div>
         <button type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors active:scale-[0.98]">
+          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors active:scale-[0.98]">
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? "Enviando..." : "Enviar instruções"}
         </button>

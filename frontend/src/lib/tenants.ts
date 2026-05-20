@@ -8,13 +8,6 @@ export interface Tenant {
 }
 
 export const tenants: Record<string, Omit<Tenant, "domain">> = {
-  "klabin.com.br": {
-    name: "Klabin S.A.", // tenant mantém o nome real da empresa cliente
-    slug: "klabin",
-    primaryColor: "#16a34a",
-    logo: "KL",
-    industry: "Papel & Embalagens",
-  },
   "empresaa.com": {
     name: "Empresa A",
     slug: "empresa-a",

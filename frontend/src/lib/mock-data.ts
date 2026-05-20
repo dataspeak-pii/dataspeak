@@ -107,7 +107,7 @@ export const mockResults: Record<string, AnalysisResult> = {
       explanation:
         "Query que agrega o volume de produção por mês e linha, juntando as ordens de produção (AUFK/AFKO) com os centros de trabalho (CRHD) e materiais (MARA). O filtro de data cobre os últimos 90 dias.",
       code: `-- =====================================================
--- Script Gerado Automaticamente – Klabin Dashboard
+-- Script Gerado Automaticamente – DataSpeak
 -- Análise: Volume de Produção | Últimos 3 meses
 -- Gerado em: 16/04/2026 14:32
 -- =====================================================
@@ -271,7 +271,7 @@ ORDER BY
       explanation:
         "Ranking dos 10 materiais com maior volume de vendas no ano, com receita total associada.",
       code: `-- =====================================================
--- Script Gerado Automaticamente – Klabin Dashboard
+-- Script Gerado Automaticamente – DataSpeak
 -- Análise: Top 10 Materiais | Volume de Vendas 2026
 -- Gerado em: 16/04/2026 14:32
 -- =====================================================
@@ -364,7 +364,7 @@ export function buildGenericResult(id: string, question: string): AnalysisResult
       estimatedRows: 524,
       explanation: "Script gerado com base na interpretação semântica da pergunta.",
       code: `-- =====================================================
--- Script Gerado Automaticamente – Klabin Dashboard
+-- Script Gerado Automaticamente – DataSpeak
 -- Análise: ${question}
 -- Gerado em: ${new Date().toLocaleDateString("pt-BR")}
 -- =====================================================

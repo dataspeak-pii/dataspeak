@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -41,15 +41,15 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
       <motion.div
         animate={{
           boxShadow: focused
-            ? "0 0 0 2px #16a34a, 0 8px 32px rgba(0,0,0,0.08)"
+            ? "0 0 0 2px #C2410C, 0 8px 32px rgba(0,0,0,0.08)"
             : "0 2px 16px rgba(0,0,0,0.06)",
         }}
         transition={{ duration: 0.15 }}
-        className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden"
+        className="relative bg-card rounded-2xl border border-gray-200 overflow-hidden focus-within:border-t-2 focus-within:border-t-brand-600"
       >
         <div className="flex items-start gap-3 p-4">
-          <div className="mt-0.5 w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-green-600" />
+          <div className="mt-0.5 w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-brand-600" />
           </div>
 
           <textarea
@@ -74,7 +74,7 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
             onClick={handleSubmit}
             disabled={!value.trim() || isLoading}
             size="sm"
-            className="bg-green-600 hover:bg-green-700 text-white gap-1.5 h-8 px-4"
+            className="bg-brand-700 hover:bg-brand-800 text-white gap-1.5 h-8 px-4"
           >
             {isLoading ? (
               <>
@@ -101,10 +101,10 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
             transition={{ duration: 0.2, delay: 0.1 }}
             className="mt-4"
           >
-            <p className="text-xs text-gray-400 mb-2.5 flex items-center gap-1.5">
-              <Search className="w-3 h-3" />
-              Sugestões de análises
-            </p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2.5">
+              <kbd className="px-1.5 py-0.5 text-xs border border-border rounded font-mono bg-muted">↵</kbd>
+              <span>Sugestões rápidas — clique para usar</span>
+            </div>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((s) => (
                 <button
@@ -112,7 +112,7 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
                   onClick={() => handleSuggestion(s)}
                   className={cn(
                     "text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white",
-                    "text-gray-600 hover:border-green-400 hover:text-green-700 hover:bg-green-50",
+                    "text-gray-600 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50",
                     "transition-colors duration-150"
                   )}
                 >

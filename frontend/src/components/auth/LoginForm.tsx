@@ -60,7 +60,7 @@ export function LoginForm({ onRegister, onForgot, successMessage }: Props) {
       </div>
 
       {successMessage && (
-        <div className="mb-4 flex items-start gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+        <div className="mb-4 flex items-start gap-2 bg-brand-50 border border-brand-200 text-brand-700 rounded-xl px-4 py-3 text-sm">
           {successMessage}
         </div>
       )}
@@ -102,13 +102,13 @@ export function LoginForm({ onRegister, onForgot, successMessage }: Props) {
         </Field>
 
         <div className="flex justify-end">
-          <button type="button" onClick={onForgot} className="text-xs text-green-600 hover:text-green-700 transition-colors">
+          <button type="button" onClick={onForgot} className="text-xs text-brand-600 hover:text-brand-700 transition-colors">
             Esqueci minha senha
           </button>
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors shadow-sm shadow-green-200 active:scale-[0.98]">
+          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors shadow-sm shadow-brand-200 active:scale-[0.98]">
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? "Entrando..." : "Entrar"}
         </button>
@@ -116,14 +116,14 @@ export function LoginForm({ onRegister, onForgot, successMessage }: Props) {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Não tem conta?{" "}
-        <button onClick={onRegister} className="text-green-600 hover:text-green-700 font-medium transition-colors">
+        <button onClick={onRegister} className="text-brand-600 hover:text-brand-700 font-medium transition-colors">
           Criar conta
         </button>
       </p>
 
       <div className="mt-6 pt-4 border-t border-gray-100">
         <p className="text-center text-xs text-gray-400">
-          Domínios para teste: <span className="text-gray-500">klabin.com.br · demo.com · empresaa.com</span>
+          Domínios para teste: <span className="text-gray-500">dataspeak.com.br · demo.com · empresaa.com</span>
         </p>
       </div>
     </motion.div>
@@ -143,7 +143,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 function inputCls(hasError: boolean, extra = "") {
   return cn(
     "w-full rounded-xl border bg-white text-sm text-gray-900 placeholder-gray-400 outline-none transition-all py-2.5 pr-4",
-    "focus:ring-2 focus:ring-green-500/20 focus:border-green-500",
+    "focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500",
     hasError ? "border-red-300 focus:border-red-400 focus:ring-red-500/20" : "border-gray-200",
     extra
   );

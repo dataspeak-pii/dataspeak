@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import type { GeneratedScript } from "@/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,18 +31,18 @@ function highlightSQL(code: string) {
   html = html.replace(/(--[^\n]*)/g, '<span class="text-gray-400 italic">$1</span>');
 
   // String literals
-  html = html.replace(/'([^']*)'/g, '<span class="text-amber-400">\'$1\'</span>');
+  html = html.replace(/'([^']*)'/g, '<span class="text-[color:var(--color-syntax-string)]">\'$1\'</span>');
 
   // Keywords (only outside of already-tagged spans — simple approach)
   keywords.forEach((kw) => {
     const re = new RegExp(`\\b(${kw})\\b`, "g");
-    html = html.replace(re, '<span class="text-blue-400 font-semibold">$1</span>');
+    html = html.replace(re, '<span class="text-[color:var(--color-syntax-keyword)] font-semibold">$1</span>');
   });
 
   // Table/field names in ALL_CAPS (SAP naming)
   html = html.replace(
     /\b([A-Z]{2,}[A-Z0-9_]*\.[A-Z_]+)\b/g,
-    '<span class="text-green-400">$&</span>'
+    '<span class="text-[color:var(--color-brand-400)]">$&</span>'
   );
 
   return html;
@@ -53,6 +54,7 @@ export function ScriptView({ script }: ScriptViewProps) {
   const handleCopy = async () => {
     await navigator.clipboard.writeText(script.code);
     setCopied(true);
+    toast.success("SQL copiado para a área de transferência", { duration: 2000 });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -89,7 +91,7 @@ export function ScriptView({ script }: ScriptViewProps) {
 
       {/* Code block */}
       <Card className="border border-gray-100 shadow-sm overflow-hidden">
-        <CardHeader className="py-3 px-4 border-b border-gray-100 bg-gray-900 flex flex-row items-center justify-between">
+        <CardHeader className="py-3 px-4 border-b border-white/10 bg-gray-900 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -108,8 +110,8 @@ export function ScriptView({ script }: ScriptViewProps) {
           >
             {copied ? (
               <>
-                <CheckCheck className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-green-400 text-xs">Copiado!</span>
+                <CheckCheck className="w-3.5 h-3.5 text-brand-400" />
+                <span className="text-brand-400 text-xs">Copiado!</span>
               </>
             ) : (
               <>

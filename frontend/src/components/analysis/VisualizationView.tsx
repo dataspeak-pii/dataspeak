@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import type { AnalysisResult } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { KPICard } from "@/components/shared/KPICard";
@@ -26,8 +27,11 @@ import { cn } from "@/lib/utils";
 type ChartMode = "bar" | "line" | "pie";
 
 const COLORS = [
-  "#16a34a", "#2563eb", "#9333ea", "#ea580c", "#0891b2",
-  "#ca8a04", "#dc2626", "#7c3aed",
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
+  "var(--color-chart-4)",
+  "var(--color-chart-5)",
 ];
 
 interface VisualizationViewProps {
@@ -39,12 +43,14 @@ export function VisualizationView({ result }: VisualizationViewProps) {
     result.chartType === "line" ? "line" : "bar"
   );
 
-  const seriesKeys = result.chartData.length
-    ? Object.keys(result.chartData[0]).filter((k) => k !== "label")
+  const chartData = Array.isArray(result.chartData) ? result.chartData : [];
+
+  const seriesKeys = chartData.length
+    ? Object.keys(chartData[0]).filter((k) => k !== "label")
     : [];
 
   const seriesSum = (key: string) =>
-    result.chartData.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+    chartData.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
 
   const sums = seriesKeys.map((k) => seriesSum(k));
   const maxSum = sums.length ? Math.max(...sums) : 0;
@@ -62,8 +68,15 @@ export function VisualizationView({ result }: VisualizationViewProps) {
     <div className="space-y-5">
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {result.kpis.map((kpi) => (
-          <KPICard key={kpi.id} kpi={kpi} />
+        {result.kpis.map((kpi, index) => (
+          <motion.div
+            key={kpi.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: index * 0.06 }}
+          >
+            <KPICard kpi={kpi} />
+          </motion.div>
         ))}
       </div>
 
@@ -74,7 +87,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
             Visualização gráfica
           </CardTitle>
           {/* Chart type switcher */}
-          <div className="flex gap-1 p-0.5 bg-gray-100 rounded-lg">
+          <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
             {(
               [
                 { mode: "bar" as ChartMode, Icon: BarChart2 },
@@ -88,7 +101,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
                   chartMode === mode
-                    ? "bg-white shadow-sm text-green-600"
+                    ? "bg-background shadow-sm text-brand-700"
                     : "text-gray-400 hover:text-gray-600"
                 )}
               >
@@ -100,7 +113,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
         <CardContent className="pt-4 pb-2">
           <ResponsiveContainer width="100%" height={280}>
             {chartMode === "bar" ? (
-              <BarChart data={result.chartData} barGap={4}>
+              <BarChart data={chartData} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -114,7 +127,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                 ))}
               </BarChart>
             ) : chartMode === "line" ? (
-              <LineChart data={result.chartData}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -137,7 +150,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
             ) : (
               <PieChart>
                 <Pie
-                  data={result.chartData.map((d) => ({
+                  data={chartData.map((d) => ({
                     name: d.label,
                     value: Number(d[visibleKeys[0]] ?? 0),
                   }))}
@@ -150,7 +163,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   }
                   labelLine={false}
                 >
-                  {result.chartData.map((_, i) => (
+                  {chartData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>

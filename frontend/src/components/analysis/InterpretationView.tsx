@@ -9,9 +9,9 @@ interface InterpretationViewProps {
 }
 
 const fieldTypeStyle: Record<string, string> = {
-  date: "bg-blue-50 text-blue-700 border-blue-200",
-  dimension: "bg-purple-50 text-purple-700 border-purple-200",
-  measure: "bg-green-50 text-green-700 border-green-200",
+  date: "bg-cat-date-bg text-cat-date border-accent-200",
+  dimension: "bg-cat-dimension-bg text-cat-dimension border-neutral-300",
+  measure: "bg-cat-measure-bg text-cat-measure border-brand-200",
 };
 
 const fieldTypeLabel: Record<string, string> = {
@@ -25,10 +25,10 @@ export function InterpretationView({ data }: InterpretationViewProps) {
     <div className="space-y-4">
       {/* Intent card */}
       <Card className="border border-gray-100 shadow-sm">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 border-b border-border">
           <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-purple-50 flex items-center justify-center">
-              <Brain className="w-3.5 h-3.5 text-purple-600" />
+            <div className="w-6 h-6 rounded-md bg-accent-50 flex items-center justify-center">
+              <Brain className="w-3.5 h-3.5 text-accent-700" />
             </div>
             Interpretação da IA
           </CardTitle>
@@ -51,7 +51,7 @@ export function InterpretationView({ data }: InterpretationViewProps) {
                 Intenção identificada
               </p>
               <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-brand-600 shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-700">{data.intent}</p>
               </div>
             </div>
@@ -76,11 +76,11 @@ export function InterpretationView({ data }: InterpretationViewProps) {
               <div className="flex items-center gap-1">
                 <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-green-500"
+                    className="h-full rounded-full bg-brand-600"
                     style={{ width: `${data.confidence}%` }}
                   />
                 </div>
-                <span className="text-xs font-semibold text-green-600">
+                <span className="text-xs font-semibold text-brand-600">
                   {data.confidence}%
                 </span>
               </div>
@@ -91,10 +91,10 @@ export function InterpretationView({ data }: InterpretationViewProps) {
 
       {/* Fields table */}
       <Card className="border border-gray-100 shadow-sm">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 border-b border-border">
           <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center">
-              <Database className="w-3.5 h-3.5 text-blue-600" />
+            <div className="w-6 h-6 rounded-md bg-accent-50 flex items-center justify-center">
+              <Database className="w-3.5 h-3.5 text-accent-700" />
             </div>
             Campos e tabelas SAP identificados
           </CardTitle>

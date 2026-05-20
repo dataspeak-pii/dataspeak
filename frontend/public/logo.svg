@@ -1,0 +1,7 @@
+<svg width="160" height="32" viewBox="0 0 160 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DataSpeak">
+  <rect x="0" y="0" width="32" height="32" rx="7" fill="#C2410C"/>
+  <rect x="9" y="14" width="2.5" height="4" rx="1.25" fill="#FFFFFF"/>
+  <rect x="14.75" y="9" width="2.5" height="14" rx="1.25" fill="#FFFFFF"/>
+  <rect x="20.5" y="12" width="2.5" height="8" rx="1.25" fill="#FFFFFF"/>
+  <text x="42" y="22" font-family="Geist, system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#1C1917" letter-spacing="-0.45">DataSpeak</text>
+</svg>

@@ -60,13 +60,13 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors mb-6">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ArrowLeft size={14} /> Voltar ao login
       </button>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Criar conta</h1>
-        <p className="text-sm text-gray-500">Use seu e-mail corporativo</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Criar conta</h1>
+        <p className="text-sm text-muted-foreground">Use seu e-mail corporativo</p>
       </div>
 
       <TenantBadge tenant={tenant} />
@@ -80,7 +80,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
         <Field label="Nome completo" error={fieldErrors.name}>
           <div className="relative">
-            <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="text" placeholder="João da Silva" value={name} autoComplete="name"
               onChange={(e) => { setName(e.target.value); clearError("name"); }}
               className={inputCls(!!fieldErrors.name, "pl-9")} />
@@ -89,7 +89,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
         <Field label="E-mail corporativo" error={fieldErrors.email}>
           <div className="relative">
-            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="email" placeholder="voce@suaempresa.com" value={email} autoComplete="email"
               onChange={(e) => { setEmail(e.target.value); clearError("email"); }}
               className={inputCls(!!fieldErrors.email, "pl-9")} />
@@ -98,12 +98,12 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
         <Field label="Senha" error={fieldErrors.password}>
           <div className="relative">
-            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type={showPw ? "text" : "password"} placeholder="Mínimo 6 caracteres" value={password}
               onChange={(e) => { setPassword(e.target.value); clearError("password"); }}
               className={inputCls(!!fieldErrors.password, "pl-9 pr-10")} />
             <button type="button" onClick={() => setShowPw((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
@@ -111,7 +111,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
         <Field label="Confirmar senha" error={fieldErrors.confirm}>
           <div className="relative">
-            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type={showPw ? "text" : "password"} placeholder="Repita a senha" value={confirm}
               onChange={(e) => { setConfirm(e.target.value); clearError("confirm"); }}
               className={inputCls(!!fieldErrors.confirm, "pl-9")} />
@@ -119,7 +119,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
         </Field>
 
         <button type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors shadow-sm shadow-green-200 active:scale-[0.98]">
+          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors shadow-sm shadow-brand-200 active:scale-[0.98]">
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? "Criando conta..." : "Criar conta"}
         </button>
@@ -131,7 +131,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-foreground mb-1.5">{label}</label>
       {children}
       {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
     </div>
@@ -140,9 +140,9 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 
 function inputCls(hasError: boolean, extra = "") {
   return cn(
-    "w-full rounded-xl border bg-white text-sm text-gray-900 placeholder-gray-400 outline-none transition-all py-2.5 pr-4",
-    "focus:ring-2 focus:ring-green-500/20 focus:border-green-500",
-    hasError ? "border-red-300 focus:border-red-400 focus:ring-red-500/20" : "border-gray-200",
+    "w-full rounded-xl border bg-background text-sm text-foreground placeholder-gray-400 outline-none transition-all py-2.5 pr-4",
+    "focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500",
+    hasError ? "border-red-300 focus:border-red-400 focus:ring-red-500/20" : "border-input",
     extra
   );
 }
