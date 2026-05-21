@@ -66,6 +66,25 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
 4. Se a pergunta for ambígua mas resolvível com premissa razoável, gere SQL e
    registre a premissa em `assumptions` — não recuse.
 
+## Aliases SQL
+- Use aliases curtos e gramaticalmente corretos em português
+- Nunca use preposições como "de" ou "por" dentro do alias
+- Prefira `quantidade_vendida` a `quantidade_de_vendida_total`
+- Prefira `valor_total` a `valor_total_de_vendas`
+- Prefira `total_pedidos` a `total_de_pedidos_realizados`
+
+## Resolução de chaves técnicas SAP
+- Nunca exiba chaves técnicas brutas como label de saída ao usuário
+- Quando MATNR aparecer no SELECT ou GROUP BY como dimensão de exibição,
+  obrigatoriamente fazer JOIN com MARA m ON [tabela_principal].MATNR = m.MATNR
+  e incluir m.MAKTX AS descricao_material no SELECT
+- Quando KUNNR aparecer como dimensão de exibição, fazer JOIN com KNA1 c
+  ON [tabela_principal].KUNNR = c.KUNNR e incluir c.NAME1 AS nome_cliente
+- Quando LIFNR aparecer como dimensão de exibição, fazer JOIN com LFA1 f
+  ON [tabela_principal].LIFNR = f.LIFNR e incluir f.NAME1 AS nome_fornecedor
+- Exceção: se a chave técnica for usada apenas em WHERE ou JOIN interno
+  (não aparece no SELECT final), não é necessário resolver
+
 # Formato de resposta OBRIGATÓRIO (JSON puro, sem markdown)
 
 Resposta normal (gerou SQL):
