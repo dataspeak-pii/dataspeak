@@ -10,9 +10,10 @@ interface QueryInputProps {
   onSubmit: (question: string) => void;
   isLoading: boolean;
   suggestions: string[];
+  isIdle?: boolean;
 }
 
-export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps) {
+export function QueryInput({ onSubmit, isLoading, suggestions, isIdle }: QueryInputProps) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -35,22 +36,51 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
     textareaRef.current?.focus();
   };
 
+  const shouldPulse = !focused && !isLoading;
+  const glowShadow = focused
+    ? "0 0 0 2.5px oklch(0.58 0.19 40), 0 8px 32px rgba(0,0,0,0.10)"
+    : "0 2px 16px rgba(0,0,0,0.06)";
+
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {/* Main input card */}
       <motion.div
         animate={{
           boxShadow: focused
-            ? "0 0 0 2px #C2410C, 0 8px 32px rgba(0,0,0,0.08)"
-            : "0 2px 16px rgba(0,0,0,0.06)",
+            ? glowShadow
+            : shouldPulse
+              ? [
+                  "0 0 0 0px rgba(194,65,12,0), 0 2px 16px rgba(0,0,0,0.06)",
+                  "0 0 0 3.5px rgba(194,65,12,0.11), 0 6px 24px rgba(194,65,12,0.07)",
+                  "0 0 0 0px rgba(194,65,12,0), 0 2px 16px rgba(0,0,0,0.06)",
+                ]
+              : "0 2px 16px rgba(0,0,0,0.06)",
         }}
-        transition={{ duration: 0.15 }}
-        className="relative bg-card rounded-2xl border border-gray-200 overflow-hidden focus-within:border-t-2 focus-within:border-t-brand-600"
+        transition={
+          shouldPulse && !focused
+            ? { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.18 }
+        }
+        className={cn(
+          "relative bg-card rounded-2xl border overflow-hidden",
+          focused ? "border-brand-300" : "border-gray-200"
+        )}
       >
+        {/* Top accent bar on focus */}
+        <motion.div
+          animate={{ scaleX: focused ? 1 : 0, opacity: focused ? 1 : 0 }}
+          initial={{ scaleX: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-brand-500 via-brand-600 to-brand-400 origin-left"
+        />
+
         <div className="flex items-start gap-3 p-4">
-          <div className="mt-0.5 w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
+          <motion.div
+            animate={{ backgroundColor: focused ? "oklch(0.93 0.05 50)" : "oklch(0.97 0.02 50)" }}
+            transition={{ duration: 0.2 }}
+            className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+          >
             <Sparkles className="w-4 h-4 text-brand-600" />
-          </div>
+          </motion.div>
 
           <textarea
             ref={textareaRef}
@@ -68,7 +98,7 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
 
         <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/60">
           <p className="text-[11px] text-gray-400">
-            Enter para enviar • Shift+Enter para nova linha
+            Enter para enviar · Shift+Enter para nova linha
           </p>
           <Button
             onClick={handleSubmit}
@@ -107,17 +137,20 @@ export function QueryInput({ onSubmit, isLoading, suggestions }: QueryInputProps
             </div>
             <div className="flex flex-wrap gap-2">
               {suggestions.map((s) => (
-                <button
+                <motion.button
                   key={s}
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   onClick={() => handleSuggestion(s)}
                   className={cn(
                     "text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white",
                     "text-gray-600 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50",
-                    "transition-colors duration-150"
+                    "transition-colors duration-150 shadow-sm"
                   )}
                 >
                   {s}
-                </button>
+                </motion.button>
               ))}
             </div>
           </motion.div>

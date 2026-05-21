@@ -213,6 +213,40 @@
   --sidebar-ring: oklch(0.65 0.18 42);
 }
 
+/* ── Animated gradient heading ── */
+.gradient-heading {
+  background: linear-gradient(
+    120deg,
+    oklch(0.20 0.006 60) 0%,
+    oklch(0.52 0.18 38) 38%,
+    oklch(0.38 0.08 200) 65%,
+    oklch(0.20 0.006 60) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s linear infinite;
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Glassmorphism utility ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

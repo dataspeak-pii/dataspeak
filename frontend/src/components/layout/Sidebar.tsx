@@ -8,6 +8,7 @@ import {
   Clock,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,14 +22,15 @@ interface SidebarProps {
 
 const categoryColor: Record<string, string> = {
   Produção: "bg-cat-2-bg text-cat-2",
-  Vendas: "bg-cat-1-bg text-cat-1",
-  Estoque: "bg-cat-5-bg text-cat-5",
-  Qualidade: "bg-cat-4-bg text-cat-4",
-  Análise: "bg-cat-3-bg text-cat-3",
+  Vendas:   "bg-cat-1-bg text-cat-1",
+  Estoque:  "bg-cat-5-bg text-cat-5",
+  Qualidade:"bg-cat-4-bg text-cat-4",
+  Análise:  "bg-cat-3-bg text-cat-3",
 };
 
 export function Sidebar({ history, onSelectHistory, activeId }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
     <motion.aside
@@ -37,24 +39,12 @@ export function Sidebar({ history, onSelectHistory, activeId }: SidebarProps) {
       className="relative flex flex-col h-screen bg-sidebar border-r border-border shadow-sm overflow-hidden shrink-0"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 h-16 border-b border-border">
+      <div className="flex items-center justify-between p-4 h-16 border-b border-border shrink-0">
         <div className="flex items-center gap-2.5">
           {!collapsed ? (
-            <Image
-              src="/logo.svg"
-              alt="DataSpeak"
-              width={140}
-              height={28}
-              priority
-            />
+            <Image src="/logo.svg" alt="DataSpeak" width={140} height={28} priority />
           ) : (
-            <Image
-              src="/logo-mark.svg"
-              alt="DataSpeak"
-              width={28}
-              height={28}
-              priority
-            />
+            <Image src="/logo-mark.svg" alt="DataSpeak" width={28} height={28} priority />
           )}
         </div>
 
@@ -72,8 +62,8 @@ export function Sidebar({ history, onSelectHistory, activeId }: SidebarProps) {
         </div>
       </div>
 
-      {/* Nav item – Dashboard */}
-      <div className="p-3">
+      {/* Nav — Dashboard */}
+      <div className="p-3 shrink-0">
         <button
           className={cn(
             "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
@@ -105,51 +95,92 @@ export function Sidebar({ history, onSelectHistory, activeId }: SidebarProps) {
           </p>
 
           <div className="space-y-0">
-            {history.map((item) => (
-              <motion.button
-                key={item.id}
-                layout
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                onClick={() => onSelectHistory(item)}
-                className={cn(
-                  "w-full text-left px-3 py-2.5 transition-colors group border-b border-border/40 last:border-0",
-                  activeId === item.id
-                    ? "bg-brand-50 border-l-2 border-l-brand-500"
-                    : "hover:bg-muted"
-                )}
-              >
-                <p className="text-xs text-foreground font-medium line-clamp-2 leading-snug mb-1.5">
-                  {item.question}
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <span
+            {history.map((item) => {
+              const isHovered = hoveredId === item.id;
+              const isActive = activeId === item.id;
+
+              return (
+                <motion.button
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  onClick={() => onSelectHistory(item)}
+                  onHoverStart={() => setHoveredId(item.id)}
+                  onHoverEnd={() => setHoveredId(null)}
+                  className={cn(
+                    "w-full text-left px-3 py-2.5 transition-colors group border-b border-border/40 last:border-0 relative",
+                    isActive
+                      ? "bg-brand-50"
+                      : isHovered
+                        ? "bg-muted/80"
+                        : "hover:bg-muted/50"
+                  )}
+                >
+                  {/* Active left bar */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-sidebar-bar"
+                      className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r-full bg-brand-500"
+                    />
+                  )}
+
+                  <p
                     className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
-                      categoryColor[item.category] ?? categoryColor["Análise"]
+                      "text-xs text-foreground font-medium leading-snug mb-1.5 transition-all",
+                      !isHovered && "line-clamp-2"
                     )}
                   >
-                    {item.category}
-                  </span>
-                  <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground ml-auto">
-                    <Clock className="w-3 h-3" />
-                    {item.timestamp.toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "short",
-                    })}
-                  </span>
-                </div>
-              </motion.button>
-            ))}
+                    {item.question}
+                  </p>
+
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
+                        categoryColor[item.category] ?? categoryColor["Análise"]
+                      )}
+                    >
+                      {item.category}
+                    </span>
+                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground ml-auto">
+                      <Clock className="w-3 h-3" />
+                      {item.timestamp.toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Hover expand — "Ver análise" hint */}
+                  <AnimatePresence>
+                    {isHovered && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/40 text-[10px] text-brand-600 font-medium">
+                          <ChevronRight className="w-3 h-3" />
+                          Ver análise
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Footer */}
       {!collapsed && (
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border shrink-0">
           <p className="text-[10px] text-muted-foreground text-center">
-            DataSpeak • PI 2026
+            DataSpeak · PI 2026
           </p>
         </div>
       )}

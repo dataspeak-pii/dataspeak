@@ -65,128 +65,163 @@ export function VisualizationView({ result }: VisualizationViewProps) {
     : [];
 
   return (
-    <div className="space-y-5">
-      {/* KPIs */}
+    <div className="space-y-5 relative">
+      {/* Gradient mesh for glassmorphism depth */}
+      <div
+        className="absolute -inset-6 -z-10 rounded-3xl pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 20% 30%, oklch(0.93 0.05 50 / 0.35) 0%, transparent 60%), " +
+            "radial-gradient(ellipse 60% 40% at 80% 70%, oklch(0.86 0.07 200 / 0.18) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* KPI grid — staggered entrance */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {result.kpis.map((kpi, index) => (
-          <motion.div
-            key={kpi.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: index * 0.06 }}
-          >
-            <KPICard kpi={kpi} />
-          </motion.div>
+          <KPICard key={kpi.id} kpi={kpi} delay={index * 80} />
         ))}
       </div>
 
       {/* Chart card */}
-      <Card className="border border-gray-100 shadow-sm">
-        <CardHeader className="py-3 px-4 border-b border-gray-100 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-semibold text-gray-700">
-            Visualização gráfica
-          </CardTitle>
-          {/* Chart type switcher */}
-          <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
-            {(
-              [
-                { mode: "bar" as ChartMode, Icon: BarChart2 },
-                { mode: "line" as ChartMode, Icon: LineIcon },
-                { mode: "pie" as ChartMode, Icon: PieIcon },
-              ] as const
-            ).map(({ mode, Icon }) => (
-              <button
-                key={mode}
-                onClick={() => setChartMode(mode)}
-                className={cn(
-                  "p-1.5 rounded-md transition-colors",
-                  chartMode === mode
-                    ? "bg-background shadow-sm text-brand-700"
-                    : "text-gray-400 hover:text-gray-600"
-                )}
-              >
-                <Icon className="w-4 h-4" />
-              </button>
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent className="pt-4 pb-2">
-          <ResponsiveContainer width="100%" height={280}>
-            {chartMode === "bar" ? (
-              <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {visibleKeys.map((key, i) => (
-                  <Bar key={key} dataKey={key} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
-                ))}
-              </BarChart>
-            ) : chartMode === "line" ? (
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {visibleKeys.map((key, i) => (
-                  <Line
-                    key={key}
-                    type="monotone"
-                    dataKey={key}
-                    stroke={COLORS[i % COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                  />
-                ))}
-              </LineChart>
-            ) : (
-              <PieChart>
-                <Pie
-                  data={chartData.map((d) => ({
-                    name: d.label,
-                    value: Number(d[visibleKeys[0]] ?? 0),
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
-                  }
-                  labelLine={false}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+      >
+        <Card className="border border-gray-100/80 shadow-sm bg-white/80 backdrop-blur-sm">
+          <CardHeader className="py-3 px-4 border-b border-gray-100 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-gray-700">
+              Visualização gráfica
+            </CardTitle>
+            {/* Chart type switcher */}
+            <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
+              {(
+                [
+                  { mode: "bar" as ChartMode, Icon: BarChart2 },
+                  { mode: "line" as ChartMode, Icon: LineIcon },
+                  { mode: "pie" as ChartMode, Icon: PieIcon },
+                ] as const
+              ).map(({ mode, Icon }) => (
+                <motion.button
+                  key={mode}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                  onClick={() => setChartMode(mode)}
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    chartMode === mode
+                      ? "bg-background shadow-sm text-brand-700"
+                      : "text-gray-400 hover:text-gray-600"
+                  )}
                 >
-                  {chartData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  <Icon className="w-4 h-4" />
+                </motion.button>
+              ))}
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4 pb-2">
+            <ResponsiveContainer width="100%" height={280}>
+              {chartMode === "bar" ? (
+                <BarChart data={chartData} barGap={4}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.10)" }}
+                    formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  {visibleKeys.map((key, i) => (
+                    <Bar
+                      key={key}
+                      dataKey={key}
+                      fill={COLORS[i % COLORS.length]}
+                      radius={[5, 5, 0, 0]}
+                      animationDuration={1100}
+                      animationBegin={i * 120}
+                      animationEasing="ease-out"
+                    />
                   ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                  formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            )}
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+                </BarChart>
+              ) : chartMode === "line" ? (
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.10)" }}
+                    formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  {visibleKeys.map((key, i) => (
+                    <Line
+                      key={key}
+                      type="monotone"
+                      dataKey={key}
+                      stroke={COLORS[i % COLORS.length]}
+                      strokeWidth={2.5}
+                      dot={{ r: 4, fill: COLORS[i % COLORS.length], strokeWidth: 2, stroke: "#fff" }}
+                      activeDot={{ r: 6 }}
+                      animationDuration={1400}
+                      animationBegin={i * 100}
+                      animationEasing="ease-out"
+                    />
+                  ))}
+                </LineChart>
+              ) : (
+                <PieChart>
+                  <Pie
+                    data={chartData.map((d) => ({
+                      name: d.label,
+                      value: Number(d[visibleKeys[0]] ?? 0),
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={105}
+                    innerRadius={42}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`
+                    }
+                    labelLine={false}
+                    animationBegin={0}
+                    animationDuration={1200}
+                    animationEasing="ease-out"
+                  >
+                    {chartData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="white" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 10, boxShadow: "0 4px 24px rgba(0,0,0,0.10)" }}
+                    formatter={(v) => (v != null ? Number(v).toLocaleString("pt-BR") : "")}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              )}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {omittedKeys.length > 0 && (
         <p className="text-xs text-gray-400 -mt-2 px-1">
-          Exibindo apenas <span className="font-medium text-gray-500">{visibleKeys[0]}</span> —{" "}
+          Exibindo apenas{" "}
+          <span className="font-medium text-gray-500">{visibleKeys[0]}</span> —{" "}
           séries com escalas muito diferentes foram omitidas para melhor visualização.
         </p>
       )}
 
       {/* Data table */}
-      <DataTableView table={result.table} />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+      >
+        <DataTableView table={result.table} />
+      </motion.div>
     </div>
   );
 }
