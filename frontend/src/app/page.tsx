@@ -80,7 +80,7 @@ const FEATURE_PILLS = [
 ] as const;
 
 export default function HomePage() {
-  const { status, result, errorMessage, history, runAnalysis } = useAnalysis();
+  const { status, result, errorMessage, history, runAnalysis, restoreFromHistory } = useAnalysis();
   const [lastQuestion, setLastQuestion] = useState<string>("");
   const typewriter = useTypewriter(TYPEWRITER_PHRASES);
   const isIdle = status === "idle";
@@ -91,8 +91,7 @@ export default function HomePage() {
   };
 
   const handleHistorySelect = (item: QueryHistoryItem) => {
-    setLastQuestion(item.question);
-    runAnalysis(item.question);
+    restoreFromHistory(item);
   };
 
   return (

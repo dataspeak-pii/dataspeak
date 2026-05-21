@@ -11,11 +11,178 @@ interface KPICardProps {
   delay?: number;
 }
 
-const formatLabel = (label: string) =>
-  label
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b(total|média|distintos)\b/gi, (m) => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase());
+const formatLabel = (label: string): string => {
+  const dict: Record<string, string> = {
+    // Abreviações SAP comuns
+    QTD: "Quantidade", QTDE: "Quantidade", QT: "Quantidade",
+    VLR: "Valor", VAL: "Valor",
+    TOT: "Total", MED: "Média", AVG: "Média", SUM: "Total",
+    CNT: "Contagem", COUNT: "Contagem",
+    DIST: "Distintos", DISTINTOS: "Distintos",
+    MIN: "Mínimo", MAX: "Máximo",
+    PCT: "Percentual", PERC: "Percentual",
+    NUM: "Número", NR: "Número",
+    DT: "Data", DAT: "Data",
+    MAT: "Material", MATNR: "Material", MAKTX: "Descrição do Material",
+    WERKS: "Planta", BUKRS: "Empresa", KUNNR: "Cliente",
+    LIFNR: "Fornecedor", VBELN: "Pedido", AUFNR: "Ordem",
+    NET: "Líquido", NETWR: "Valor Líquido",
+    MENGE: "Quantidade", DMBTR: "Valor", WAERS: "Moeda",
+    LAND: "País", ORT: "Cidade", NAME: "Nome",
+    // Palavras completas (para labels já parcialmente humanizados)
+    MEDIA: "Média", TOTAL: "Total", VALOR: "Valor",
+    QUANTIDADE: "Quantidade", VENDAS: "Vendas", VENDA: "Venda",
+    COMPRAS: "Compras", COMPRA: "Compra",
+    PRODUCAO: "Produção", ESTOQUE: "Estoque",
+    PEDIDOS: "Pedidos", PEDIDO: "Pedido",
+    ORDENS: "Ordens", ORDEM: "Ordem",
+    MATERIAIS: "Materiais", MATERIAL: "Material",
+    CLIENTES: "Clientes", CLIENTE: "Cliente",
+    FORNECEDORES: "Fornecedores", FORNECEDOR: "Fornecedor",
+    PLANTAS: "Plantas", PLANTA: "Planta",
+    PERCENTUAL: "Percentual", REALIZADO: "Realizado",
+    PLANEJADO: "Planejado", LIVRE: "Livre",
+    BLOQUEADO: "Bloqueado", TRANSFERENCIA: "Transferência",
+    DEPOSITO: "Depósito", CENTRO: "Centro",
+    DISTRIBUICAO: "Distribuição", REGIAO: "Região",
+    LIQUIDO: "Líquido", BRUTO: "Bruto",
+    MINIMO: "Mínimo", MAXIMO: "Máximo", MEDIO: "Médio",
+  };
+
+  const prepositions = new Set([
+    "de", "do", "da", "dos", "das",
+    "por", "para", "em", "no", "na", "nos", "nas", "e", "a", "o",
+  ]);
+
+  // [palavraAnterior, palavraSeguinte, conectivo]
+  // conectivo "" → sem separador (ex: "Valor Total")
+  // conectivo "do" → artigo já contraído (ex: "Média do Valor")
+  const connectives: Array<[string, string, string]> = [
+    ["média",      "valor",      "do"],
+    ["média",      "quantidade", "de"],
+    ["média",      "percentual", "de"],
+    ["média",      "total",      "do"],
+    ["média",      "contagem",   "de"],
+    ["média",      "número",     "de"],
+    ["média",      "mínimo",     "do"],
+    ["média",      "máximo",     "do"],
+    ["total",      "valor",      "de"],
+    ["total",      "quantidade", "de"],
+    ["total",      "pedidos",    "de"],
+    ["total",      "ordens",     "de"],
+    ["total",      "vendas",     "de"],
+    ["total",      "compras",    "de"],
+    ["total",      "materiais",  "de"],
+    ["total",      "produção",   "de"],
+    ["total",      "estoque",    "de"],
+    ["contagem",   "pedidos",    "de"],
+    ["contagem",   "ordens",     "de"],
+    ["contagem",   "clientes",   "de"],
+    ["contagem",   "materiais",  "de"],
+    ["número",     "pedidos",    "de"],
+    ["número",     "ordens",     "de"],
+    ["valor",      "total",      ""],
+    ["valor",      "líquido",    ""],
+    ["valor",      "bruto",      ""],
+    ["valor",      "vendas",     "de"],
+    ["valor",      "compras",    "de"],
+    ["valor",      "pedidos",    "de"],
+    ["quantidade", "vendida",    ""],
+    ["quantidade", "produzida",  ""],
+    ["quantidade", "planejada",  ""],
+    ["quantidade", "vendas",     "de"],
+    ["quantidade", "materiais",  "de"],
+    ["percentual", "realizado",  ""],
+    ["percentual", "planejado",  ""],
+    ["vendas",     "total",      ""],
+    ["vendas",     "líquido",    ""],
+    ["estoque",    "livre",      ""],
+    ["estoque",    "bloqueado",  ""],
+    ["estoque",    "transferência", "em"],
+    ["distintos",  "cliente",    "de"],
+    ["distintos",  "clientes",   "de"],
+    ["distintos",  "material",   "de"],
+    ["distintos",  "materiais",  "de"],
+    ["distintos",  "planta",     "de"],
+    ["distintos",  "plantas",    "de"],
+    ["distintos",  "país",       "de"],
+    ["distintos",  "moeda",      "de"],
+    ["distintos",  "depósito",   "de"],
+    ["distintos",  "região",     "de"],
+    ["distintos",  "unidade",    "de"],
+  ];
+
+  // Usada APENAS no fallback genérico — contrai "de"/"em" com artigo por gênero/número
+  const feminine = new Set([
+    "quantidade", "média", "ordem", "ordens", "venda", "vendas",
+    "compra", "compras", "produção", "transferência", "região",
+    "distribuição", "unidade", "moeda", "planta", "plantas",
+  ]);
+  const pluralWords = new Set([
+    "vendas", "compras", "ordens", "pedidos", "materiais",
+    "clientes", "fornecedores", "plantas", "unidades",
+  ]);
+  const contractPrep = (prep: string, nextWord: string): string => {
+    if (prep !== "de" && prep !== "em") return prep;
+    const nw = nextWord.toLowerCase();
+    const isFem = feminine.has(nw);
+    const isPlur = pluralWords.has(nw);
+    if (prep === "de") {
+      if (isPlur && isFem) return "das";
+      if (isPlur) return "dos";
+      if (isFem) return "da";
+      return "do";
+    }
+    if (isPlur && isFem) return "nas";
+    if (isPlur) return "nos";
+    if (isFem) return "na";
+    return "no";
+  };
+
+  // 1. Separar por underscore e espaços
+  const parts = label.split(/[_\s]+/).filter(Boolean);
+
+  // 2. Expandir via dicionário (lookup em UPPERCASE)
+  const expanded = parts.map((part) => {
+    const up = part.toUpperCase();
+    return dict[up] ?? (part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+  });
+
+  // 3. Remover todas as preposições do label original — serão reinseridas pelas regras
+  const words = expanded.filter((w) => !prepositions.has(w.toLowerCase()));
+
+  // 4. Inserir conectivos entre pares de palavras adjacentes
+  const METRICS = new Set(["total","média","contagem","número","mínimo","máximo","distintos","percentual"]);
+  const MODIFIERS = new Set(["total","média","mínimo","máximo","médio","líquido","bruto","livre","bloqueado","realizado","planejado","distintos"]);
+
+  const result: string[] = [];
+  for (let i = 0; i < words.length; i++) {
+    result.push(words[i]);
+    if (i < words.length - 1) {
+      const curr = words[i].toLowerCase();
+      const next = words[i + 1].toLowerCase();
+      const rule = connectives.find(([a, b]) => a === curr && b === next);
+      if (rule) {
+        // Bug fix: usa o prep da regra DIRETAMENTE, sem contractPrep
+        // (contractPrep só para fallback genérico abaixo)
+        if (rule[2]) result.push(rule[2]);
+      } else if (METRICS.has(curr) && !MODIFIERS.has(next)) {
+        // Fallback genérico: métrica + substantivo → "de" contraído por gênero
+        result.push(contractPrep("de", next));
+      }
+    }
+  }
+
+  // 5. Capitalizar — preposições em minúsculo exceto na posição 0
+  const prepsLc = new Set(["de","do","da","dos","das","por","em","no","na","nos","nas","e","a","o"]);
+  return result
+    .map((w, i) => {
+      const lc = w.toLowerCase();
+      if (i > 0 && prepsLc.has(lc)) return lc;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
 
 const formatValue = (value: number | string) => {
   const num = typeof value === "string" ? parseFloat(value) : value;

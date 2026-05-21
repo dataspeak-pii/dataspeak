@@ -8,6 +8,7 @@ export interface QueryHistoryItem {
   timestamp: Date;
   status: QueryStatus;
   category: string;
+  result?: AnalysisResult;
 }
 
 export interface InterpretedField {

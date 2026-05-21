@@ -94,6 +94,12 @@ export function Sidebar({ history, onSelectHistory, activeId }: SidebarProps) {
             Histórico
           </p>
 
+          {history.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-6 px-2">
+              Nenhuma consulta realizada ainda.
+            </p>
+          )}
+
           <div className="space-y-0">
             {history.map((item) => {
               const isHovered = hoveredId === item.id;

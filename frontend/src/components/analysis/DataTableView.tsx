@@ -1,4 +1,5 @@
 import type { DataTable } from "@/types";
+import { formatColumnLabel } from "@/lib/column-labels";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table2, Database, AlertTriangle, Info } from "lucide-react";
@@ -60,7 +61,7 @@ export function DataTableView({ table }: DataTableViewProps) {
                     key={col}
                     className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    {col}
+                    {formatColumnLabel(col)}
                   </th>
                 ))}
               </tr>
