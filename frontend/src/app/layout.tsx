@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Host_Grotesk, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const hostGrotesk = Host_Grotesk({
+  variable: "--font-host-grotesk",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -32,20 +33,22 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${hostGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-background">
+      <body className="min-h-full bg-background tracking-[-0.02em] cursor-default">
         {children}
         <Toaster
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "var(--color-surface)",
-              color: "var(--color-text)",
-              border: "1px solid var(--color-border-subtle)",
+              background: "var(--color-bg-a1)",
+              color: "var(--color-fg-1)",
+              border: "1px solid var(--color-border)",
               fontFamily: "var(--font-sans)",
+              borderRadius: "14px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
             },
-            className: "rounded-md",
+            className: "!rounded-[14px]",
           }}
         />
       </body>

@@ -61,36 +61,36 @@ export function ScriptView({ script }: ScriptViewProps) {
   return (
     <div className="space-y-4">
       {/* Info bar */}
-      <Card className="border border-gray-100 shadow-sm">
+      <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <Code2 className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600">Linguagem:</span>
-              <Badge variant="secondary" className="font-mono uppercase">
+              <Code2 className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-foreground/70">Linguagem:</span>
+              <Badge variant="secondary" className="font-mono uppercase rounded-md">
                 {script.language}
               </Badge>
             </div>
             {script.estimatedRows > 0 && (
               <div className="flex items-center gap-1.5">
-                <Rows className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">Linhas estimadas:</span>
-                <span className="text-sm font-semibold text-gray-800">
+                <Rows className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-foreground/70">Linhas estimadas:</span>
+                <span className="text-sm font-semibold text-foreground">
                   ~{script.estimatedRows.toLocaleString("pt-BR")}
                 </span>
               </div>
             )}
           </div>
 
-          <div className="mt-3 flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
-            <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-700 leading-relaxed">{script.explanation}</p>
+          <div className="mt-3 flex items-start gap-2 bg-accent-50 border border-accent-100 rounded-xl px-3 py-2.5">
+            <Info className="w-3.5 h-3.5 text-accent-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-accent-800 leading-relaxed">{script.explanation}</p>
           </div>
         </CardContent>
       </Card>
 
       {/* Code block */}
-      <Card className="border border-gray-100 shadow-sm overflow-hidden">
+      <Card className="border border-border shadow-sm overflow-hidden rounded-2xl">
         <CardHeader className="py-3 px-4 border-b border-white/10 bg-gray-900 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">

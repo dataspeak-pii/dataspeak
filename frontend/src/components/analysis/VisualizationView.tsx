@@ -89,13 +89,13 @@ export function VisualizationView({ result }: VisualizationViewProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.25 }}
       >
-        <Card className="border border-gray-100/80 shadow-sm bg-white/80 backdrop-blur-sm">
-          <CardHeader className="py-3 px-4 border-b border-gray-100 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-gray-700">
+        <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
+          <CardHeader className="py-3 px-4 border-b border-border flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-foreground">
               Visualização gráfica
             </CardTitle>
             {/* Chart type switcher */}
-            <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
+            <div className="flex gap-1 p-0.5 bg-[var(--color-bg-a3)] rounded-xl border border-border">
               {(
                 [
                   { mode: "bar" as ChartMode, Icon: BarChart2 },
@@ -109,10 +109,10 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   whileTap={{ scale: 0.94 }}
                   onClick={() => setChartMode(mode)}
                   className={cn(
-                    "p-1.5 rounded-md transition-colors",
+                    "p-1.5 rounded-lg transition-colors",
                     chartMode === mode
                       ? "bg-background shadow-sm text-brand-700"
-                      : "text-gray-400 hover:text-gray-600"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -207,7 +207,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
       </motion.div>
 
       {omittedKeys.length > 0 && (
-        <p className="text-xs text-gray-400 -mt-2 px-1">
+        <p className="text-xs text-muted-foreground -mt-2 px-1">
           Exibindo apenas{" "}
           <span className="font-medium text-gray-500">{visibleKeys[0]}</span> —{" "}
           séries com escalas muito diferentes foram omitidas para melhor visualização.

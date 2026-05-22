@@ -249,13 +249,9 @@ export function KPICard({ kpi, delay = 0 }: KPICardProps) {
       whileHover={{ scale: 1.025, y: -3 }}
       whileTap={{ scale: 0.98 }}
       style={{ willChange: "transform" }}
-      className="relative rounded-xl overflow-hidden cursor-default"
+      className="relative rounded-2xl overflow-hidden cursor-default"
     >
-      {/* Glassmorphism base */}
-      <div className="glass-card rounded-xl shadow-sm hover:shadow-lg hover:shadow-brand-500/10 transition-shadow duration-300">
-        {/* Subtle inner gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-brand-50/20 pointer-events-none rounded-xl" />
-
+      <div className="bg-[var(--color-bg-a1)] border border-border rounded-2xl shadow-sm hover:shadow-md hover:shadow-brand-500/8 transition-all duration-300">
         <div className="relative p-5">
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2">
             {formatLabel(kpi.label)}

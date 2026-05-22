@@ -9,6 +9,7 @@ import { ScriptView } from "./ScriptView";
 import { VisualizationView } from "./VisualizationView";
 import { cn } from "@/lib/utils";
 import { Brain, Code2, BarChart2, Loader2, AlertTriangle } from "lucide-react";
+import { HoverButton } from "@/components/ui/hover-button";
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={cn("animate-pulse rounded-md bg-muted", className)} />
@@ -104,8 +105,8 @@ export function AnalysisPanel({
       >
         {/* Error state */}
         {status === "error" && (
-          <div className="rounded-xl border border-danger bg-danger-bg p-6 flex flex-col items-center gap-4 text-center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-danger-bg">
+          <div className="rounded-2xl border border-danger/30 bg-danger-bg p-6 flex flex-col items-center gap-4 text-center">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-danger/10 border border-danger/20">
               <AlertTriangle className="w-5 h-5 text-danger" />
             </div>
             <div>
@@ -113,16 +114,17 @@ export function AnalysisPanel({
                 Não foi possível processar sua pergunta
               </p>
               {errorMessage && (
-                <p className="mt-1 text-xs text-danger">{errorMessage}</p>
+                <p className="mt-1 text-xs text-danger/80">{errorMessage}</p>
               )}
             </div>
             {onRetry && (
-              <button
+              <HoverButton
                 onClick={onRetry}
-                className="text-xs font-medium text-danger border border-danger rounded-lg px-4 py-1.5 hover:bg-danger-bg transition-colors"
+                variant="danger"
+                size="sm"
               >
                 Tentar novamente
-              </button>
+              </HoverButton>
             )}
           </div>
         )}
@@ -135,9 +137,9 @@ export function AnalysisPanel({
             className="w-full"
           >
             {status === "loading" && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                <Loader2 className="w-4 h-4 animate-spin text-brand-600" />
-                <span>Processando sua pergunta...</span>
+              <div className="flex items-center gap-2.5 text-sm text-muted-foreground mb-4 bg-[var(--color-bg-a1)] border border-border rounded-xl px-4 py-2.5">
+                <Loader2 className="w-4 h-4 animate-spin text-brand-600 shrink-0" />
+                <span className="font-medium">Processando sua pergunta...</span>
               </div>
             )}
 

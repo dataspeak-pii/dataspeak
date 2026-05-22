@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUpIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HoverButton } from "@/components/ui/hover-button";
 
 interface QueryInputProps {
   onSubmit: (question: string) => void;
@@ -13,18 +13,69 @@ interface QueryInputProps {
   isIdle?: boolean;
 }
 
-export function QueryInput({ onSubmit, isLoading, suggestions, isIdle }: QueryInputProps) {
-  const [value, setValue] = useState("");
-  const [focused, setFocused] = useState(false);
+function useAutoResizeTextarea({
+  minHeight,
+  maxHeight,
+}: {
+  minHeight: number;
+  maxHeight?: number;
+}) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const adjustHeight = useCallback(
+    (reset?: boolean) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      if (reset) {
+        textarea.style.height = `${minHeight}px`;
+        return;
+      }
+      textarea.style.height = `${minHeight}px`;
+      const newHeight = Math.max(
+        minHeight,
+        Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY)
+      );
+      textarea.style.height = `${newHeight}px`;
+    },
+    [minHeight, maxHeight]
+  );
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) textarea.style.height = `${minHeight}px`;
+  }, [minHeight]);
+
+  useEffect(() => {
+    const handleResize = () => adjustHeight();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [adjustHeight]);
+
+  return { textareaRef, adjustHeight };
+}
+
+export function QueryInput({
+  onSubmit,
+  isLoading,
+  suggestions,
+}: QueryInputProps) {
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
+    minHeight: 88,
+    maxHeight: 280,
+  });
+
+  const canSubmit = value.trim() !== "" && !isLoading;
+
   const handleSubmit = () => {
-    if (value.trim() && !isLoading) {
-      onSubmit(value.trim());
-    }
+    if (!canSubmit) return;
+    onSubmit(value.trim());
+    setValue("");
+    adjustHeight(true);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -33,120 +84,113 @@ export function QueryInput({ onSubmit, isLoading, suggestions, isIdle }: QueryIn
 
   const handleSuggestion = (s: string) => {
     setValue(s);
+    // Let the next frame measure the new content before adjusting
+    requestAnimationFrame(() => adjustHeight());
     textareaRef.current?.focus();
   };
 
-  const shouldPulse = !focused && !isLoading;
-  const glowShadow = focused
-    ? "0 0 0 2.5px oklch(0.58 0.19 40), 0 8px 32px rgba(0,0,0,0.10)"
-    : "0 2px 16px rgba(0,0,0,0.06)";
-
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {/* ── Main card ── */}
       <motion.div
-        animate={{
-          boxShadow: focused
-            ? glowShadow
-            : shouldPulse
-              ? [
-                  "0 0 0 0px rgba(194,65,12,0), 0 2px 16px rgba(0,0,0,0.06)",
-                  "0 0 0 3.5px rgba(194,65,12,0.11), 0 6px 24px rgba(194,65,12,0.07)",
-                  "0 0 0 0px rgba(194,65,12,0), 0 2px 16px rgba(0,0,0,0.06)",
-                ]
-              : "0 2px 16px rgba(0,0,0,0.06)",
-        }}
-        transition={
-          shouldPulse && !focused
-            ? { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
-            : { duration: 0.18 }
-        }
+        initial={{ scale: 0.98, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
         className={cn(
-          "relative bg-card rounded-2xl border overflow-hidden",
-          focused ? "border-brand-300" : "border-gray-200"
+          "relative bg-[var(--color-bg-a1)] rounded-2xl border overflow-hidden",
+          "transition-[border-color] duration-200",
+          focused ? "border-brand-300" : "border-border"
         )}
+        style={{
+          boxShadow: focused
+            ? "0 0 0 3px oklch(0.64 0.19 42 / 0.12), 0 6px 28px rgba(0,0,0,0.07)"
+            : "0 2px 12px rgba(0,0,0,0.04)",
+        }}
       >
-        {/* Top accent bar on focus */}
-        <motion.div
-          animate={{ scaleX: focused ? 1 : 0, opacity: focused ? 1 : 0 }}
-          initial={{ scaleX: 0, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-brand-500 via-brand-600 to-brand-400 origin-left"
-        />
-
-        <div className="flex items-start gap-3 p-4">
-          <motion.div
-            animate={{ backgroundColor: focused ? "oklch(0.93 0.05 50)" : "oklch(0.97 0.02 50)" }}
-            transition={{ duration: 0.2 }}
-            className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          >
-            <Sparkles className="w-4 h-4 text-brand-600" />
-          </motion.div>
-
+        {/* Textarea */}
+        <div className="px-5 pt-5 pb-3">
           <textarea
             ref={textareaRef}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              adjustHeight();
+            }}
+            onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            onKeyDown={handleKeyDown}
             placeholder="Descreva o que você quer analisar... (ex: volume de produção dos últimos 3 meses)"
-            rows={3}
             disabled={isLoading}
-            className="flex-1 resize-none bg-transparent text-gray-800 placeholder-gray-400 text-sm leading-relaxed outline-none disabled:opacity-50"
+            className={cn(
+              "w-full resize-none bg-transparent outline-none",
+              "text-foreground placeholder:text-muted-foreground",
+              "text-base leading-relaxed tracking-[-0.01em]",
+              "disabled:opacity-50",
+            )}
+            style={{ overflow: "hidden", minHeight: 88 }}
           />
         </div>
 
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/60">
-          <p className="text-[11px] text-gray-400">
+        {/* Bottom toolbar */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-t border-border bg-[var(--color-bg-a2)]/60">
+          <p className="text-xs text-muted-foreground select-none">
             Enter para enviar · Shift+Enter para nova linha
           </p>
-          <Button
+
+          <HoverButton
+            type="button"
             onClick={handleSubmit}
-            disabled={!value.trim() || isLoading}
-            size="sm"
-            className="bg-brand-700 hover:bg-brand-800 text-white gap-1.5 h-8 px-4"
+            disabled={!canSubmit}
+            variant={canSubmit ? "primary" : "secondary"}
+            size="md"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Analisando...
               </>
             ) : (
               <>
+                <ArrowUpIcon className="w-4 h-4" />
                 Gerar análise
-                <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}
-          </Button>
+          </HoverButton>
         </div>
       </motion.div>
 
-      {/* Suggestions */}
+      {/* ── Quick suggestions ── */}
       <AnimatePresence>
         {!isLoading && !value && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
-            className="mt-4"
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.22, delay: 0.08 }}
+            className="mt-5"
           >
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2.5">
-              <kbd className="px-1.5 py-0.5 text-xs border border-border rounded font-mono bg-muted">↵</kbd>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+              <kbd className="px-1.5 py-0.5 text-xs border border-border rounded font-mono bg-muted leading-none">
+                ↵
+              </kbd>
               <span>Sugestões rápidas — clique para usar</span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((s) => (
+
+            <div className="flex flex-wrap gap-2.5">
+              {suggestions.map((s, i) => (
                 <motion.button
                   key={s}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.06 + i * 0.04, duration: 0.2 }}
                   whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   onClick={() => handleSuggestion(s)}
                   className={cn(
-                    "text-xs px-3 py-1.5 rounded-full border border-gray-200 bg-white",
-                    "text-gray-600 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50",
-                    "transition-colors duration-150 shadow-sm"
+                    "text-sm px-4 py-2 rounded-full border border-border",
+                    "bg-[var(--color-bg-a1)] text-muted-foreground font-medium",
+                    "hover:border-brand-300 hover:text-brand-700 hover:bg-brand-50",
+                    "transition-all duration-150 shadow-sm"
                   )}
                 >
                   {s}

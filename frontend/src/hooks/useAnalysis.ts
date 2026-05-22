@@ -9,36 +9,45 @@ import { getSession } from "@/lib/auth";
 function getHistoryKey(): string {
   if (typeof window === "undefined") return "ds_history_guest";
   const session = getSession();
-  return session ? `ds_history_${session.email}` : "ds_history_guest";
+  return session ? `ds_history_${session.email.toLowerCase()}` : "ds_history_guest";
 }
 
-function loadHistory(): QueryHistoryItem[] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function deserializeItem(item: any): QueryHistoryItem {
+  return {
+    ...item,
+    timestamp: new Date(item.timestamp),
+    result: item.result
+      ? {
+          ...item.result,
+          query: {
+            ...item.result.query,
+            timestamp: new Date(item.result.query.timestamp),
+          },
+        }
+      : undefined,
+  };
+}
+
+function loadHistoryForKey(key: string): QueryHistoryItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(getHistoryKey());
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (JSON.parse(raw) as Array<any>).map((item) => ({
-      ...item,
-      timestamp: new Date(item.timestamp),
-      result: item.result
-        ? {
-            ...item.result,
-            query: {
-              ...item.result.query,
-              timestamp: new Date(item.result.query.timestamp),
-            },
-          }
-        : undefined,
-    }));
+    return (JSON.parse(raw) as Array<any>).map(deserializeItem);
   } catch {
     return [];
   }
 }
 
-function persistHistory(history: QueryHistoryItem[]): void {
+function persistHistoryForKey(key: string, history: QueryHistoryItem[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(getHistoryKey(), JSON.stringify(history));
+  try {
+    localStorage.setItem(key, JSON.stringify(history));
+  } catch {
+    // localStorage full — ignore
+  }
 }
 
 export function useAnalysis() {
@@ -47,11 +56,28 @@ export function useAnalysis() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [history, setHistory] = useState<QueryHistoryItem[]>([]);
 
+  // Stable key captured on first load — avoids key drift during a session
+  const historyKeyRef = useRef<string>("");
+
   // Guard: true while restoring from history so runAnalysis doesn't add a duplicate entry
   const isRestoringRef = useRef(false);
 
   useEffect(() => {
-    setHistory(loadHistory());
+    const key = getHistoryKey();
+    historyKeyRef.current = key;
+    setHistory(loadHistoryForKey(key));
+
+    // Re-sync when another tab writes to localStorage (e.g., login in another tab)
+    function onStorage(e: StorageEvent) {
+      if (e.key === key && e.newValue) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setHistory((JSON.parse(e.newValue) as Array<any>).map(deserializeItem));
+        } catch { /* ignore */ }
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const runAnalysis = useCallback(async (question: string) => {
@@ -67,19 +93,17 @@ export function useAnalysis() {
       const analysisResult = adaptQueryResponse(apiResponse, question, id);
 
       setHistory((prev) => {
-        if (isRestoringRef.current) return prev; // não adiciona ao histórico ao restaurar
-        const next: QueryHistoryItem[] = [
-          {
-            id,
-            question,
-            timestamp: new Date(),
-            status: "done",
-            category: analysisResult.interpretation.category ?? "Análise",
-            result: analysisResult,
-          },
-          ...prev,
-        ].slice(0, 10);
-        persistHistory(next);
+        if (isRestoringRef.current) return prev;
+        const newItem: QueryHistoryItem = {
+          id,
+          question,
+          timestamp: new Date(),
+          status: "done" as QueryStatus,
+          category: analysisResult.interpretation.category ?? "Análise",
+          result: analysisResult,
+        };
+        const next = [newItem, ...prev].slice(0, 10);
+        persistHistoryForKey(historyKeyRef.current || getHistoryKey(), next);
         return next;
       });
 

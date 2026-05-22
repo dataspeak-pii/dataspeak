@@ -52,10 +52,10 @@ export function InterpretationView({ data }: InterpretationViewProps) {
         animate="visible"
         custom={0}
       >
-        <Card className="border border-gray-100/80 shadow-sm bg-white/75 backdrop-blur-sm">
+        <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
           <CardHeader className="pb-3 border-b border-border">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-accent-50 flex items-center justify-center">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-accent-50 flex items-center justify-center">
                 <Brain className="w-3.5 h-3.5 text-accent-700" />
               </div>
               Interpretação da IA
@@ -64,10 +64,10 @@ export function InterpretationView({ data }: InterpretationViewProps) {
           <CardContent className="space-y-4">
             {/* Original question */}
             <div>
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">
                 Pergunta original
               </p>
-              <p className="text-sm text-gray-800 font-medium bg-gray-50/80 px-3 py-2 rounded-lg border border-gray-100">
+              <p className="text-sm text-foreground font-medium bg-[var(--color-bg-a2)] px-3 py-2 rounded-xl border border-border">
                 &ldquo;{data.originalQuestion}&rdquo;
               </p>
             </div>
@@ -75,12 +75,12 @@ export function InterpretationView({ data }: InterpretationViewProps) {
             {/* Intent */}
             {data.intent && (
               <div>
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-1">
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">
                   Intenção identificada
                 </p>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-brand-600 shrink-0 mt-0.5" />
-                  <p className="text-sm text-gray-700">{data.intent}</p>
+                  <p className="text-sm text-foreground/80">{data.intent}</p>
                 </div>
               </div>
             )}
@@ -88,23 +88,23 @@ export function InterpretationView({ data }: InterpretationViewProps) {
             {/* Meta row */}
             <div className="flex flex-wrap gap-3">
               {data.category && (
-                <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                  <Target className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-xs text-foreground/70">
+                  <Target className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="font-medium">{data.category}</span>
                 </div>
               )}
               {data.period && (
-                <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-xs text-foreground/70">
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>{data.period}</span>
                 </div>
               )}
 
               {/* Confidence bar */}
               <div className="ml-auto flex items-center gap-1.5">
-                <span className="text-[11px] text-gray-400">Confiança</span>
+                <span className="text-[11px] text-muted-foreground">Confiança</span>
                 <div className="flex items-center gap-1">
-                  <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="w-20 h-1.5 rounded-full bg-muted overflow-hidden">
                     <motion.div
                       className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-700"
                       initial={{ width: 0 }}
@@ -129,10 +129,10 @@ export function InterpretationView({ data }: InterpretationViewProps) {
         animate="visible"
         custom={0.12}
       >
-        <Card className="border border-gray-100/80 shadow-sm bg-white/75 backdrop-blur-sm">
+        <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
           <CardHeader className="pb-3 border-b border-border">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-accent-50 flex items-center justify-center">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-accent-50 flex items-center justify-center">
                 <Database className="w-3.5 h-3.5 text-accent-700" />
               </div>
               Campos e tabelas SAP identificados
@@ -147,7 +147,7 @@ export function InterpretationView({ data }: InterpretationViewProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Badge variant="secondary" className="font-mono text-xs">
+                  <Badge variant="secondary" className="font-mono text-xs rounded-md">
                     {t}
                   </Badge>
                 </motion.span>
@@ -158,11 +158,11 @@ export function InterpretationView({ data }: InterpretationViewProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo</th>
-                      <th className="text-left py-2 px-3 text-gray-400 font-medium">Tabela SAP</th>
-                      <th className="text-left py-2 px-3 text-gray-400 font-medium">Campo SAP</th>
-                      <th className="text-left py-2 px-3 text-gray-400 font-medium">Tipo</th>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Campo</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Tabela SAP</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Campo SAP</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Tipo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -172,23 +172,23 @@ export function InterpretationView({ data }: InterpretationViewProps) {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}
-                        className="border-b border-gray-50 hover:bg-brand-50/40 transition-colors"
+                        className="border-b border-border/50 hover:bg-brand-50/30 transition-colors"
                       >
-                        <td className="py-2.5 px-3 text-gray-700 font-medium">{f.name}</td>
+                        <td className="py-2.5 px-3 text-foreground font-medium">{f.name}</td>
                         <td className="py-2.5 px-3">
-                          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                          <code className="bg-[var(--color-bg-a3)] px-1.5 py-0.5 rounded-md text-foreground/70">
                             {f.sapTable}
                           </code>
                         </td>
                         <td className="py-2.5 px-3">
-                          <code className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                          <code className="bg-[var(--color-bg-a3)] px-1.5 py-0.5 rounded-md text-foreground/70">
                             {f.sapField}
                           </code>
                         </td>
                         <td className="py-2.5 px-3">
                           <span
                             className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-medium border",
+                              "px-2 py-0.5 rounded-md text-[10px] font-medium border",
                               fieldTypeStyle[f.type]
                             )}
                           >

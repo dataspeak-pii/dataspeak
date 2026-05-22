@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { HoverButton } from "@/components/ui/hover-button";
 import { TenantBadge } from "./TenantBadge";
 import { getTenantFromEmail } from "@/lib/tenants";
 import { mockRegister } from "@/lib/auth";
@@ -118,11 +119,10 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
           </div>
         </Field>
 
-        <button type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors shadow-sm shadow-brand-200 active:scale-[0.98]">
+        <HoverButton type="submit" disabled={loading} fullWidth size="lg" className="rounded-2xl">
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? "Criando conta..." : "Criar conta"}
-        </button>
+        </HoverButton>
       </form>
     </motion.div>
   );

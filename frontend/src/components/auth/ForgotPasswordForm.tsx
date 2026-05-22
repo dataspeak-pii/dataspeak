@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowLeft, Loader2, AlertCircle, Send } from "lucide-react";
+import { HoverButton } from "@/components/ui/hover-button";
 import { TenantBadge } from "./TenantBadge";
 import { getTenantFromEmail } from "@/lib/tenants";
 import { mockForgotPassword } from "@/lib/auth";
@@ -77,11 +78,10 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
               className={cn("w-full rounded-xl border border-input bg-background text-sm text-foreground placeholder-gray-400 outline-none py-2.5 pl-9 pr-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all")} />
           </div>
         </div>
-        <button type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl py-3 transition-colors active:scale-[0.98]">
+        <HoverButton type="submit" disabled={loading} fullWidth size="lg" className="rounded-2xl">
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? "Enviando..." : "Enviar instruções"}
-        </button>
+        </HoverButton>
       </form>
     </motion.div>
   );

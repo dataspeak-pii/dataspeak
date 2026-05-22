@@ -104,9 +104,19 @@
   --color-cat-5-bg: oklch(0.96 0.04 145);
 
   /* === FONTES === */
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-host-grotesk), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
+  --font-heading: var(--font-host-grotesk), system-ui, sans-serif;
+
+  /* === CAMADAS SEMÂNTICAS (Visitors-style fg/bg layers) === */
+  --color-fg-1: var(--foreground);
+  --color-fg-2: oklch(0.36 0.010 60);
+  --color-fg-3: oklch(0.50 0.010 60);
+  --color-fg-4: oklch(0.65 0.008 60);
+  --color-bg-a1: oklch(0.975 0.004 60);
+  --color-bg-a2: oklch(0.965 0.005 60);
+  --color-bg-a3: oklch(0.95 0.006 60);
+  --color-bg-a4: oklch(0.93 0.006 60);
 
   /* === RAIOS === */
   --radius: 0.625rem;
@@ -185,6 +195,14 @@
 }
 
 .dark {
+  --color-fg-1: oklch(0.93 0.005 60);
+  --color-fg-2: oklch(0.80 0.006 60);
+  --color-fg-3: oklch(0.65 0.008 60);
+  --color-fg-4: oklch(0.50 0.010 60);
+  --color-bg-a1: oklch(0.20 0.006 60);
+  --color-bg-a2: oklch(0.22 0.006 60);
+  --color-bg-a3: oklch(0.24 0.006 60);
+  --color-bg-a4: oklch(0.26 0.007 60);
   --background: oklch(0.16 0.006 60);
   --foreground: oklch(0.93 0.005 60);
   --card: oklch(0.20 0.006 60);
@@ -245,6 +263,38 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+/* ── Visitors-style nav pill ── */
+.nav-pill {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid oklch(0.92 0.006 60);
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  padding: 6px 8px;
+}
+
+/* ── Card-a1 surface ── */
+.card-a1 {
+  background: var(--color-bg-a1);
+  border: 1px solid var(--color-border);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+
+/* ── Superellipse corner utility ── */
+.corner-superellipse {
+  border-radius: 28% / 24%;
 }
 
 @layer base {
