@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { QueryInput } from "@/components/dashboard/QueryInput";
 import { AnalysisPanel } from "@/components/analysis/AnalysisPanel";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { suggestionPrompts } from "@/lib/mock-data";
+import { getSession } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Database, TrendingUp, BarChart3 } from "lucide-react";
 import type { QueryHistoryItem } from "@/types";
@@ -81,6 +83,7 @@ const FEATURE_PILLS = [
 ] as const;
 
 export default function HomePage() {
+  const router = useRouter();
   const { status, result, errorMessage, history, runAnalysis, restoreFromHistory } = useAnalysis();
   const [lastQuestion, setLastQuestion] = useState<string>("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -88,9 +91,13 @@ export default function HomePage() {
   const isIdle = status === "idle";
 
   const handleSubmit = useCallback((q: string) => {
+    if (!getSession()) {
+      router.push("/login");
+      return;
+    }
     setLastQuestion(q);
     runAnalysis(q);
-  }, [runAnalysis]);
+  }, [runAnalysis, router]);
 
   const handleHistorySelect = useCallback((item: QueryHistoryItem) => {
     restoreFromHistory(item);
@@ -119,11 +126,11 @@ export default function HomePage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, scale: 0.99, y: -12 }}
                 transition={{ duration: 0.28 }}
-                className="absolute inset-0 flex flex-col items-center justify-center px-8 z-10"
+                className="absolute inset-0 flex flex-col items-center px-8 z-10 overflow-y-auto"
               >
                 <GridBackground />
 
-                <div className="relative w-full max-w-3xl z-10 flex flex-col gap-8">
+                <div className="relative w-full max-w-3xl z-10 flex flex-col gap-8 py-12 my-auto">
                   {/* Heading + subtitle + typewriter */}
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -131,7 +138,7 @@ export default function HomePage() {
                     transition={{ duration: 0.4, delay: 0.08 }}
                     className="text-center flex flex-col gap-3"
                   >
-                    <h1 className="text-[3.25rem] leading-[1.5] font-bold tracking-[-0.04em] text-foreground">
+                    <h1 className="text-[2rem] sm:text-[2.75rem] lg:text-[3.25rem] leading-[2.0] font-bold tracking-[-0.04em] text-foreground">
                       O que você quer analisar hoje?
                     </h1>
 

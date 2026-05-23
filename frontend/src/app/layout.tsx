@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DataSpeak — Pergunte aos seus dados em linguagem natural",
+  title: "DataSpeak",
   description: "Sistema de tradução de perguntas em linguagem natural para consultas SQL sobre estruturas de dados SAP, com explicação contextualizada e execução em banco simulado.",
   icons: {
     icon: [

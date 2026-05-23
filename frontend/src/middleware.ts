@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+const PUBLIC_PATHS = ["/", "/login"];
+
+export function middleware(request: NextRequest) {
   const session = request.cookies.get("mt_session");
   const { pathname } = request.nextUrl;
 
-  if (!session && pathname !== "/login") {
+  if (!session && !PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -17,5 +19,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|.*\\.svg|.*\\.png|.*\\.ico|.*\\.webp|.*\\.jpg|.*\\.jpeg).*)"],
 };

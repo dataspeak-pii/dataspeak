@@ -63,7 +63,7 @@ export default function AccountPage() {
 
   function handleLogout() {
     clearSession();
-    router.push("/");
+    window.location.href = "/";
   }
 
   if (!session) return null;
