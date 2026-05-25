@@ -156,12 +156,27 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Charts (Recharts) — sequência harmônica baseada na marca */
-  --color-chart-1: var(--color-brand-600);
-  --color-chart-2: var(--color-accent-700);
-  --color-chart-3: var(--color-brand-400);
-  --color-chart-4: var(--color-accent-500);
-  --color-chart-5: var(--color-neutral-500);
+  /* Charts (Recharts) — 20 cores distintas, harmônicas com a marca */
+  --color-chart-1:  #C25A14;  /* laranja brand      */
+  --color-chart-2:  #0F4E5C;  /* teal escuro        */
+  --color-chart-3:  #D4940A;  /* âmbar              */
+  --color-chart-4:  #4E8A18;  /* verde-oliva        */
+  --color-chart-5:  #2C64AA;  /* azul ardósia       */
+  --color-chart-6:  #6244AA;  /* púrpura            */
+  --color-chart-7:  #AA3C7A;  /* rosa-ameixa        */
+  --color-chart-8:  #9A3020;  /* tijolo escuro      */
+  --color-chart-9:  #7A8A14;  /* oliva-amarelado    */
+  --color-chart-10: #1C8A52;  /* esmeralda          */
+  --color-chart-11: #1A7472;  /* teal-seafoam       */
+  --color-chart-12: #245C9E;  /* azul-cerúleo       */
+  --color-chart-13: #3C3CAA;  /* índigo             */
+  --color-chart-14: #7632AA;  /* uva                */
+  --color-chart-15: #9C3C8A;  /* orquídea           */
+  --color-chart-16: #2A7A4C;  /* verde-floresta     */
+  --color-chart-17: #C03C34;  /* vermelho-tomate    */
+  --color-chart-18: #C47C14;  /* dourado-âmbar      */
+  --color-chart-19: #1C4A82;  /* azul-marinho       */
+  --color-chart-20: #6C3EAA;  /* violeta            */
 }
 
 :root {

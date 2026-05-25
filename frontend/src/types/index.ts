@@ -60,7 +60,8 @@ export interface KPI {
 
 export interface ChartDataPoint {
   label: string;
-  [key: string]: string | number;
+  originalLabel?: string; // SAP technical ID when label was resolved to a name
+  [key: string]: string | number | undefined;
 }
 
 export interface AnalysisResult {

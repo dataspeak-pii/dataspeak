@@ -154,7 +154,7 @@ export function InterpretationView({ data }: InterpretationViewProps) {
               ))}
             </div>
 
-            {data.fields.length > 0 && (
+            {data.fields.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
@@ -200,7 +200,11 @@ export function InterpretationView({ data }: InterpretationViewProps) {
                   </tbody>
                 </table>
               </div>
-            )}
+            ) : data.sapTables.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic text-center py-3">
+                Nenhum campo ou tabela SAP identificado.
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </motion.div>

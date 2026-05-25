@@ -61,19 +61,299 @@ function mapApiKpiToKpi(k: ApiKpi, index: number): KPI {
   };
 }
 
-function mapChartData(raw: QueryResponse["chart_data"]): ChartDataPoint[] {
+// SAP zero-padded IDs: start with one or more 0s followed by at least 4 digits
+const SAP_ID_RE = /^0+\d{4,}$/;
+
+// Column name patterns that indicate a human-readable name/description in SAP.
+// Covers: SAP standard fields (NAME1, MAKTX, KTEXT…), German terms (BEZEI, BEZEICH…),
+// English (name, desc, descr), Portuguese business terms (razao, fantasia, empresa…).
+const NAME_COL_RE =
+  /name|nome|maktx|ktext|stext|bezei|vtext|bezeich|descr|desc|razao|fantasia|empresa|parceiro|social|titular|cliente_n|fornecedor_n|partner_n/i;
+
+// Column name tokens that indicate a metric/measure — used to exclude these
+// columns from the heuristic name-column fallback.
+const METRIC_COL_RE =
+  /count|contagem|sum|soma|avg|media|min|max|total|qty|qtd|qtde|valor|amount|percent|pct|volume|receita|custo|saldo|preco|price|revenue|cost/i;
+
+/**
+ * Builds a lookup map from SAP technical IDs to human-readable names.
+ *
+ * Stores BOTH the full zero-padded key ("000000000000000009") AND the
+ * stripped key ("9") so the resolve step handles padding mismatches
+ * between the results table and the chart_data labels.
+ */
+function buildIdToNameMap(
+  results: Record<string, string | number | null>[],
+  columns: string[],
+): Map<string, string> {
+  const map = new Map<string, string>();
+  if (!results.length) return map;
+
+  // ── DEBUG ──────────────────────────────────────────────────────────────────
+  console.group("[adapter] buildIdToNameMap — diagnóstico");
+  console.log("Detected columns:", columns);
+
+  const idColsDebug: string[] = [];
+  if (results[0]) {
+    for (const col of columns) {
+      const val = results[0][col];
+      if (typeof val === "string" && SAP_ID_RE.test(val.trim())) idColsDebug.push(col);
+    }
+  }
+  console.log(
+    "SAP ID columns (from first row):",
+    idColsDebug.length ? idColsDebug : "(none)",
+  );
+
+  const nameColCandidates = columns.filter((c) => NAME_COL_RE.test(c));
+  console.log(
+    "Name column candidates:",
+    nameColCandidates.length ? nameColCandidates : "(none — regex não bateu)",
+  );
+  if (!nameColCandidates.length) {
+    console.log(
+      "Column test details:",
+      columns.map((c) => `"${c}" → ${NAME_COL_RE.test(c)}`),
+    );
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
+  let nameCol: string | undefined = nameColCandidates[0];
+
+  if (!nameCol) {
+    console.warn(
+      "[adapter] Nenhuma coluna de nome encontrada via NAME_COL_RE.\n" +
+      "  Padrão atual: " + NAME_COL_RE.toString() + "\n" +
+      "  Tentando heurística de fallback…",
+    );
+    if (results[0]) {
+      console.log("Primeira linha completa (para identificar a coluna de nome):");
+      for (const [col, val] of Object.entries(results[0])) {
+        console.log(`  [${col}] = ${JSON.stringify(val)} (${typeof val})`);
+      }
+    }
+
+    // ── Fallback heurístico ────────────────────────────────────────────────
+    // Procura a primeira coluna cujo valor na linha 0 parece um nome legível:
+    //   • é string
+    //   • comprimento ≥ 4 (descarta siglas/códigos curtos)
+    //   • não é puramente numérico
+    //   • não é um SAP ID zero-padded
+    //   • a coluna não é uma métrica
+    // Prefere colunas com valores que contêm espaços (nomes compostos) e
+    // valores mais longos — heurísticas fortes para nomes de entidades.
+    if (results[0]) {
+      const candidates = columns
+        .filter((c) => {
+          if (METRIC_COL_RE.test(c)) return false;
+          const raw = results[0][c];
+          if (typeof raw !== "string") return false;
+          const v = raw.trim();
+          return v.length >= 4 && !/^\d+$/.test(v) && !SAP_ID_RE.test(v);
+        })
+        .sort((a, b) => {
+          const va = String(results[0]![a] ?? "");
+          const vb = String(results[0]![b] ?? "");
+          // Prefer values with spaces (multi-word names like "Empresa XYZ Ltda")
+          const diff = (vb.includes(" ") ? 1 : 0) - (va.includes(" ") ? 1 : 0);
+          // Then prefer longer values
+          return diff !== 0 ? diff : vb.length - va.length;
+        });
+
+      if (candidates[0]) {
+        nameCol = candidates[0];
+        console.log(
+          "[adapter] Coluna de nome detectada por heurística:",
+          nameCol,
+          "→",
+          results[0][nameCol],
+        );
+      }
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
+    if (!nameCol) {
+      console.groupEnd();
+      return map;
+    }
+  }
+
+  console.log("Name column selected:", nameCol);
+
+  for (const row of results) {
+    const name = String(row[nameCol] ?? "").trim();
+    if (!name) continue;
+    for (const col of columns) {
+      if (col === nameCol) continue;
+      const raw = row[col];
+
+      // Accept both string and integer values as potential SAP IDs.
+      // Integers without leading zeros (e.g. KUNNR stored as number) are also
+      // stored in the map so the stripped-key lookup in resolveId can find them.
+      let strVal: string | null = null;
+      if (typeof raw === "string") {
+        strVal = raw.trim();
+      } else if (typeof raw === "number" && Number.isInteger(raw) && raw > 0 && !METRIC_COL_RE.test(col)) {
+        strVal = String(raw);
+      }
+      if (!strVal) continue;
+
+      if (SAP_ID_RE.test(strVal)) {
+        const stripped = strVal.replace(/^0+/, "") || strVal;
+        map.set(strVal, name);
+        if (stripped !== strVal) map.set(stripped, name);
+      } else if (typeof raw === "number" && strVal.length >= 3) {
+        // Non-zero-padded numeric ID (e.g. customer number stored as integer 1001)
+        map.set(strVal, name);
+      }
+    }
+  }
+
+  // ── DEBUG ──────────────────────────────────────────────────────────────────
+  console.log(`Generated idToNameMap size: ${map.size}`);
+  if (map.size > 0) {
+    let count = 0;
+    console.log("Sample mapping (primeiros 5):");
+    for (const [id, name] of map) {
+      if (count++ >= 5) break;
+      console.log(`  "${id}" → "${name}"`);
+    }
+  } else {
+    console.warn(
+      "[adapter] Mapa vazio após varredura.\n" +
+      "  Causas prováveis:\n" +
+      "  1. Nenhuma coluna tem valores com padrão " + SAP_ID_RE.toString() + "\n" +
+      "  2. IDs chegam como number (não string) — ex: 9 em vez de '000000000000000009'\n" +
+      "  Primeira linha:",
+      results[0],
+    );
+  }
+  console.groupEnd();
+  // ──────────────────────────────────────────────────────────────────────────
+
+  return map;
+}
+
+/**
+ * Attempts to resolve a string to a human-readable name using the idToName map.
+ * Tries: exact match → stripped match (remove leading zeros).
+ */
+function resolveId(
+  id: string,
+  idToName: Map<string, string>,
+): string | undefined {
+  return (
+    idToName.get(id) ??
+    idToName.get(id.replace(/^0+/, "") || id)
+  );
+}
+
+/**
+ * Resolves the best display label for a chart data point.
+ *
+ * Strategy:
+ *   1. Try `labelField` directly (exact + stripped match)
+ *   2. If unresolved, scan ALL other string fields of the point that look
+ *      like SAP IDs — covers cases where the backend used the wrong column
+ *      as the chart label dimension
+ */
+function resolvePoint(
+  labelField: string,
+  allFields: Record<string, unknown>,
+  idToName: Map<string, string>,
+): { display: string; original?: string; strategy: string } {
+  // 1. Direct label resolution
+  const direct = resolveId(labelField, idToName);
+  if (direct) return { display: direct, original: labelField, strategy: "direct" };
+
+  // 2. Scan other string fields for any SAP ID that resolves
+  if (idToName.size > 0) {
+    for (const [key, val] of Object.entries(allFields)) {
+      if (key === "label" || key === "originalLabel") continue;
+      if (typeof val !== "string") continue;
+      const trimmed = val.trim();
+      if (!SAP_ID_RE.test(trimmed)) continue;
+      const name = resolveId(trimmed, idToName);
+      if (name) {
+        return { display: name, original: trimmed, strategy: `field:${key}` };
+      }
+    }
+  }
+
+  return { display: labelField, strategy: "unresolved" };
+}
+
+function mapChartData(
+  raw: QueryResponse["chart_data"],
+  results: Record<string, string | number | null>[],
+  columns: string[],
+): ChartDataPoint[] {
   if (!raw) return [];
-  if ("labels" in raw && "series" in raw) {
+
+  const idToName = buildIdToNameMap(results, columns);
+
+  if ("labels" in (raw as object) && "series" in (raw as object)) {
     const { labels, series } = raw as ApiChartDataRaw;
+
+    // ── DEBUG ────────────────────────────────────────────────────────────────
+    console.group("[adapter] mapChartData (ApiChartDataRaw) — resolução");
+    console.log("Chart labels do backend:", labels.slice(0, 10));
+    console.log("Resolução:");
+    labels.slice(0, 10).forEach((l) => {
+      const r = resolveId(l, idToName);
+      console.log(`  "${l}" → ${r ? `"${r}" ✓ (direct)` : "(não resolvido — tentando field scan...)"}`);
+    });
+    console.groupEnd();
+    // ────────────────────────────────────────────────────────────────────────
+
     return labels.map((label, i) => {
-      const point: ChartDataPoint = { label };
+      // For the ApiChartDataRaw format the point doesn't carry other fields
+      // yet, so we resolve using the label alone (direct + stripped).
+      const name = resolveId(label, idToName);
+      const point: ChartDataPoint = { label: name ?? label };
+      if (name) point.originalLabel = label;
       series.forEach((s) => {
         point[s.name] = s.data[i] ?? 0;
       });
       return point;
     });
   }
-  return Array.isArray(raw) ? (raw as ChartDataPoint[]) : [];
+
+  if (Array.isArray(raw)) {
+    const points = raw as ChartDataPoint[];
+
+    // ── DEBUG ────────────────────────────────────────────────────────────────
+    console.group("[adapter] mapChartData (ApiChartPoint[]) — resolução");
+    console.log("Chart labels do backend:", points.slice(0, 5).map((p) => p.label));
+    points.slice(0, 5).forEach((p) => {
+      const r = resolvePoint(
+        String(p.label),
+        p as Record<string, unknown>,
+        idToName,
+      );
+      console.log(
+        `  "${p.label}" → "${r.display}" [strategy: ${r.strategy}]`,
+        r.original ? `(original: "${r.original}")` : "",
+      );
+    });
+    console.groupEnd();
+    // ────────────────────────────────────────────────────────────────────────
+
+    return points.map((p) => {
+      const r = resolvePoint(
+        String(p.label),
+        p as Record<string, unknown>,
+        idToName,
+      );
+      return {
+        ...p,
+        label: r.display,
+        ...(r.original ? { originalLabel: r.original } : {}),
+      };
+    });
+  }
+
+  return [];
 }
 
 function mapApiResultsToTable(res: QueryResponse): DataTable {
@@ -83,8 +363,8 @@ function mapApiResultsToTable(res: QueryResponse): DataTable {
     columns,
     rows,
     totalRows: res.total_rows ?? rows.length,
-    sapSource: res.tables_used.length
-      ? `SAP — Tabelas: ${res.tables_used.join(", ")}`
+    sapSource: (res.tables_used ?? []).length
+      ? `SAP — Tabelas: ${res.tables_used!.join(", ")}`
       : "SAP",
     truncated: res.truncated ?? false,
     executionError: res.execution_error ?? null,
@@ -106,19 +386,23 @@ export function adaptQueryResponse(
     category: res.category,
     period: res.period,
     fields: (res.fields ?? []).map(mapApiFieldToInterpretedField),
-    sapTables: res.tables_used,
+    sapTables: res.tables_used ?? [],
   };
 
   const script: GeneratedScript = {
     language: "sql",
-    code: res.sql,
-    explanation: res.explanation,
+    code: res.sql ?? "",
+    explanation: res.explanation ?? "",
     estimatedRows: res.estimated_rows ?? res.total_rows ?? 0,
   };
 
   const table = mapApiResultsToTable(res);
   const kpis: KPI[] = (res.kpis ?? []).map(mapApiKpiToKpi);
-  const chartData: ChartDataPoint[] = mapChartData(res.chart_data);
+  const chartData: ChartDataPoint[] = mapChartData(
+    res.chart_data,
+    res.results ?? [],
+    res.columns ?? [],
+  );
 
   return {
     id,

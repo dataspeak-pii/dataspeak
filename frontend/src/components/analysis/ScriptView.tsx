@@ -13,7 +13,8 @@ interface ScriptViewProps {
 }
 
 // Minimal keyword-based syntax highlight for SQL
-function highlightSQL(code: string) {
+function highlightSQL(code: string | null | undefined) {
+  if (!code) return "";
   const keywords = [
     "SELECT","FROM","WHERE","JOIN","INNER","LEFT","ON","AND","OR","NOT",
     "GROUP BY","ORDER BY","HAVING","AS","IN","BETWEEN","TOP","DISTINCT",
@@ -50,6 +51,19 @@ function highlightSQL(code: string) {
 
 export function ScriptView({ script }: ScriptViewProps) {
   const [copied, setCopied] = useState(false);
+
+  if (!script.code) {
+    return (
+      <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
+        <CardContent className="p-8 flex flex-col items-center gap-2 text-center">
+          <Code2 className="w-8 h-8 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">
+            Nenhum script SQL foi gerado para esta consulta.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(script.code);

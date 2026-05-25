@@ -140,7 +140,7 @@ const formatLabel = (label: string): string => {
   };
 
   // 1. Separar por underscore e espaços
-  const parts = label.split(/[_\s]+/).filter(Boolean);
+  const parts = label.split(/[_\s\-]+/).filter(Boolean);
 
   // 2. Expandir via dicionário (lookup em UPPERCASE)
   const expanded = parts.map((part) => {
@@ -279,9 +279,7 @@ export function KPICard({ kpi, delay = 0 }: KPICardProps) {
                 {!isUp && !isDown && <Minus className="w-3.5 h-3.5 text-muted-foreground" />}
                 <span>{Math.abs(kpi.trend)}%</span>
               </div>
-            ) : (
-              <span className="text-sm text-muted-foreground font-medium">—</span>
-            )}
+            ) : null}
           </div>
           {hasTrend && (
             <p className="text-[11px] text-muted-foreground mt-1">vs. período anterior</p>
