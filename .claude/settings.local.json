@@ -11,7 +11,9 @@
       "Bash(PYTHONIOENCODING=utf-8 python -m app.ai_engine.indexer)",
       "PowerShell(cd C:\\\\Users\\\\Pedro\\\\Documents\\\\GitHub\\\\dataspeak\\\\backend; $env:PYTHONIOENCODING=\"utf-8\"; python -m app.ai_engine.indexer 2>&1)",
       "Bash(npx next *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(Get-ChildItem -Recurse -Include \"*sap*\", \"*table*\", \"*catalog*\" -Exclude \"node_modules\")",
+      "Bash(Select-Object -First 30)"
     ]
   }
 }

@@ -47,12 +47,12 @@ export const mockHistory: QueryHistoryItem[] = [
 // ─── Suggestion prompts ──────────────────────────────────────────────────────
 
 export const suggestionPrompts = [
-  "Qual foi o volume de produção nos últimos 3 meses?",
-  "Quais os 10 materiais com maior volume de vendas?",
-  "Como está o estoque por centro de distribuição?",
-  "Comparativo de produção realizada vs planejada",
-  "Qual a eficiência das linhas de produção por turno?",
-  "Pedidos em aberto por cliente e região",
+  "Produção realizada vs planejada nos últimos 3 meses",
+  "Top 10 materiais por receita de faturamento",
+  "Estoque por depósito abaixo do mínimo",
+  "Pedidos de compra por fornecedor e valor comprometido",
+  "Faturamento mensal por cliente no 1º trimestre",
+  "Ordens de produção em aberto com atraso",
 ];
 
 // ─── Full analysis results (keyed by question slug) ─────────────────────────
