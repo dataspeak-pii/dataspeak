@@ -267,6 +267,25 @@ async def call_openrouter(
     return data["choices"][0]["message"]["content"]
 
 
+def build_powerbi_script(sql: str) -> str:
+    """
+    Monta o código M (Power Query) pronto para colar no Power BI Desktop.
+    O usuário precisa substituir [CAMINHO_DO_BANCO] pelo path local do .db.
+    Em produção SAP/HANA, substituir Sqlite.Database por SapHana.Database.
+    """
+    sql_inline = sql.replace('"', "'").replace("\n", " ").strip()
+    return (
+        'let\n'
+        '    // Substitua [CAMINHO_DO_BANCO] pelo caminho completo do arquivo .db\n'
+        '    // Exemplo Windows: C:\\Users\\usuario\\dataspeak\\backend\\data\\dataspeak_simulado.db\n'
+        '    Fonte = Sqlite.Database("[CAMINHO_DO_BANCO]",\n'
+        '        [Query = "' + sql_inline + '"]),\n'
+        '    Resultado = Fonte\n'
+        'in\n'
+        '    Resultado'
+    )
+
+
 async def generate_sql(
     question: str,
     model: str = DEFAULT_MODEL,
@@ -296,5 +315,10 @@ async def generate_sql(
 
     # NOVO: normaliza invariante refusal/sql
     result = normalize_refusal(result)
+
+    if result.get("sql"):
+        result["powerbi_script"] = build_powerbi_script(result["sql"])
+    else:
+        result["powerbi_script"] = None
 
     return result

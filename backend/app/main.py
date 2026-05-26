@@ -100,6 +100,7 @@ class QueryResponse(BaseModel):
     kpis: list[dict] = []
     chart_type: Optional[str] = None
     chart_data: dict = {}
+    powerbi_script: Optional[str] = None
 
     # Tempo total
     duration_ms: int
