@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Host_Grotesk, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
 const hostGrotesk = Host_Grotesk({
@@ -36,21 +37,23 @@ export default function RootLayout({
       className={`${hostGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background tracking-[-0.02em] cursor-default">
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "var(--color-bg-a1)",
-              color: "var(--color-fg-1)",
-              border: "1px solid var(--color-border)",
-              fontFamily: "var(--font-sans)",
-              borderRadius: "14px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
-            },
-            className: "!rounded-[14px]",
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "var(--color-bg-a1)",
+                color: "var(--color-fg-1)",
+                border: "1px solid var(--color-border)",
+                fontFamily: "var(--font-sans)",
+                borderRadius: "14px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
+              },
+              className: "!rounded-[14px]",
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

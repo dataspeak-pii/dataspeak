@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
@@ -50,7 +50,7 @@ export default function LoginPage() {
       {/* Top bar with logo + back to home */}
       <header className="relative z-10 flex items-center justify-between h-14 px-6 border-b border-border">
         <Link href="/">
-          <Image src="/logo.svg" alt="DataSpeak" width={120} height={24} priority />
+          <Logo width={120} height={24} />
         </Link>
         <Link
           href="/"

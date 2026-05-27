@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 import { getSession, clearSession } from "@/lib/auth";
 import type { Session } from "@/lib/auth";
 import type { QueryHistoryItem } from "@/types";
@@ -75,7 +75,7 @@ export default function AccountPage() {
       {/* Top bar */}
       <header className="relative z-10 flex items-center justify-between h-14 px-6 border-b border-border bg-background">
         <Link href="/">
-          <Image src="/logo.svg" alt="DataSpeak" width={120} height={24} priority />
+          <Logo width={120} height={24} />
         </Link>
         <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           ← Voltar ao início

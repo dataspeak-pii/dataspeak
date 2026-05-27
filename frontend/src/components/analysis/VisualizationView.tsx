@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import type { AnalysisResult, ChartDataPoint } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -170,6 +171,8 @@ export function VisualizationView({ result }: VisualizationViewProps) {
   const [chartMode, setChartMode] = useState<ChartMode>(
     result.chartType === "line" ? "line" : "bar"
   );
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const kpis = result.kpis ?? [];
 
@@ -239,9 +242,11 @@ export function VisualizationView({ result }: VisualizationViewProps) {
       <div
         className="absolute -inset-6 -z-10 rounded-3xl pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 20% 30%, oklch(0.93 0.05 50 / 0.35) 0%, transparent 60%), " +
-            "radial-gradient(ellipse 60% 40% at 80% 70%, oklch(0.86 0.07 200 / 0.18) 0%, transparent 60%)",
+          background: isDark
+            ? "radial-gradient(ellipse 80% 50% at 20% 30%, oklch(0.52 0.10 42 / 0.12) 0%, transparent 60%), " +
+              "radial-gradient(ellipse 60% 40% at 80% 70%, oklch(0.45 0.08 200 / 0.10) 0%, transparent 60%)"
+            : "radial-gradient(ellipse 80% 50% at 20% 30%, oklch(0.93 0.05 50 / 0.35) 0%, transparent 60%), " +
+              "radial-gradient(ellipse 60% 40% at 80% 70%, oklch(0.86 0.07 200 / 0.18) 0%, transparent 60%)",
         }}
       />
 
@@ -282,7 +287,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   className={cn(
                     "p-1.5 rounded-lg transition-colors",
                     chartMode === mode
-                      ? "bg-background shadow-sm text-brand-700"
+                      ? "bg-background shadow-sm text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -321,7 +326,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                         <Cell
                           key={i}
                           fill={COLORS[i % COLORS.length]}
-                          stroke="white"
+                          stroke={isDark ? "#1a1a1a" : "#fff"}
                           strokeWidth={0.5}
                         />
                       ))}
@@ -355,24 +360,27 @@ export function VisualizationView({ result }: VisualizationViewProps) {
               <ResponsiveContainer width="100%" height={280}>
                 {chartMode === "bar" ? (
                   <BarChart data={chartData} barGap={4}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2d2d2d" : "#f0f0f0"} />
                     <XAxis
                       dataKey="label"
                       interval={0}
                       height={xHeight}
                       tick={(p) => (
                         <XAxisTick
-                          x={p.x} y={p.y} payload={p.payload}
+                          x={Number(p.x)} y={Number(p.y)} payload={p.payload}
                           angled={needsAngle} maxLen={xMaxLen}
                         />
                       )}
                     />
-                    <YAxis tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11, fill: isDark ? "#9ca3af" : "#6b7280" }} />
                     <Tooltip
                       contentStyle={{
                         fontSize: 12,
                         borderRadius: 10,
-                        boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
+                        boxShadow: isDark ? "0 4px 24px rgba(0,0,0,0.40)" : "0 4px 24px rgba(0,0,0,0.10)",
+                        background: isDark ? "#1e1e1e" : "#fff",
+                        border: isDark ? "1px solid #2d2d2d" : "1px solid #e5e7eb",
+                        color: isDark ? "#ededed" : "#111",
                       }}
                       formatter={(v) =>
                         v != null ? Number(v).toLocaleString("pt-BR") : ""
@@ -396,24 +404,27 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   </BarChart>
                 ) : (
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2d2d2d" : "#f0f0f0"} />
                     <XAxis
                       dataKey="label"
                       interval={0}
                       height={xHeight}
                       tick={(p) => (
                         <XAxisTick
-                          x={p.x} y={p.y} payload={p.payload}
+                          x={Number(p.x)} y={Number(p.y)} payload={p.payload}
                           angled={needsAngle} maxLen={xMaxLen}
                         />
                       )}
                     />
-                    <YAxis tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11, fill: isDark ? "#9ca3af" : "#6b7280" }} />
                     <Tooltip
                       contentStyle={{
                         fontSize: 12,
                         borderRadius: 10,
-                        boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
+                        boxShadow: isDark ? "0 4px 24px rgba(0,0,0,0.40)" : "0 4px 24px rgba(0,0,0,0.10)",
+                        background: isDark ? "#1e1e1e" : "#fff",
+                        border: isDark ? "1px solid #2d2d2d" : "1px solid #e5e7eb",
+                        color: isDark ? "#ededed" : "#111",
                       }}
                       formatter={(v) =>
                         v != null ? Number(v).toLocaleString("pt-BR") : ""

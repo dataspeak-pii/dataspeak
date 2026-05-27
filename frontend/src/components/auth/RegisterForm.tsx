@@ -74,7 +74,7 @@ export function RegisterForm({ onBack, onSuccess }: Props) {
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
         {error && (
-          <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-start gap-2 bg-danger-bg border border-danger/30 text-danger rounded-xl px-4 py-3 text-sm">
             <AlertCircle size={15} className="mt-0.5 shrink-0" /> {error}
           </div>
         )}

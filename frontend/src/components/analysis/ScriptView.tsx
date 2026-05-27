@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import type { GeneratedScript } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,8 @@ function TrafficLights() {
 export function ScriptView({ script }: ScriptViewProps) {
   const [sqlCopied, setSqlCopied] = useState(false);
   const [pbiCopied, setPbiCopied] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const codeTheme = resolvedTheme === "dark" ? "github-dark" : "github-light";
 
   if (!script.code) {
     return (
@@ -83,9 +86,9 @@ export function ScriptView({ script }: ScriptViewProps) {
             )}
           </div>
 
-          <div className="mt-3 flex items-start gap-2 bg-accent-50 border border-accent-100 rounded-xl px-3 py-2.5">
-            <Info className="w-3.5 h-3.5 text-accent-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-accent-800 leading-relaxed">{script.explanation}</p>
+          <div className="mt-3 flex items-start gap-2 bg-accent-50 dark:bg-accent-950/40 border border-accent-100 dark:border-accent-800/50 rounded-xl px-3 py-2.5">
+            <Info className="w-3.5 h-3.5 text-accent-600 dark:text-accent-300 mt-0.5 shrink-0" />
+            <p className="text-xs text-accent-800 dark:text-accent-200 leading-relaxed">{script.explanation}</p>
           </div>
         </CardContent>
       </Card>
@@ -101,7 +104,7 @@ export function ScriptView({ script }: ScriptViewProps) {
             variant="ghost"
             size="sm"
             onClick={handleCopySQL}
-            className="h-7 px-3 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/60 gap-1.5"
+            className="h-7 px-3 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60 gap-1.5"
           >
             {sqlCopied ? (
               <>
@@ -116,7 +119,7 @@ export function ScriptView({ script }: ScriptViewProps) {
             )}
           </Button>
         </CodeBlockGroup>
-        <CodeBlockCode code={script.code} language="sql" theme="github-light" />
+        <CodeBlockCode code={script.code} language="sql" theme={codeTheme} />
       </CodeBlock>
 
       {/* Power BI M script block */}
@@ -131,7 +134,7 @@ export function ScriptView({ script }: ScriptViewProps) {
               variant="ghost"
               size="sm"
               onClick={handleCopyPBI}
-              className="h-7 px-3 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/60 gap-1.5"
+              className="h-7 px-3 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60 gap-1.5"
             >
               {pbiCopied ? (
                 <>
@@ -148,13 +151,13 @@ export function ScriptView({ script }: ScriptViewProps) {
           </CodeBlockGroup>
 
           {/* Amber warning banner */}
-          <div className="flex items-start gap-2 px-4 py-2.5 bg-amber-50 border-b border-amber-200/60">
-            <Info size={13} className="text-amber-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-amber-700 leading-relaxed">
+          <div className="flex items-start gap-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200/60 dark:border-amber-700/30">
+            <Info size={13} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
               Substitua{" "}
-              <code className="font-mono bg-amber-100 px-1 rounded">[CAMINHO_DO_BANCO]</code>{" "}
+              <code className="font-mono bg-amber-100 dark:bg-amber-800/40 px-1 rounded">[CAMINHO_DO_BANCO]</code>{" "}
               pelo caminho do arquivo{" "}
-              <code className="font-mono bg-amber-100 px-1 rounded">.db</code>{" "}
+              <code className="font-mono bg-amber-100 dark:bg-amber-800/40 px-1 rounded">.db</code>{" "}
               antes de usar.
             </p>
           </div>
@@ -162,7 +165,7 @@ export function ScriptView({ script }: ScriptViewProps) {
           <CodeBlockCode
             code={script.powerbiScript}
             language="powerquery"
-            theme="github-light"
+            theme={codeTheme}
           />
         </CodeBlock>
       )}
