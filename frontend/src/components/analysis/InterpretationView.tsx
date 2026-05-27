@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import type { AnalysisInterpretation } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,15 +34,20 @@ const CARD_VARIANTS = {
 };
 
 export function InterpretationView({ data }: InterpretationViewProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
   return (
     <div className="space-y-4 relative">
       {/* Gradient mesh for depth */}
       <div
         className="absolute -inset-6 -z-10 rounded-3xl pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse 70% 50% at 15% 40%, oklch(0.93 0.05 50 / 0.30) 0%, transparent 55%), " +
-            "radial-gradient(ellipse 55% 45% at 85% 60%, oklch(0.97 0.02 200 / 0.22) 0%, transparent 55%)",
+          background: isDark
+            ? "radial-gradient(ellipse 70% 50% at 15% 40%, oklch(0.52 0.10 42 / 0.10) 0%, transparent 55%), " +
+              "radial-gradient(ellipse 55% 45% at 85% 60%, oklch(0.45 0.08 200 / 0.08) 0%, transparent 55%)"
+            : "radial-gradient(ellipse 70% 50% at 15% 40%, oklch(0.93 0.05 50 / 0.30) 0%, transparent 55%), " +
+              "radial-gradient(ellipse 55% 45% at 85% 60%, oklch(0.97 0.02 200 / 0.22) 0%, transparent 55%)",
         }}
       />
 
@@ -55,8 +61,8 @@ export function InterpretationView({ data }: InterpretationViewProps) {
         <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
           <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-accent-50 flex items-center justify-center">
-                <Brain className="w-3.5 h-3.5 text-accent-700" />
+              <div className="w-6 h-6 rounded-lg bg-accent-50 dark:bg-accent-950/50 flex items-center justify-center">
+                <Brain className="w-3.5 h-3.5 text-accent-700 dark:text-accent-300" />
               </div>
               Interpretação da IA
             </CardTitle>
@@ -132,8 +138,8 @@ export function InterpretationView({ data }: InterpretationViewProps) {
         <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
           <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-accent-50 flex items-center justify-center">
-                <Database className="w-3.5 h-3.5 text-accent-700" />
+              <div className="w-6 h-6 rounded-lg bg-accent-50 dark:bg-accent-950/50 flex items-center justify-center">
+                <Database className="w-3.5 h-3.5 text-accent-700 dark:text-accent-300" />
               </div>
               Campos e tabelas SAP identificados
             </CardTitle>
@@ -172,7 +178,7 @@ export function InterpretationView({ data }: InterpretationViewProps) {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}
-                        className="border-b border-border/50 hover:bg-brand-50/30 transition-colors"
+                        className="border-b border-border/50 hover:bg-brand-50/30 dark:hover:bg-brand-900/20 transition-colors"
                       >
                         <td className="py-2.5 px-3 text-foreground font-medium">{f.name}</td>
                         <td className="py-2.5 px-3">

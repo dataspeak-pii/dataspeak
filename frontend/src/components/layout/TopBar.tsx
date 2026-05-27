@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import type { Session } from "@/lib/auth";
 import { HoverButton } from "@/components/ui/hover-button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Logo } from "@/components/ui/logo";
 import { User } from "lucide-react";
 
 export function TopBar() {
@@ -31,10 +32,11 @@ export function TopBar() {
   return (
     <header className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0 z-20">
       <Link href="/" className="flex items-center">
-        <Image src="/logo.svg" alt="DataSpeak" width={128} height={26} priority />
+        <Logo width={128} height={26} />
       </Link>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         {mounted && (
           session ? (
             <HoverButton

@@ -35,13 +35,13 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
   if (success) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-        <div className="w-14 h-14 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center mx-auto mb-4">
-          <Send size={22} className="text-brand-600" />
+        <div className="w-14 h-14 rounded-2xl bg-brand-50 dark:bg-brand-900/30 border border-brand-200 dark:border-brand-800/50 flex items-center justify-center mx-auto mb-4">
+          <Send size={22} className="text-brand-600 dark:text-brand-400" />
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">E-mail enviado!</h2>
         <p className="text-sm text-muted-foreground mb-1">Enviamos as instruções para:</p>
         <p className="text-sm font-semibold text-foreground mb-5">{email}</p>
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3 text-xs text-left mb-6">
+        <div className="bg-info-bg border border-info/30 text-info rounded-xl px-4 py-3 text-xs text-left mb-6">
           Em um sistema real, você receberia o link de redefinição por e-mail.
         </div>
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 mx-auto transition-colors">
@@ -65,7 +65,7 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
         {error && (
-          <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-start gap-2 bg-danger-bg border border-danger/30 text-danger rounded-xl px-4 py-3 text-sm">
             <AlertCircle size={15} className="mt-0.5 shrink-0" /> {error}
           </div>
         )}
@@ -75,7 +75,7 @@ export function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
             <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="email" placeholder="voce@suaempresa.com" value={email} autoComplete="email"
               onChange={(e) => { setEmail(e.target.value); setError(""); }}
-              className={cn("w-full rounded-xl border border-input bg-background text-sm text-foreground placeholder-gray-400 outline-none py-2.5 pl-9 pr-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all")} />
+              className={cn("w-full rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground/60 outline-none py-2.5 pl-9 pr-4 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all")} />
           </div>
         </div>
         <HoverButton type="submit" disabled={loading} fullWidth size="lg" className="rounded-2xl">

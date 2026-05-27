@@ -110,7 +110,7 @@ export function Sidebar({
                     className={cn(
                       "w-full text-left px-4 py-3.5 rounded-xl transition-all relative",
                       isActive
-                        ? "bg-brand-50 border border-brand-100"
+                        ? "bg-brand-50 dark:bg-brand-900/25 border border-brand-100 dark:border-brand-800/40"
                         : isHovered
                           ? "bg-[var(--color-bg-a1)] border border-border"
                           : "border border-transparent hover:bg-[var(--color-bg-a1)]"

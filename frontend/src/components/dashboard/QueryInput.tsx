@@ -189,7 +189,7 @@ export function QueryInput({
                   className={cn(
                     "text-sm px-4 py-2 rounded-full border border-border",
                     "bg-[var(--color-bg-a1)] text-muted-foreground font-medium",
-                    "hover:border-brand-300 hover:text-brand-700 hover:bg-brand-50",
+                    "hover:border-brand-300 dark:hover:border-brand-700 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/30",
                     "transition-all duration-150 shadow-sm"
                   )}
                 >
