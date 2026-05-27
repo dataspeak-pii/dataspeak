@@ -394,6 +394,7 @@ export function adaptQueryResponse(
     code: res.sql ?? "",
     explanation: res.explanation ?? "",
     estimatedRows: res.estimated_rows ?? res.total_rows ?? 0,
+    powerbiScript: res.powerbi_script ?? null,
   };
 
   const table = mapApiResultsToTable(res);

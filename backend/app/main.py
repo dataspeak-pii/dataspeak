@@ -232,6 +232,7 @@ async def query(req: QueryRequest):
         total_rows=execution.total_rows,
         truncated=execution.truncated,
         execution_error=execution_error,
+        powerbi_script=result.get("powerbi_script"),
         **compute_analytics(execution.results, execution.columns),
         duration_ms=duration_ms,
     )
