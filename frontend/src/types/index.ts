@@ -33,7 +33,6 @@ export interface GeneratedScript {
   code: string;
   explanation: string;
   estimatedRows: number;
-  powerbiScript?: string | null;
 }
 
 export interface DataRow {

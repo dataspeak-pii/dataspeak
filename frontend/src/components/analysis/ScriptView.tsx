@@ -30,7 +30,6 @@ function TrafficLights() {
 
 export function ScriptView({ script }: ScriptViewProps) {
   const [sqlCopied, setSqlCopied] = useState(false);
-  const [pbiCopied, setPbiCopied] = useState(false);
   const { resolvedTheme } = useTheme();
   const codeTheme = resolvedTheme === "dark" ? "github-dark" : "github-light";
 
@@ -52,14 +51,6 @@ export function ScriptView({ script }: ScriptViewProps) {
     setSqlCopied(true);
     toast.success("SQL copiado para a área de transferência", { duration: 2000 });
     setTimeout(() => setSqlCopied(false), 2000);
-  };
-
-  const handleCopyPBI = async () => {
-    if (!script.powerbiScript) return;
-    await navigator.clipboard.writeText(script.powerbiScript);
-    setPbiCopied(true);
-    toast.success("Script Power BI copiado", { duration: 2000 });
-    setTimeout(() => setPbiCopied(false), 2000);
   };
 
   return (
@@ -122,53 +113,6 @@ export function ScriptView({ script }: ScriptViewProps) {
         <CodeBlockCode code={script.code} language="sql" theme={codeTheme} />
       </CodeBlock>
 
-      {/* Power BI M script block */}
-      {script.powerbiScript && (
-        <CodeBlock className="shadow-sm">
-          <CodeBlockGroup>
-            <div className="flex items-center gap-3">
-              <TrafficLights />
-              <span className="font-mono text-xs text-neutral-400">power_query.m</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopyPBI}
-              className="h-7 px-3 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60 gap-1.5"
-            >
-              {pbiCopied ? (
-                <>
-                  <CheckCheck className="w-3.5 h-3.5 text-brand-600" />
-                  <span className="text-brand-600 text-xs">Copiado!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span className="text-xs">Copiar</span>
-                </>
-              )}
-            </Button>
-          </CodeBlockGroup>
-
-          {/* Amber warning banner */}
-          <div className="flex items-start gap-2 px-4 py-2.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200/60 dark:border-amber-700/30">
-            <Info size={13} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
-              Substitua{" "}
-              <code className="font-mono bg-amber-100 dark:bg-amber-800/40 px-1 rounded">[CAMINHO_DO_BANCO]</code>{" "}
-              pelo caminho do arquivo{" "}
-              <code className="font-mono bg-amber-100 dark:bg-amber-800/40 px-1 rounded">.db</code>{" "}
-              antes de usar.
-            </p>
-          </div>
-
-          <CodeBlockCode
-            code={script.powerbiScript}
-            language="powerquery"
-            theme={codeTheme}
-          />
-        </CodeBlock>
-      )}
     </div>
   );
 }

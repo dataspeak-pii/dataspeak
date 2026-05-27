@@ -79,8 +79,6 @@ export interface QueryResponse {
   chart_data?: ApiChartDataRaw | ApiChartPoint[];
   chart_type?: "line" | "bar" | "pie" | "composed";
 
-  // Bloco F — exportação Power BI
-  powerbi_script?: string | null;
 }
 
 // ─── Erro tipado ───────────────────────────────────────────────────────────
