@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import type { AnalysisResult } from "@/types";
+import type { AnalysisResult, ChartDataPoint } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { KPICard } from "@/components/shared/KPICard";
 import { DataTableView } from "./DataTableView";
@@ -172,10 +172,32 @@ export function VisualizationView({ result }: VisualizationViewProps) {
   );
 
   const kpis = result.kpis ?? [];
-  const chartData = Array.isArray(result.chartData) ? result.chartData : [];
 
+  const rawChartData = Array.isArray(result.chartData) ? result.chartData : [];
+
+  // Fallback: se o backend não enviou chart_data, deriva da tabela
+  const chartData: ChartDataPoint[] = rawChartData.length > 0
+    ? rawChartData
+    : (() => {
+        const { columns, rows } = result.table;
+        if (!rows.length) return [];
+        const numericCols = columns.filter((col) =>
+          rows.some((r) => typeof r[col] === "number")
+        );
+        const labelCol = columns.find((col) => !numericCols.includes(col));
+        if (!labelCol || !numericCols.length) return [];
+        return rows.map((row) => {
+          const point: ChartDataPoint = { label: String(row[labelCol] ?? "") };
+          numericCols.forEach((col) => { point[col] = Number(row[col] ?? 0); });
+          return point;
+        });
+      })();
+
+  // "originalLabel" guarda o ID SAP original — não é série numérica
   const seriesKeys = chartData.length
-    ? Object.keys(chartData[0]).filter((k) => k !== "label")
+    ? Object.keys(chartData[0]).filter(
+        (k) => k !== "label" && k !== "originalLabel"
+      )
     : [];
 
   const seriesSum = (key: string) =>

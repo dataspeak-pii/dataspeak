@@ -3,54 +3,33 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { GeneratedScript } from "@/types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Code2, Copy, CheckCheck, Info, Rows } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  CodeBlock,
+  CodeBlockCode,
+  CodeBlockGroup,
+} from "@/components/ui/code-block";
+import { Code2, Copy, CheckCheck, Info, Rows } from "lucide-react";
 
 interface ScriptViewProps {
   script: GeneratedScript;
 }
 
-// Minimal keyword-based syntax highlight for SQL
-function highlightSQL(code: string | null | undefined) {
-  if (!code) return "";
-  const keywords = [
-    "SELECT","FROM","WHERE","JOIN","INNER","LEFT","ON","AND","OR","NOT",
-    "GROUP BY","ORDER BY","HAVING","AS","IN","BETWEEN","TOP","DISTINCT",
-    "SUM","COUNT","AVG","MAX","MIN","TO_CHAR","ADD_MONTHS","SYSDATE",
-    "ASC","DESC","BY","INTO","SET","UPDATE","INSERT","DELETE","WITH",
-  ];
-
-  // Escape HTML
-  let html = code
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  // Comments
-  html = html.replace(/(--[^\n]*)/g, '<span class="text-gray-400 italic">$1</span>');
-
-  // String literals
-  html = html.replace(/'([^']*)'/g, '<span class="text-[color:var(--color-syntax-string)]">\'$1\'</span>');
-
-  // Keywords (only outside of already-tagged spans — simple approach)
-  keywords.forEach((kw) => {
-    const re = new RegExp(`\\b(${kw})\\b`, "g");
-    html = html.replace(re, '<span class="text-[color:var(--color-syntax-keyword)] font-semibold">$1</span>');
-  });
-
-  // Table/field names in ALL_CAPS (SAP naming)
-  html = html.replace(
-    /\b([A-Z]{2,}[A-Z0-9_]*\.[A-Z_]+)\b/g,
-    '<span class="text-[color:var(--color-brand-400)]">$&</span>'
+function TrafficLights() {
+  return (
+    <div className="flex gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
+      <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
+      <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
+    </div>
   );
-
-  return html;
 }
 
 export function ScriptView({ script }: ScriptViewProps) {
-  const [copied, setCopied] = useState(false);
+  const [sqlCopied, setSqlCopied] = useState(false);
+  const [pbiCopied, setPbiCopied] = useState(false);
 
   if (!script.code) {
     return (
@@ -65,16 +44,24 @@ export function ScriptView({ script }: ScriptViewProps) {
     );
   }
 
-  const handleCopy = async () => {
+  const handleCopySQL = async () => {
     await navigator.clipboard.writeText(script.code);
-    setCopied(true);
+    setSqlCopied(true);
     toast.success("SQL copiado para a área de transferência", { duration: 2000 });
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setSqlCopied(false), 2000);
+  };
+
+  const handleCopyPBI = async () => {
+    if (!script.powerbiScript) return;
+    await navigator.clipboard.writeText(script.powerbiScript);
+    setPbiCopied(true);
+    toast.success("Script Power BI copiado", { duration: 2000 });
+    setTimeout(() => setPbiCopied(false), 2000);
   };
 
   return (
     <div className="space-y-4">
-      {/* Info bar */}
+      {/* Metadata bar */}
       <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -103,29 +90,23 @@ export function ScriptView({ script }: ScriptViewProps) {
         </CardContent>
       </Card>
 
-      {/* Code block */}
-      <Card className="border border-border shadow-sm overflow-hidden rounded-2xl">
-        <CardHeader className="py-3 px-4 border-b border-white/10 bg-gray-900 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <div className="w-3 h-3 rounded-full bg-yellow-400" />
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-            </div>
-            <span className="text-xs text-gray-400 font-mono ml-2">
-              query_gerada.sql
-            </span>
+      {/* SQL code block */}
+      <CodeBlock className="shadow-sm">
+        <CodeBlockGroup>
+          <div className="flex items-center gap-3">
+            <TrafficLights />
+            <span className="font-mono text-xs text-neutral-400">query_gerada.sql</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleCopy}
-            className="h-7 px-3 text-gray-400 hover:text-white hover:bg-gray-700 gap-1.5"
+            onClick={handleCopySQL}
+            className="h-7 px-3 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/60 gap-1.5"
           >
-            {copied ? (
+            {sqlCopied ? (
               <>
-                <CheckCheck className="w-3.5 h-3.5 text-brand-400" />
-                <span className="text-brand-400 text-xs">Copiado!</span>
+                <CheckCheck className="w-3.5 h-3.5 text-brand-600" />
+                <span className="text-brand-600 text-xs">Copiado!</span>
               </>
             ) : (
               <>
@@ -134,17 +115,57 @@ export function ScriptView({ script }: ScriptViewProps) {
               </>
             )}
           </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="bg-gray-950 overflow-x-auto">
-            <pre className="p-5 text-xs leading-relaxed font-mono text-gray-300">
-              <code
-                dangerouslySetInnerHTML={{ __html: highlightSQL(script.code) }}
-              />
-            </pre>
+        </CodeBlockGroup>
+        <CodeBlockCode code={script.code} language="sql" theme="github-light" />
+      </CodeBlock>
+
+      {/* Power BI M script block */}
+      {script.powerbiScript && (
+        <CodeBlock className="shadow-sm">
+          <CodeBlockGroup>
+            <div className="flex items-center gap-3">
+              <TrafficLights />
+              <span className="font-mono text-xs text-neutral-400">power_query.m</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyPBI}
+              className="h-7 px-3 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/60 gap-1.5"
+            >
+              {pbiCopied ? (
+                <>
+                  <CheckCheck className="w-3.5 h-3.5 text-brand-600" />
+                  <span className="text-brand-600 text-xs">Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span className="text-xs">Copiar</span>
+                </>
+              )}
+            </Button>
+          </CodeBlockGroup>
+
+          {/* Amber warning banner */}
+          <div className="flex items-start gap-2 px-4 py-2.5 bg-amber-50 border-b border-amber-200/60">
+            <Info size={13} className="text-amber-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700 leading-relaxed">
+              Substitua{" "}
+              <code className="font-mono bg-amber-100 px-1 rounded">[CAMINHO_DO_BANCO]</code>{" "}
+              pelo caminho do arquivo{" "}
+              <code className="font-mono bg-amber-100 px-1 rounded">.db</code>{" "}
+              antes de usar.
+            </p>
           </div>
-        </CardContent>
-      </Card>
+
+          <CodeBlockCode
+            code={script.powerbiScript}
+            language="powerquery"
+            theme="github-light"
+          />
+        </CodeBlock>
+      )}
     </div>
   );
 }

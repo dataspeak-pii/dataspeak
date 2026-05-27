@@ -1,14 +1,43 @@
+"use client";
+
 import type { DataTable } from "@/types";
 import { formatColumnLabel } from "@/lib/column-labels";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table2, Database, AlertTriangle, Info } from "lucide-react";
+import { Table2, Database, AlertTriangle, Info, Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface DataTableViewProps {
   table: DataTable;
 }
 
 export function DataTableView({ table }: DataTableViewProps) {
+  const exportCSV = () => {
+    if (!table?.rows?.length) return;
+
+    const headers = table.columns.map((col) => `"${col}"`).join(",");
+    const rows = table.rows.map((row) =>
+      table.columns.map((col) => {
+        const val = row[col] ?? "";
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      }).join(",")
+    );
+
+    const csv = [headers, ...rows].join("\n");
+    const bom = "﻿";
+    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `dataspeak_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado com sucesso", { duration: 2000 });
+  };
+
   if (table.executionError) {
     return (
       <Card className="border border-danger shadow-sm overflow-hidden">
@@ -34,7 +63,7 @@ export function DataTableView({ table }: DataTableViewProps) {
 
   return (
     <Card className="border border-border shadow-sm overflow-hidden rounded-2xl bg-[var(--color-bg-a1)]">
-      <CardHeader className="py-3 px-4 border-b border-border bg-[var(--color-bg-a2)] flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between py-3 px-4 border-b border-border bg-[var(--color-bg-a2)] rounded-t-2xl">
         <div className="flex items-center gap-2">
           <Table2 className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-semibold text-foreground">
@@ -49,8 +78,15 @@ export function DataTableView({ table }: DataTableViewProps) {
           <Badge variant="secondary" className="text-xs rounded-md">
             {table.totalRows.toLocaleString("pt-BR")} registros
           </Badge>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:border-brand-400 px-2.5 py-1.5 rounded-md transition-colors"
+          >
+            <Download size={12} />
+            Exportar CSV
+          </button>
         </div>
-      </CardHeader>
+      </div>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
