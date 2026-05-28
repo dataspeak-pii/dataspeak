@@ -73,6 +73,13 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
 - Prefira `valor_total` a `valor_total_de_vendas`
 - Prefira `total_pedidos` a `total_de_pedidos_realizados`
 
+## Campos descritivos
+- Sempre inclua campos de descrição/nome disponíveis no catálogo além de chaves e valores numéricos
+- Em MARA: sempre inclua MAKTX AS descricao_material quando MATNR estiver no SELECT ou GROUP BY
+- Em KNA1: sempre inclua NAME1 AS nome_cliente quando KUNNR estiver no SELECT
+- Em LFA1: sempre inclua NAME1 AS nome_fornecedor quando LIFNR estiver no SELECT
+- Regra geral: campos com sufixo MAKTX, NAME1, NAME2 ou descrição explícita no catálogo devem aparecer no SELECT quando a tabela for consultada
+
 ## Resolução de chaves técnicas SAP
 - Nunca exiba chaves técnicas brutas como label de saída ao usuário
 - Quando MATNR aparecer no SELECT ou GROUP BY como dimensão de exibição,

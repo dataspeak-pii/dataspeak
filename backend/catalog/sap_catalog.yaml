@@ -36,6 +36,11 @@ tables:
     type: UNIT(3)
     description: Unidade de medida base do material.
     business_label: Unidade de medida
+  - name: MAKTX
+    type: CHAR(40)
+    description: Descrição do material em português. Campo mais importante para exibição ao usuário final — use sempre que MATNR aparecer no SELECT.
+    business_label: Descrição do material
+    example: Parafuso Sextavado M8x30
   example_questions:
   - Quais materiais do tipo matéria-prima estão cadastrados?
   - Quantos produtos acabados existem no sistema?
