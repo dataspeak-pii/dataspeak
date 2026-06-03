@@ -80,6 +80,15 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
 - Em LFA1: sempre inclua NAME1 AS nome_fornecedor quando LIFNR estiver no SELECT
 - Regra geral: campos com sufixo MAKTX, NAME1, NAME2 ou descrição explícita no catálogo devem aparecer no SELECT quando a tabela for consultada
 
+## Formato de datas SAP
+- Datas em tabelas SAP são armazenadas como TEXT no formato YYYYMMDD (ex: '20260401')
+- Nunca use funções DATE(), datetime() ou strftime() para filtros em campos de data SAP
+- Para filtros temporais, gere literais string diretamente:
+  - "mês passado": >= '20260401' AND < '20260501'
+  - "este ano": >= '20260101' AND < '20270101'
+  - "último trimestre": >= '20260101' AND < '20260401'
+- Use BETWEEN apenas com literais string no formato YYYYMMDD
+
 ## Resolução de chaves técnicas SAP
 - Nunca exiba chaves técnicas brutas como label de saída ao usuário
 - Quando MATNR aparecer no SELECT ou GROUP BY como dimensão de exibição,
