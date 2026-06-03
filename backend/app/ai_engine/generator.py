@@ -108,6 +108,12 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
   - "último trimestre": >= '20260101' AND < '20260401'
 - Use BETWEEN apenas com literais string no formato YYYYMMDD
 
+## Nível de confiança (confidence)
+- Use "high" quando a intenção é clara, as tabelas são únicas e não há ambiguidade semântica
+- Use "medium" quando há ambiguidade semântica, múltiplas tabelas possíveis, ou a pergunta admite mais de uma interpretação válida
+- Use "low" quando a pergunta é vaga, fora do catálogo, não interpretável, ou resulta em recusa
+- Nunca retorne sempre "high" — o campo deve refletir a certeza real do sistema sobre a interpretação
+
 ## Resolução de chaves técnicas SAP
 - Nunca exiba chaves técnicas brutas como label de saída ao usuário
 - Quando MATNR aparecer no SELECT ou GROUP BY como dimensão de exibição,
@@ -154,13 +160,13 @@ Resposta de recusa:
 # Exemplos de recusa (siga este padrão)
 
 Pergunta: "Liste os funcionários cadastrados no sistema"
-Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
+Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
 
 Pergunta: "Delete todos os pedidos de compra antigos"
 Resposta: {{"intent":"Deletar pedidos de compra antigos","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"write_operation","message":"O DataSpeak é um sistema de consulta apenas. Operações de exclusão não são permitidas."}}}}
 
 Pergunta: "Me mostra tudo"
-Resposta: {{"intent":"Solicitação genérica não específica","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"ambiguous","message":"A pergunta é genérica demais. Você quer ver dados sobre vendas, compras, estoque ou produção?"}}}}"""
+Resposta: {{"intent":"Solicitação genérica não específica","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"ambiguous","message":"A pergunta é genérica demais. Você quer ver dados sobre vendas, compras, estoque ou produção?"}}}}"""
 
 
 def build_user_prompt(question: str, tables: list[dict]) -> str:
