@@ -27,7 +27,7 @@ DEPOSITOS_PESOS: Final[list[float]] = [0.60, 0.25, 0.15]
 
 # Janela temporal
 DATA_INICIO: Final[str] = "20240101"
-DATA_FIM: Final[str] = "20251231"
+DATA_FIM: Final[str] = "20260531"
 SAZONALIDADE_FIM_MES_PESO: Final[float] = 0.30
 CRESCIMENTO_MENSAL: Final[float] = 0.01
 
