@@ -174,7 +174,7 @@ export function AnalysisPanel({
                 <TabsContent value="script">
                   {status === "loading"
                     ? <ScriptSkeleton />
-                    : result && <ScriptView script={result.script} />}
+                    : result && <ScriptView script={result.script} refusal={result.refusal} />}
                 </TabsContent>
                 <TabsContent value="visualization">
                   {status === "loading"

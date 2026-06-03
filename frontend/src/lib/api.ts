@@ -46,6 +46,11 @@ export interface ApiChartPoint {
   [series: string]: string | number;
 }
 
+export interface ApiRefusal {
+  reason: "out_of_catalog" | "write_operation" | "ambiguous" | "nonsense";
+  message: string;
+}
+
 export interface QueryResponse {
   // Bloco A — sempre presente
   sql: string;
@@ -61,6 +66,7 @@ export interface QueryResponse {
   intent?: string;
   category?: string;
   period?: string;
+  refusal?: ApiRefusal | null;
 
   // Bloco C — derivado do catálogo (Chat 05)
   fields?: ApiField[];

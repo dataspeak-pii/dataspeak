@@ -24,6 +24,7 @@ import type {
   ApiKpi,
   ApiChartDataRaw,
   ApiConfidence,
+  ApiRefusal,
 } from "./api";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -419,5 +420,6 @@ export function adaptQueryResponse(
     kpis,
     chartData,
     chartType: res.chart_type ?? "bar",
+    refusal: (res.refusal as ApiRefusal | null | undefined)?.message ?? null,
   };
 }
