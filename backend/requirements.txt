@@ -7,3 +7,4 @@ chromadb==0.5.3
 PyYAML==6.0.1
 Faker>=20.0.0
 pydantic-settings>=2.0.0
+sentence-transformers==5.5.1
