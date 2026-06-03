@@ -7,6 +7,7 @@ import os
 import re
 import json
 import httpx
+from datetime import date, timedelta
 from .retriever import retrieve_relevant_tables
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -21,10 +22,28 @@ CATALOG_TABLES = [
 ]
 
 
-def build_system_prompt() -> str:
+def build_system_prompt(reference_date: date | None = None) -> str:
     catalog_list = ", ".join(CATALOG_TABLES)
 
-    return f"""Você é um especialista em SAP e SQL, responsável por transformar
+    hoje = reference_date or date.today()
+    ontem = hoje - timedelta(days=1)
+    primeiro_dia_mes = hoje.replace(day=1)
+    ultimo_dia_mes_anterior = primeiro_dia_mes - timedelta(days=1)
+    primeiro_dia_mes_anterior = ultimo_dia_mes_anterior.replace(day=1)
+    primeiro_dia_ano = hoje.replace(month=1, day=1)
+
+    data_context = f"""## Contexto Temporal
+- Data atual: {hoje.strftime('%Y%m%d')} ({hoje.strftime('%d/%m/%Y')})
+- Ontem: {ontem.strftime('%Y%m%d')}
+- Primeiro dia do mês atual: {primeiro_dia_mes.strftime('%Y%m%d')}
+- Mês anterior: {primeiro_dia_mes_anterior.strftime('%Y%m%d')} a {ultimo_dia_mes_anterior.strftime('%Y%m%d')}
+- Início do ano atual: {primeiro_dia_ano.strftime('%Y%m%d')}
+Use sempre esses valores para resolver referências temporais relativas.
+Nunca invente ou assuma datas — use apenas os valores acima."""
+
+    return f"""{data_context}
+
+Você é um especialista em SAP e SQL, responsável por transformar
 perguntas de negócio em linguagem natural em queries SQL precisas, OU recusar
 perguntas que estão fora do escopo do sistema.
 
