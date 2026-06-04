@@ -118,7 +118,5 @@ export function adaptQueryResponse(
     chartType: response.chart_type ?? "bar",
   };
 
-  result.query.result = result;
-
   return result;
 }

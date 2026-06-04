@@ -2,4 +2,4 @@
 // No Windows, use: ipconfig
 // O backend precisa estar rodando com: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-export const API_URL = "http://10.2.0.87:8000";
+export const API_URL = "http://172.20.10.9:8000";

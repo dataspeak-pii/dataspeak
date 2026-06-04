@@ -29,6 +29,7 @@ import {
 } from "../../src/auth";
 import { getTenantFromEmail, type Tenant } from "../../src/tenants";
 import type { AnalysisResult, QueryHistoryItem, QueryStatus } from "../../src/types";
+import React from "react";
 
 type ScreenView = "home" | "login" | "register" | "forgot" | "account";
 type ResultTab = "interpretation" | "script" | "data";
@@ -51,7 +52,7 @@ const suggestions = [
 ];
 
 const infoPills: { icon: keyof typeof Feather.glyphMap; text: string }[] = [
-  { icon: "database", text: "16 Tabelas · 130 Campos SAP" },
+  { icon: "database", text: "15 Tabelas SAP" },
   { icon: "bar-chart-2", text: "Visualização automática" },
   { icon: "trending-up", text: "Análise em segundos" },
 ];
@@ -181,6 +182,11 @@ export default function HomeScreen() {
     const cleanedQuestion = question.trim();
     if (!cleanedQuestion || isLoading) return;
 
+    if (!session) {
+      setView("login");
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage(null);
     setResult(null);
@@ -267,7 +273,7 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.screen}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <TopBar
             isDark={isDark}
@@ -574,7 +580,10 @@ function TopBar({
               <Text style={[styles.loginText, { color: theme.text }]}>Entrar</Text>
             </Pressable>
 
-            <Pressable style={styles.createAccountButton} onPress={onRegister}>
+            <Pressable
+              style={[styles.createAccountButton, { backgroundColor: theme.primary }]}
+              onPress={onRegister}
+            >
               <Text style={styles.createAccountText}>Criar conta</Text>
             </Pressable>
           </>
@@ -1056,7 +1065,7 @@ function AccountScreen({
           <View style={styles.accountUserInfo}>
             <Text style={[styles.accountName, { color: theme.text }]}>{session.name}</Text>
             <Text style={[styles.accountMeta, { color: theme.muted }]}>
-              Membro desde {new Date(session.loginAt).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+              Membro desde {new Date(session.createdAt ?? session.loginAt).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
             </Text>
           </View>
         </View>
@@ -1206,11 +1215,20 @@ function HistoryDrawer({
   onClose: () => void;
   onSelect: (item: QueryHistoryItem) => void;
 }) {
-  if (!isOpen) return null;
+  const backdropOpacity = drawerTranslate.interpolate({
+    inputRange: [-320, 0],
+    outputRange: [0, 0.48],
+    extrapolate: "clamp",
+  });
 
   return (
-    <View style={styles.historyOverlay}>
-      <Pressable style={styles.historyBackdrop} onPress={onClose} />
+    <View
+      pointerEvents={isOpen ? "box-none" : "none"}
+      style={styles.historyOverlay}
+    >
+      <Animated.View style={[styles.historyBackdrop, { opacity: backdropOpacity }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      </Animated.View>
 
       <Animated.View
         style={[
@@ -1230,7 +1248,11 @@ function HistoryDrawer({
           </Pressable>
         </View>
 
-        <View style={styles.historyContent}>
+        <ScrollView
+          style={styles.historyContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {history.length === 0 ? (
             <Text style={[styles.emptyHistory, { color: theme.muted }]}>
               Nenhuma consulta realizada ainda.
@@ -1247,7 +1269,7 @@ function HistoryDrawer({
               </Pressable>
             ))
           )}
-        </View>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -1318,7 +1340,11 @@ function AnalysisResultView({
           <Text style={[styles.resultTitle, { color: theme.text }]}>Script SQL gerado</Text>
           <Text style={[styles.resultParagraph, { color: theme.muted }]}>{result.script.explanation}</Text>
 
-          <ScrollView horizontal style={[styles.codeBox, { backgroundColor: theme.codeBackground }]}>
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            style={[styles.codeBox, { backgroundColor: theme.codeBackground }]}
+          >
             <Text style={styles.codeText}>{result.script.code || "Nenhum SQL retornado pelo backend."}</Text>
           </ScrollView>
         </View>
@@ -1341,7 +1367,7 @@ function AnalysisResultView({
               O backend não retornou linhas de dados para esta consulta.
             </Text>
           ) : (
-            <ScrollView horizontal style={styles.tableScroll}>
+            <ScrollView horizontal nestedScrollEnabled style={styles.tableScroll}>
               <View>
                 <View style={styles.tableRow}>
                   {result.table.columns.slice(0, 5).map((column) => (
@@ -1537,7 +1563,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#D94A00",
   },
 
   createAccountText: {
@@ -1688,7 +1713,7 @@ const styles = StyleSheet.create({
   infoText: { fontSize: 12, fontWeight: "600", textAlign: "center" },
 
   historyOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 100 },
-  historyBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0, 0, 0, 0.48)" },
+  historyBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "#000000" },
 
   historyDrawer: {
     width: "82%",
@@ -1896,9 +1921,10 @@ const styles = StyleSheet.create({
     minHeight: 42,
     borderWidth: 1,
     borderRadius: 999,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 5,
     paddingHorizontal: 8,
   },
 
@@ -1907,9 +1933,9 @@ const styles = StyleSheet.create({
   resultTitle: { fontSize: 17, fontWeight: "900", marginBottom: 10 },
   resultSubtitle: { fontSize: 14, fontWeight: "900", marginTop: 18, marginBottom: 10 },
   resultParagraph: { fontSize: 14, lineHeight: 21 },
-  kpiGrid: { width: "100%", gap: 10, marginTop: 14 },
+  kpiGrid: { width: "100%", flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14 },
 
-  miniCard: { borderWidth: 1, borderRadius: 16, padding: 14 },
+  miniCard: { borderWidth: 1, borderRadius: 16, padding: 14, flex: 1, minWidth: "45%" },
   miniCardLabel: { fontSize: 12, fontWeight: "700", marginBottom: 6 },
   miniCardValue: { fontSize: 15, fontWeight: "900" },
 

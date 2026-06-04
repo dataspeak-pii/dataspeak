@@ -7,6 +7,7 @@ export interface Session {
   name: string;
   tenant: Tenant;
   loginAt: string;
+  createdAt: string;
 }
 
 interface StoredUser {
@@ -86,6 +87,7 @@ export async function mockLogin(email: string, password: string): Promise<Sessio
     name: user.name,
     tenant,
     loginAt: new Date().toISOString(),
+    createdAt: user.createdAt,
   };
 
   await saveSession(session);
