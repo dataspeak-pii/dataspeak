@@ -7,6 +7,7 @@ import os
 import re
 import json
 import httpx
+from datetime import date, timedelta
 from .retriever import retrieve_relevant_tables
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -21,10 +22,28 @@ CATALOG_TABLES = [
 ]
 
 
-def build_system_prompt() -> str:
+def build_system_prompt(reference_date: date | None = None) -> str:
     catalog_list = ", ".join(CATALOG_TABLES)
 
-    return f"""Você é um especialista em SAP e SQL, responsável por transformar
+    hoje = reference_date or date.today()
+    ontem = hoje - timedelta(days=1)
+    primeiro_dia_mes = hoje.replace(day=1)
+    ultimo_dia_mes_anterior = primeiro_dia_mes - timedelta(days=1)
+    primeiro_dia_mes_anterior = ultimo_dia_mes_anterior.replace(day=1)
+    primeiro_dia_ano = hoje.replace(month=1, day=1)
+
+    data_context = f"""## Contexto Temporal
+- Data atual: {hoje.strftime('%Y%m%d')} ({hoje.strftime('%d/%m/%Y')})
+- Ontem: {ontem.strftime('%Y%m%d')}
+- Primeiro dia do mês atual: {primeiro_dia_mes.strftime('%Y%m%d')}
+- Mês anterior: {primeiro_dia_mes_anterior.strftime('%Y%m%d')} a {ultimo_dia_mes_anterior.strftime('%Y%m%d')}
+- Início do ano atual: {primeiro_dia_ano.strftime('%Y%m%d')}
+Use sempre esses valores para resolver referências temporais relativas.
+Nunca invente ou assuma datas — use apenas os valores acima."""
+
+    return f"""{data_context}
+
+Você é um especialista em SAP e SQL, responsável por transformar
 perguntas de negócio em linguagem natural em queries SQL precisas, OU recusar
 perguntas que estão fora do escopo do sistema.
 
@@ -80,6 +99,21 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
 - Em LFA1: sempre inclua NAME1 AS nome_fornecedor quando LIFNR estiver no SELECT
 - Regra geral: campos com sufixo MAKTX, NAME1, NAME2 ou descrição explícita no catálogo devem aparecer no SELECT quando a tabela for consultada
 
+## Formato de datas SAP
+- Datas em tabelas SAP são armazenadas como TEXT no formato YYYYMMDD (ex: '20260401')
+- Nunca use funções DATE(), datetime() ou strftime() para filtros em campos de data SAP
+- Para filtros temporais, gere literais string diretamente:
+  - "mês passado": >= '20260401' AND < '20260501'
+  - "este ano": >= '20260101' AND < '20270101'
+  - "último trimestre": >= '20260101' AND < '20260401'
+- Use BETWEEN apenas com literais string no formato YYYYMMDD
+
+## Nível de confiança (confidence)
+- Use "high" quando a intenção é clara, as tabelas são únicas e não há ambiguidade semântica
+- Use "medium" quando há ambiguidade semântica, múltiplas tabelas possíveis, ou a pergunta admite mais de uma interpretação válida
+- Use "low" quando a pergunta é vaga, fora do catálogo, não interpretável, ou resulta em recusa
+- Nunca retorne sempre "high" — o campo deve refletir a certeza real do sistema sobre a interpretação
+
 ## Resolução de chaves técnicas SAP
 - Nunca exiba chaves técnicas brutas como label de saída ao usuário
 - Quando MATNR aparecer no SELECT ou GROUP BY como dimensão de exibição,
@@ -126,13 +160,13 @@ Resposta de recusa:
 # Exemplos de recusa (siga este padrão)
 
 Pergunta: "Liste os funcionários cadastrados no sistema"
-Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
+Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
 
 Pergunta: "Delete todos os pedidos de compra antigos"
 Resposta: {{"intent":"Deletar pedidos de compra antigos","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"write_operation","message":"O DataSpeak é um sistema de consulta apenas. Operações de exclusão não são permitidas."}}}}
 
 Pergunta: "Me mostra tudo"
-Resposta: {{"intent":"Solicitação genérica não específica","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"ambiguous","message":"A pergunta é genérica demais. Você quer ver dados sobre vendas, compras, estoque ou produção?"}}}}"""
+Resposta: {{"intent":"Solicitação genérica não específica","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"ambiguous","message":"A pergunta é genérica demais. Você quer ver dados sobre vendas, compras, estoque ou produção?"}}}}"""
 
 
 def build_user_prompt(question: str, tables: list[dict]) -> str:

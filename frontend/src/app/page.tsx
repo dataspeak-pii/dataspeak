@@ -77,7 +77,7 @@ function GridBackground() {
 }
 
 const FEATURE_PILLS = [
-  { icon: Database,   label: "16 Tabelas · 130 Campos SAP" },
+  { icon: Database,   label: "15 Tabelas SAP" },
   { icon: BarChart3,  label: "Visualização automática" },
   { icon: TrendingUp, label: "Análise em segundos" },
 ] as const;

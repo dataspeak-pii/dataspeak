@@ -1,5 +1,5 @@
 -- =============================================================================
--- DataSpeak — Schema do Banco Simulado SAP (v2)
+-- DataSpeak — Schema do Banco Simulado SAP
 -- =============================================================================
 -- Objetivo: replicar a estrutura de 15 tabelas SAP curadas em SQLite,
 -- permitindo execução de queries Text-to-SQL geradas pelo motor de IA.

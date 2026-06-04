@@ -12,10 +12,11 @@ import {
   CodeBlockCode,
   CodeBlockGroup,
 } from "@/components/ui/code-block";
-import { Code2, Copy, CheckCheck, Info, Rows } from "lucide-react";
+import { Code2, Copy, CheckCheck, Info, Rows, AlertTriangle } from "lucide-react";
 
 interface ScriptViewProps {
   script: GeneratedScript;
+  refusal?: string | null;
 }
 
 function TrafficLights() {
@@ -28,21 +29,43 @@ function TrafficLights() {
   );
 }
 
-export function ScriptView({ script }: ScriptViewProps) {
+export function ScriptView({ script, refusal }: ScriptViewProps) {
   const [sqlCopied, setSqlCopied] = useState(false);
   const { resolvedTheme } = useTheme();
   const codeTheme = resolvedTheme === "dark" ? "github-dark" : "github-light";
 
+  if (!script.code && refusal) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-warning bg-warning-bg p-5 flex gap-4">
+          <div className="flex-shrink-0 mt-0.5">
+            <AlertTriangle size={18} className="text-warning" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground mb-1">
+              Consulta fora do escopo
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {refusal}
+            </p>
+            <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+              Tente reformular a pergunta usando termos relacionados a materiais, estoque, vendas, compras ou produção.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!script.code) {
     return (
-      <Card className="border border-border shadow-sm bg-[var(--color-bg-a1)] rounded-2xl">
-        <CardContent className="p-8 flex flex-col items-center gap-2 text-center">
-          <Code2 className="w-8 h-8 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">
-            Nenhum script SQL foi gerado para esta consulta.
+      <div className="p-6">
+        <div className="rounded-xl border border-border bg-muted p-5">
+          <p className="text-sm text-muted-foreground text-center">
+            Nenhum script SQL foi gerado.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 

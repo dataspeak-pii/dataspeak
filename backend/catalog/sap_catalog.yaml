@@ -113,6 +113,18 @@ tables:
     type: DEC(13,2)
     description: Valor total da movimentação em moeda local.
     business_label: Valor do movimento
+  - name: AUFNR
+    type: CHAR(12)
+    description: Ordem de produção associada ao movimento. Preenchido apenas quando BWART=261 (consumo para produção).
+    business_label: Ordem de produção
+  - name: KUNNR
+    type: CHAR(10)
+    description: Cliente da saída. Preenchido apenas quando BWART=601 (saída para entrega ao cliente).
+    business_label: Código do cliente
+  - name: LIFNR
+    type: CHAR(10)
+    description: Fornecedor da entrada. Preenchido apenas quando BWART=101 (entrada de mercadoria por compra).
+    business_label: Código do fornecedor
   example_questions:
   - Qual o volume total de entradas de material no último mês?
   - Quais materiais tiveram saída para produção na semana passada?
@@ -597,7 +609,7 @@ tables:
     total. Os itens com os materiais vendidos ficam em VBAP.
 
     '
-  business_context: 'UUse APENAS para perguntas sobre PEDIDOS DE VENDA: volume de pedidos por cliente ou 
+  business_context: 'Use APENAS para perguntas sobre PEDIDOS DE VENDA: volume de pedidos por cliente ou 
     período, valor em carteira, canal de distribuição usado em pedidos. NUNCA use VBAK 
     para faturamento ou receita realizada — para isso use VBRK. VBAK é pedido (intenção); 
     VBRK é fatura (realização). Para detalhes por produto pedido, fazer JOIN com VBAP.
@@ -978,12 +990,17 @@ tables:
     para rastreabilidade da produção.
 
     '
-  business_context: 'Use esta tabela quando a pergunta envolve: ordens de produção
-    abertas ou encerradas, volume de produção planejado ou confirmado, datas de início/fim
-    de produção, ou status das ordens. Para saber os componentes consumidos na produção,
-    cruzar com MSEG pelo campo AUFNR.
-
-    '
+  business_context: |
+    Use AFKO para consultas sobre ordens de produção: quantidade planejada,
+    datas programadas, status da ordem, ordens em aberto ou encerradas.
+    AFKO registra a INTENÇÃO de produção — o que foi planejado ou confirmado
+    na ordem, não o que fisicamente entrou no estoque.
+    Para volume de produção REALIZADA (entradas efetivas no estoque),
+    use MSEG com BWART = '261' (consumo para produção) ou BWART = '101'
+    (entrada de produto acabado) + JOIN MKPF para filtro por data.
+    Ambiguidade: "produção" sem qualificador pode mapear para AFKO (planejado)
+    ou MSEG (realizado). Na dúvida, prefira AFKO e mencione a limitação
+    na explicação.
   grain: one row per production order
   primary_key: AUFNR
   relationships:

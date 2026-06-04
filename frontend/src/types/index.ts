@@ -73,4 +73,5 @@ export interface AnalysisResult {
   kpis: KPI[];
   chartData: ChartDataPoint[];
   chartType: "line" | "bar" | "pie" | "composed";
+  refusal?: string | null;
 }
