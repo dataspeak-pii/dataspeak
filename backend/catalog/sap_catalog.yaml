@@ -376,12 +376,16 @@ tables:
     requer JOIN com MKPF.
 
     '
-  business_context: 'Use esta tabela principalmente em JOIN com MSEG para filtrar
-    movimentações por data de lançamento (BUDAT) ou data de documento (BLDAT). Raramente
-    é consultada sozinha — seu papel é fornecer o contexto temporal e organizacional
-    das movimentações registradas em MSEG.
-
-    '
+  business_context: |
+    MKPF é o cabeçalho do documento de material — registra QUEM lançou
+    (USNAM), QUANDO (BUDAT) e QUAL documento (MBLNR+MJAHR).
+    Use para consultas sobre: auditoria de lançamentos, usuários que
+    criaram documentos, volume de documentos por período, rastreabilidade
+    de movimentos de estoque.
+    Termos de negócio: "quem lançou", "usuário responsável", "auditoria
+    de estoque", "documentos lançados por usuário", "volume de lançamentos".
+    Para detalhes dos itens movimentados, sempre fazer JOIN com MSEG
+    via (MBLNR, MJAHR).
   grain: one row per material document
   primary_key:
   - MBLNR
@@ -428,6 +432,7 @@ tables:
   example_questions:
   - Quais documentos de movimentação foram lançados ontem?
   - Qual usuário lançou mais documentos de estoque no mês?
+  - Quais usuários criaram mais movimentos de material em 2026?
   example_sql: "-- Documentos de entrada de mercadoria por data\nSELECT h.MBLNR, h.BUDAT,\
     \ h.USNAM, COUNT(s.ZEILE) AS qtd_itens\nFROM MKPF h\nJOIN MSEG s ON h.MBLNR =\
     \ s.MBLNR AND h.MJAHR = s.MJAHR\nWHERE s.BWART = '101'\n  AND h.BUDAT BETWEEN\
