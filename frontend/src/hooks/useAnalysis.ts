@@ -102,7 +102,7 @@ export function useAnalysis() {
           category: analysisResult.interpretation.category ?? "Análise",
           result: analysisResult,
         };
-        const next = [newItem, ...prev].slice(0, 10);
+        const next = [newItem, ...prev].slice(0, 20);
         persistHistoryForKey(historyKeyRef.current || getHistoryKey(), next);
         return next;
       });
