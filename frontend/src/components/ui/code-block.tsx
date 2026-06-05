@@ -27,7 +27,8 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
 export type CodeBlockCodeProps = {
   code: string
   language?: string
-  theme?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  theme?: string | Record<string, any>
   className?: string
 } & React.HTMLProps<HTMLDivElement>
 
@@ -46,7 +47,8 @@ function CodeBlockCode({
         setHighlightedHtml("<pre><code></code></pre>")
         return
       }
-      const html = await codeToHtml(code, { lang: language, theme })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const html = await codeToHtml(code, { lang: language, theme: theme as any })
       setHighlightedHtml(html)
     }
     highlight()

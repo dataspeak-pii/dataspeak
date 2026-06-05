@@ -13,6 +13,7 @@ import {
   CodeBlockGroup,
 } from "@/components/ui/code-block";
 import { Code2, Copy, CheckCheck, Info, Rows, AlertTriangle } from "lucide-react";
+import { dataspeakLight, dataspeakDark } from "@/lib/shiki-theme";
 
 interface ScriptViewProps {
   script: GeneratedScript;
@@ -32,7 +33,7 @@ function TrafficLights() {
 export function ScriptView({ script, refusal }: ScriptViewProps) {
   const [sqlCopied, setSqlCopied] = useState(false);
   const { resolvedTheme } = useTheme();
-  const codeTheme = resolvedTheme === "dark" ? "github-dark" : "github-light";
+  const codeTheme = resolvedTheme === "dark" ? dataspeakDark : dataspeakLight;
 
   if (!script.code && refusal) {
     return (
