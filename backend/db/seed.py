@@ -170,6 +170,22 @@ def pareto_sample(pool: list, k: int, alpha: float = 1.5) -> list:
     return random.choices(pool, weights=weights, k=k)
 
 
+def _qty(meins: str, lo: float, hi: float) -> float:
+    """Integer quantity for UN; decimal (3dp) for weight/volume/length units."""
+    if meins == "UN":
+        return random.randint(max(1, int(lo)), max(1, int(hi)))
+    return round(random.uniform(lo, hi), 3)
+
+
+def _qty_scale(meins: str, base: float, lo: float, hi: float) -> float:
+    """Scale an existing quantity by a random factor, respecting MEINS type."""
+    val = base * random.uniform(lo, hi)
+    if meins == "UN":
+        rounded = int(round(val))
+        return max(1, rounded) if base > 0 else 0
+    return round(val, 3)
+
+
 # ---------------------------------------------------------------------------
 # Helpers de código
 # ---------------------------------------------------------------------------
@@ -375,20 +391,21 @@ def seed_afko(
         gltrs = gstrp + timedelta(days=random.randint(5, 30))
         gstri = gstrp + timedelta(days=random.randint(0, 2))
         getri = gltrs + timedelta(days=random.randint(-2, 5))
-        gamng = round(random.uniform(10, 5000), 3)
+        gmein = meins_map.get(matnr, "UN")
+        gamng = _qty(gmein, 10, 5000)
         concluida = random.random() < 0.70
         rows.append({
             "AUFNR": zfill(100001 + i, 12),
             "MATNR": matnr,
             "WERKS": werks,
             "GAMNG": gamng,
-            "GMEIN": meins_map.get(matnr, "UN"),
+            "GMEIN": gmein,
             "GSTRS": _date_to_str(gstrp),
             "GLTRS": _date_to_str(gltrs),
             "GSTRI": _date_to_str(gstri),
             "GETRI": _date_to_str(getri) if concluida else None,
             "FTRMI": _date_to_str(getri) if concluida else None,
-            "IGMNG": round(gamng * random.uniform(0.90, 1.02), 3) if concluida else round(gamng * random.uniform(0, 0.80), 3),
+            "IGMNG": _qty_scale(gmein, gamng, 0.90, 1.02) if concluida else _qty_scale(gmein, gamng, 0, 0.80),
             "STSTPS": "I0045" if concluida else "I0001",
         })
     conn.executemany(
@@ -466,7 +483,8 @@ def seed_mseg(
                 werks_validas,
                 weights=[PLANTAS_PESOS[PLANTAS.index(w)] for w in werks_validas],
             )[0]
-            menge = round(random.uniform(1, 500), 3)
+            meins = meins_map.get(matnr, "UN")
+            menge = _qty(meins, 1, 500)
             preco = round(random.uniform(10, 3000), 2)
 
             aufnr, ebeln, ebelp, kunnr, lifnr = None, None, None, None, None
@@ -489,7 +507,7 @@ def seed_mseg(
                 mkpf["MBLNR"], mkpf["MJAHR"], zfill(z + 1, 4),
                 bwart, matnr, werks,
                 random.choice(LGORTS),
-                menge, meins_map.get(matnr, "UN"),
+                menge, meins,
                 round(menge * preco, 2),
                 aufnr, ebeln, ebelp, kunnr, lifnr,
             ))
@@ -553,7 +571,8 @@ def seed_ekpo(
             matnr = pareto_sample(matnrs, 1, alpha=1.2)[0]
             werks_validas = marc_idx.get(matnr, [PLANTAS[0]])
             werks = random.choice(werks_validas)
-            menge = round(random.uniform(1, 1000), 3)
+            meins = meins_map.get(matnr, "UN")
+            menge = _qty(meins, 1, 1000)
             netpr = round(random.uniform(5, 3000), 2)
             rows.append({
                 "EBELN": ek["EBELN"],
@@ -561,7 +580,7 @@ def seed_ekpo(
                 "MATNR": matnr,
                 "WERKS": werks,
                 "MENGE": menge,
-                "MEINS": meins_map.get(matnr, "UN"),
+                "MEINS": meins,
                 "NETPR": netpr,
                 "PEINH": 1.0,
                 "NETWR": round(menge * netpr, 2),
@@ -624,7 +643,8 @@ def seed_vbap(
         audat_d = _str_to_date(vbak["AUDAT"])
         for j in range(n):
             matnr = pareto_sample(fert_matnrs, 1, alpha=1.2)[0]
-            kwmeng = round(random.uniform(1, 500), 3)
+            meins = meins_map.get(matnr, "UN")
+            kwmeng = _qty(meins, 1, 500)
             netpr = round(random.uniform(20, 8000), 2)
             netwr_item = round(kwmeng * netpr, 2)
             soma += netwr_item
@@ -635,7 +655,7 @@ def seed_vbap(
                 "POSNR": zfill((j + 1) * 10, 6),
                 "MATNR": matnr,
                 "KWMENG": kwmeng,
-                "MEINS": meins_map.get(matnr, "UN"),
+                "MEINS": meins,
                 "NETPR": netpr,
                 "NETWR": netwr_item,
                 "EDATU": _date_to_str(audat_d + timedelta(days=random.randint(3, 45))),
@@ -719,7 +739,7 @@ def seed_vbrp(
                 aupos = orig["POSNR"]
             else:
                 matnr = pareto_sample(fert_matnrs, 1, alpha=1.2)[0]
-                fkimg = round(random.uniform(1, 500), 3)
+                fkimg = _qty(meins_map.get(matnr, "UN"), 1, 500)
                 netwr_item = round(fkimg * random.uniform(20, 8000), 2)
                 aupos = zfill((j + 1) * 10, 6)
             soma += netwr_item
@@ -762,8 +782,9 @@ def seed_afpo(
         n = random.choices([1, 2, 3], weights=[0.50, 0.35, 0.15])[0]
         for j in range(n):
             matnr = afko["MATNR"] if j == 0 else random.choice(matnrs)
-            psmng = round(afko["GAMNG"] * random.uniform(0.05, 0.30), 3)
-            wemng = round(psmng * random.uniform(0.80, 1.05), 3) if afko["STSTPS"] == "I0045" else 0.0
+            meins = meins_map.get(matnr, "UN")
+            psmng = _qty_scale(meins, afko["GAMNG"], 0.05, 0.30)
+            wemng = _qty_scale(meins, psmng, 0.80, 1.05) if afko["STSTPS"] == "I0045" else 0.0
             kdauf = random.choice(vbak_vbelns) if vbak_vbelns and random.random() < 0.25 else None
             rows.append({
                 "AUFNR": afko["AUFNR"],
@@ -772,7 +793,7 @@ def seed_afpo(
                 "LGORT": random.choice(LGORTS),
                 "PSMNG": psmng,
                 "WEMNG": wemng,
-                "MEINS": meins_map.get(matnr, "UN"),
+                "MEINS": meins,
                 "KDAUF": kdauf,
             })
     conn.executemany(
