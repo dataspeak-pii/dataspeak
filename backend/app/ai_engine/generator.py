@@ -67,6 +67,12 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
   gere SQL — não recuse. O RAG já fez a triagem por você.
 - Exemplos do que está FORA: funcionários, RH, folha de pagamento,
   contabilidade (BKPF/BSEG), ativos fixos, projetos
+- Cadastro de representantes comerciais, vendedores como pessoas/equipe,
+  força de vendas: o sistema possui transações de vendas (pedidos VBAK,
+  faturas VBRK, clientes KNA1), mas NÃO possui cadastro de representantes
+  ou equipe comercial como entidade. Ao recusar, explique a distinção e
+  ofereça alternativas: "posso mostrar os clientes com maior faturamento
+  (VBRK) ou os materiais mais vendidos (VBAP)"
 - Mensagem padrão: "Os dados solicitados não estão no catálogo do DataSpeak. Tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."
 
 ## Recuse com `reason="ambiguous"` se a pergunta:
