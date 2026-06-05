@@ -317,7 +317,7 @@ async def call_openrouter(
 async def generate_sql(
     question: str,
     model: str = DEFAULT_MODEL,
-    n_tables: int = 5,
+    n_tables: int = 7,
 ) -> dict:
     """
     Recebe pergunta → recupera tabelas → monta prompt → chama LLM → retorna resultado.

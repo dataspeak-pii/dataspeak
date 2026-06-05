@@ -144,11 +144,16 @@ tables:
     Cada linha é uma nota fiscal completa. Os itens ficam em VBRP.
 
     '
-  business_context: 'Use quando a pergunta envolve faturamento por período, notas
-    fiscais emitidas, receita bruta, valor de vendas por cliente, ou volume de documentos
-    emitidos. Para detalhes por produto, fazer JOIN com VBRP.
-
-    '
+  business_context: |
+    Use VBRK para consultas sobre faturamento, vendas realizadas, receita,
+    notas fiscais emitidas, volume de vendas por período ou cliente.
+    VBRK representa vendas EFETIVADAS (fatura emitida), diferente de VBAK
+    que representa INTENÇÃO de compra (pedido ainda não faturado).
+    Termos de negócio equivalentes: "vendas", "faturamento", "receita",
+    "NF emitida", "vendas do mês", "vendas do ano", "vendas por período",
+    "vendas realizadas", "volume de vendas".
+    Para faturamento agregado sem detalhe por produto, use VBRK diretamente.
+    Para detalhe por produto faturado, fazer JOIN com VBRP.
   grain: one row per billing document
   primary_key: VBELN
   fields:
@@ -195,6 +200,10 @@ tables:
   - Quantas notas fiscais foram canceladas no último mês?
   - Qual o faturamento total por organização de vendas em 2025?
   - Qual a receita total faturada por organização de vendas no ano?
+  - Qual o total de vendas do último mês?
+  - Qual a receita por cliente no trimestre?
+  - Quais foram as vendas realizadas por período?
+  - Qual o volume de vendas por organização no ano?
   example_sql: "SELECT VKORG, SUBSTR(FKDAT, 1, 6) AS ano_mes,\n       COUNT(VBELN)\
     \ AS qtd_notas, SUM(NETWR) AS faturamento_total\nFROM VBRK\nWHERE FKDAT BETWEEN\
     \ '20260101' AND '20261231'\n  AND FKART = 'F2'\n  AND (FKSTO IS NULL OR FKSTO\

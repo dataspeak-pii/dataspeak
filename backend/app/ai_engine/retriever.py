@@ -19,7 +19,7 @@ def load_full_catalog() -> dict:
     return {table["name"]: table for table in catalog.get("tables", [])}
 
 
-def retrieve_relevant_tables(question: str, n_results: int = 5) -> list[dict]:
+def retrieve_relevant_tables(question: str, n_results: int = 7) -> list[dict]:
     """
     Busca semanticamente no ChromaDB as tabelas SAP mais relevantes
     para a pergunta recebida.
