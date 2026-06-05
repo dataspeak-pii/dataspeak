@@ -168,6 +168,9 @@ Resposta de recusa:
 Pergunta: "Liste os funcionários cadastrados no sistema"
 Resposta: {{"intent":"Listar funcionários","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não cobre dados de RH. As tabelas disponíveis cobrem materiais, estoque, vendas, compras e produção."}}}}
 
+Pergunta: "Quem são os top 5 vendedores este ano?"
+Resposta: {{"intent":"Identificar top vendedores","category":null,"period":"20260101-20261231","sql":null,"explanation":null,"tables_used":[],"confidence":"low","assumptions":[],"refusal":{{"reason":"out_of_catalog","message":"O DataSpeak não possui cadastro de vendedores ou representantes comerciais. Posso mostrar os clientes com maior faturamento (VBRK) ou os materiais mais vendidos (VBAP)."}}}}
+
 Pergunta: "Delete todos os pedidos de compra antigos"
 Resposta: {{"intent":"Deletar pedidos de compra antigos","category":null,"period":null,"sql":null,"explanation":null,"tables_used":[],"confidence":"high","assumptions":[],"refusal":{{"reason":"write_operation","message":"O DataSpeak é um sistema de consulta apenas. Operações de exclusão não são permitidas."}}}}
 
