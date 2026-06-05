@@ -14,6 +14,52 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 DEFAULT_MODEL = "anthropic/claude-sonnet-4-5"
+VALIDATION_MODEL = "openai/gpt-3.5-turbo"
+
+_VALIDATION_PROMPT = (
+    'Você é um validador de perguntas para o DataSpeak, sistema de consulta\n'
+    'de dados SAP empresariais.\n\n'
+    'Responda APENAS "BLOQUEAR" se a pergunta for CLARAMENTE impossível de\n'
+    'responder com dados de negócio SAP — ou seja, não há nenhuma\n'
+    'interpretação razoável que envolva materiais, estoque, vendas, compras,\n'
+    'produção ou finanças empresariais.\n\n'
+    'Responda "PROCESSAR" em todos os outros casos, incluindo:\n'
+    '- Perguntas ambíguas que PODEM ter relação com SAP\n'
+    '- Perguntas vagas mas potencialmente sobre negócios\n'
+    '- Perguntas que você não tem certeza\n\n'
+    'Exemplos de BLOQUEAR:\n'
+    '- "Gere uma imagem de cachorro"\n'
+    '- "Escreva um poema sobre o mar"\n'
+    '- "Qual a capital da França?"\n'
+    '- "Me conte uma piada"\n'
+    '- "Traduza esse texto para inglês"\n\n'
+    'Exemplos de PROCESSAR (mesmo que pareçam estranhos):\n'
+    '- "Gere um relatório de vendas" → pode ser consulta de vendas\n'
+    '- "Mostre dados do produto Ração Animal" → produto legítimo em SAP\n'
+    '- "Quero ver tudo" → vago mas potencialmente sobre dados\n'
+    '- "Me ajuda com estoque" → legítimo\n\n'
+    'Regra de ouro: na dúvida, PROCESSAR.\n\n'
+    'Pergunta: "{pergunta}"\n'
+    'Resposta (apenas BLOQUEAR ou PROCESSAR):'
+)
+
+_OUT_OF_SCOPE_REFUSAL = {
+    "intent": "Pergunta fora do escopo do DataSpeak",
+    "category": None,
+    "period": None,
+    "sql": None,
+    "explanation": None,
+    "tables_used": [],
+    "confidence": "low",
+    "assumptions": [],
+    "refusal": {
+        "reason": "out_of_scope",
+        "message": (
+            "O DataSpeak é um sistema de consulta de dados SAP empresariais. "
+            "Esta pergunta está fora do escopo do sistema."
+        ),
+    },
+}
 
 # NOVO: lista oficial das 15 tabelas catalogadas, usada nas mensagens de recusa
 CATALOG_TABLES = [
@@ -314,6 +360,36 @@ async def call_openrouter(
     return data["choices"][0]["message"]["content"]
 
 
+async def pre_validate_query(question: str) -> bool:
+    """
+    Calls a cheap LLM to check if the question is clearly out of scope.
+    Returns True to PROCESS, False to BLOCK.
+    Fails open: any error returns True (never block on technical failure).
+    """
+    prompt = _VALIDATION_PROMPT.format(pergunta=question)
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://dataspeak.app",
+        "X-Title": "DataSpeak",
+    }
+    payload = {
+        "model": VALIDATION_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.0,
+        "max_tokens": 10,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(OPENROUTER_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+        answer = data["choices"][0]["message"]["content"].strip().upper()
+        return "BLOQUEAR" not in answer
+    except Exception:
+        return True  # fail-safe: process on any error
+
+
 async def generate_sql(
     question: str,
     model: str = DEFAULT_MODEL,
@@ -323,6 +399,13 @@ async def generate_sql(
     Recebe pergunta → recupera tabelas → monta prompt → chama LLM → retorna resultado.
     Inclui refusal estruturado para casos fora de escopo.
     """
+    if not await pre_validate_query(question):
+        refusal = dict(_OUT_OF_SCOPE_REFUSAL)
+        refusal["model_used"] = VALIDATION_MODEL
+        refusal["question"] = question
+        refusal["retrieved_tables"] = []
+        return refusal
+
     relevant_tables = retrieve_relevant_tables(question, n_results=n_tables)
 
     system_prompt = build_system_prompt()
