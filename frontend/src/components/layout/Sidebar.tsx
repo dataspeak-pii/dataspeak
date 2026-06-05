@@ -141,7 +141,7 @@ export function Sidebar({
                       >
                         {item.category}
                       </span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground dark:text-fg-2 ml-auto">
                         <Clock className="w-3.5 h-3.5" />
                         {item.timestamp.toLocaleDateString("pt-BR", {
                           day: "2-digit",
@@ -159,7 +159,7 @@ export function Sidebar({
                           transition={{ duration: 0.18, ease: "easeOut" }}
                           className="overflow-hidden"
                         >
-                          <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-border/40 text-xs text-brand-600 font-semibold">
+                          <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-border/40 text-xs text-brand-600 dark:text-brand-400 font-semibold">
                             <ChevronRight className="w-3.5 h-3.5" />
                             Ver análise
                           </div>

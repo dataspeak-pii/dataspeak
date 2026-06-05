@@ -445,7 +445,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                           r: 4,
                           fill: COLORS[i % COLORS.length],
                           strokeWidth: 2,
-                          stroke: "#fff",
+                          stroke: isDark ? "#1a1a1a" : "#fff",
                         }}
                         activeDot={{ r: 6 }}
                         animationDuration={1400}

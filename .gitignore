@@ -156,6 +156,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.claude/settings.local.json
 
 # ChromaDB - gerado localmente via indexer
 backend/data/chroma_db/

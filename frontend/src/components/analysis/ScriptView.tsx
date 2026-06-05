@@ -45,10 +45,10 @@ export function ScriptView({ script, refusal }: ScriptViewProps) {
             <p className="text-sm font-semibold text-foreground mb-1">
               Consulta fora do escopo
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground dark:text-foreground/80 leading-relaxed">
               {refusal}
             </p>
-            <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+            <p className="text-xs text-muted-foreground dark:text-foreground/60 mt-3 pt-3 border-t border-border">
               Tente reformular a pergunta usando termos relacionados a materiais, estoque, vendas, compras ou produção.
             </p>
           </div>
