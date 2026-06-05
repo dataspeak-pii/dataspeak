@@ -53,7 +53,7 @@ _OUT_OF_SCOPE_REFUSAL = {
     "confidence": "low",
     "assumptions": [],
     "refusal": {
-        "reason": "out_of_scope",
+        "reason": "out_of_catalog",
         "message": (
             "O DataSpeak é um sistema de consulta de dados SAP empresariais. "
             "Esta pergunta está fora do escopo do sistema."
@@ -385,8 +385,10 @@ async def pre_validate_query(question: str) -> bool:
             response.raise_for_status()
             data = response.json()
         answer = data["choices"][0]["message"]["content"].strip().upper()
+        print(f"DEBUG validador: '{answer}'")
         return "BLOQUEAR" not in answer
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG validador ERRO: {e}")
         return True  # fail-safe: process on any error
 
 
