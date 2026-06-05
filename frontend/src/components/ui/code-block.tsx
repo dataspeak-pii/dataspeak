@@ -54,7 +54,7 @@ function CodeBlockCode({
 
   const classNames = cn(
     "w-full overflow-x-auto text-[13px] leading-relaxed",
-    "[&>pre]:px-5 [&>pre]:py-5 [&>pre]:font-mono [&>pre]:leading-relaxed [&>pre]:!bg-transparent",
+    "[&>pre]:px-5 [&>pre]:py-5 [&>pre]:font-mono [&>pre]:leading-relaxed",
     className
   )
 
