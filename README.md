@@ -2,9 +2,9 @@
 
 <img src="frontend/public/logo-white.svg" alt="DataSpeak" width="300" />
 
-<br /><br />
+<br />
 
-**Translate business questions into executable SQL over SAP data, powered by LLMs and RAG.**
+**Translate business questions into executable SQL over SAP data, <br /> powered by LLMs and RAG.**
 
 <br />
 
