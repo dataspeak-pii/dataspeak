@@ -160,6 +160,7 @@ python -m venv venv
 
 # Linux/macOS
 source venv/bin/activate
+
 # Windows (PowerShell)
 .\venv\Scripts\Activate.ps1
 
@@ -259,7 +260,7 @@ tables:
 
 | Field | Type | Required | Description |
 |---|---|:---:|---|
-| `question` | `string` | ✅ | Business question in natural language |
+| `question` | `string` | Yes | Business question in natural language |
 | `model` | `string` | — | OpenRouter model slug (defaults to `DEFAULT_MODEL`) |
 
 <table>
