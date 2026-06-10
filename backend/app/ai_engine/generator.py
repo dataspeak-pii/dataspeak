@@ -61,7 +61,7 @@ _OUT_OF_SCOPE_REFUSAL = {
     },
 }
 
-# NOVO: lista oficial das 15 tabelas catalogadas, usada nas mensagens de recusa
+# Lista oficial das 15 tabelas catalogadas, usada nas mensagens de recusa
 CATALOG_TABLES = [
     "MARA", "MSEG", "VBRK", "VBRP", "MARC", "MARD", "MKPF",
     "EKKO", "EKPO", "VBAK", "VBAP", "KNA1", "LFA1", "AFKO", "AFPO",
