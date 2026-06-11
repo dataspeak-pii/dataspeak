@@ -26,7 +26,7 @@ def retrieve_relevant_tables(question: str, n_results: int = 7) -> list[dict]:
 
     Args:
         question: Pergunta em linguagem natural do usuário
-        n_results: Número de tabelas a retornar (padrão: 3)
+        n_results: Número de tabelas a retornar (padrão: 7)
 
     Returns:
         Lista de dicts com metadados completos das tabelas encontradas

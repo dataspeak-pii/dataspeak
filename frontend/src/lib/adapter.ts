@@ -90,50 +90,10 @@ function buildIdToNameMap(
   const map = new Map<string, string>();
   if (!results.length) return map;
 
-  // ── DEBUG ──────────────────────────────────────────────────────────────────
-  console.group("[adapter] buildIdToNameMap — diagnóstico");
-  console.log("Detected columns:", columns);
-
-  const idColsDebug: string[] = [];
-  if (results[0]) {
-    for (const col of columns) {
-      const val = results[0][col];
-      if (typeof val === "string" && SAP_ID_RE.test(val.trim())) idColsDebug.push(col);
-    }
-  }
-  console.log(
-    "SAP ID columns (from first row):",
-    idColsDebug.length ? idColsDebug : "(none)",
-  );
-
   const nameColCandidates = columns.filter((c) => NAME_COL_RE.test(c));
-  console.log(
-    "Name column candidates:",
-    nameColCandidates.length ? nameColCandidates : "(none — regex não bateu)",
-  );
-  if (!nameColCandidates.length) {
-    console.log(
-      "Column test details:",
-      columns.map((c) => `"${c}" → ${NAME_COL_RE.test(c)}`),
-    );
-  }
-  // ──────────────────────────────────────────────────────────────────────────
-
   let nameCol: string | undefined = nameColCandidates[0];
 
   if (!nameCol) {
-    console.warn(
-      "[adapter] Nenhuma coluna de nome encontrada via NAME_COL_RE.\n" +
-      "  Padrão atual: " + NAME_COL_RE.toString() + "\n" +
-      "  Tentando heurística de fallback…",
-    );
-    if (results[0]) {
-      console.log("Primeira linha completa (para identificar a coluna de nome):");
-      for (const [col, val] of Object.entries(results[0])) {
-        console.log(`  [${col}] = ${JSON.stringify(val)} (${typeof val})`);
-      }
-    }
-
     // ── Fallback heurístico ────────────────────────────────────────────────
     // Procura a primeira coluna cujo valor na linha 0 parece um nome legível:
     //   • é string
@@ -163,23 +123,14 @@ function buildIdToNameMap(
 
       if (candidates[0]) {
         nameCol = candidates[0];
-        console.log(
-          "[adapter] Coluna de nome detectada por heurística:",
-          nameCol,
-          "→",
-          results[0][nameCol],
-        );
       }
     }
     // ──────────────────────────────────────────────────────────────────────
 
     if (!nameCol) {
-      console.groupEnd();
       return map;
     }
   }
-
-  console.log("Name column selected:", nameCol);
 
   for (const row of results) {
     const name = String(row[nameCol] ?? "").trim();
@@ -209,28 +160,6 @@ function buildIdToNameMap(
       }
     }
   }
-
-  // ── DEBUG ──────────────────────────────────────────────────────────────────
-  console.log(`Generated idToNameMap size: ${map.size}`);
-  if (map.size > 0) {
-    let count = 0;
-    console.log("Sample mapping (primeiros 5):");
-    for (const [id, name] of map) {
-      if (count++ >= 5) break;
-      console.log(`  "${id}" → "${name}"`);
-    }
-  } else {
-    console.warn(
-      "[adapter] Mapa vazio após varredura.\n" +
-      "  Causas prováveis:\n" +
-      "  1. Nenhuma coluna tem valores com padrão " + SAP_ID_RE.toString() + "\n" +
-      "  2. IDs chegam como number (não string) — ex: 9 em vez de '000000000000000009'\n" +
-      "  Primeira linha:",
-      results[0],
-    );
-  }
-  console.groupEnd();
-  // ──────────────────────────────────────────────────────────────────────────
 
   return map;
 }
@@ -296,17 +225,6 @@ function mapChartData(
   if ("labels" in (raw as object) && "series" in (raw as object)) {
     const { labels, series } = raw as ApiChartDataRaw;
 
-    // ── DEBUG ────────────────────────────────────────────────────────────────
-    console.group("[adapter] mapChartData (ApiChartDataRaw) — resolução");
-    console.log("Chart labels do backend:", labels.slice(0, 10));
-    console.log("Resolução:");
-    labels.slice(0, 10).forEach((l) => {
-      const r = resolveId(l, idToName);
-      console.log(`  "${l}" → ${r ? `"${r}" ✓ (direct)` : "(não resolvido — tentando field scan...)"}`);
-    });
-    console.groupEnd();
-    // ────────────────────────────────────────────────────────────────────────
-
     return labels.map((label, i) => {
       // For the ApiChartDataRaw format the point doesn't carry other fields
       // yet, so we resolve using the label alone (direct + stripped).
@@ -322,23 +240,6 @@ function mapChartData(
 
   if (Array.isArray(raw)) {
     const points = raw as ChartDataPoint[];
-
-    // ── DEBUG ────────────────────────────────────────────────────────────────
-    console.group("[adapter] mapChartData (ApiChartPoint[]) — resolução");
-    console.log("Chart labels do backend:", points.slice(0, 5).map((p) => p.label));
-    points.slice(0, 5).forEach((p) => {
-      const r = resolvePoint(
-        String(p.label),
-        p as Record<string, unknown>,
-        idToName,
-      );
-      console.log(
-        `  "${p.label}" → "${r.display}" [strategy: ${r.strategy}]`,
-        r.original ? `(original: "${r.original}")` : "",
-      );
-    });
-    console.groupEnd();
-    // ────────────────────────────────────────────────────────────────────────
 
     return points.map((p) => {
       const r = resolvePoint(

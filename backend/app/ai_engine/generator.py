@@ -385,10 +385,8 @@ async def pre_validate_query(question: str) -> bool:
             response.raise_for_status()
             data = response.json()
         answer = data["choices"][0]["message"]["content"].strip().upper()
-        print(f"DEBUG validador: '{answer}'")
         return "BLOQUEAR" not in answer
     except Exception as e:
-        print(f"DEBUG validador ERRO: {e}")
         return True  # fail-safe: process on any error
 
 
