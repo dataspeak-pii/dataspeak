@@ -173,6 +173,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
   );
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const CHART_DISPLAY_LIMIT = 15;
 
   const kpis = result.kpis ?? [];
 
@@ -196,6 +197,10 @@ export function VisualizationView({ result }: VisualizationViewProps) {
         });
       })();
 
+  const totalItems = chartData.length;
+  const displayData = chartData.slice(0, CHART_DISPLAY_LIMIT);
+  const isTruncated = totalItems > CHART_DISPLAY_LIMIT;
+
   // "originalLabel" guarda o ID SAP original — não é série numérica
   const seriesKeys = chartData.length
     ? Object.keys(chartData[0]).filter(
@@ -218,7 +223,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
     ? seriesKeys.filter((k) => k !== visibleKeys[0])
     : [];
 
-  const pieData = chartData.map((d) => ({
+  const pieData = displayData.map((d) => ({
     name: String(d.label ?? ""),
     value: Number(d[visibleKeys[0]] ?? 0),
     originalLabel: d.originalLabel, // SAP ID when label was resolved to a name
@@ -229,11 +234,11 @@ export function VisualizationView({ result }: VisualizationViewProps) {
   // Heurística: soma de (n_itens × comprimento_médio × px_por_char) vs. largura
   // estimada do container. Se ultrapassar 500 px, labels são inclinados para
   // evitar sobreposição. Todos os ticks são forçados via interval={0}.
-  const avgLabelLen = chartData.length
-    ? chartData.reduce((s, d) => s + String(d.label ?? "").length, 0) / chartData.length
+  const avgLabelLen = displayData.length
+    ? displayData.reduce((s, d) => s + String(d.label ?? "").length, 0) / displayData.length
     : 0;
-  const needsAngle = chartData.length * avgLabelLen * 7 > 500;
-  const xMaxLen = needsAngle ? 20 : Math.max(8, Math.floor(80 / Math.max(chartData.length, 1)));
+  const needsAngle = displayData.length * avgLabelLen * 7 > 500;
+  const xMaxLen = needsAngle ? 20 : Math.max(8, Math.floor(80 / Math.max(displayData.length, 1)));
   const xHeight = needsAngle ? 88 : 30;
 
   return (
@@ -322,7 +327,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                       label={renderPieLabel}
                       labelLine={false}
                     >
-                      {chartData.map((_, i) => (
+                      {displayData.map((_, i) => (
                         <Cell
                           key={i}
                           fill={COLORS[i % COLORS.length]}
@@ -359,7 +364,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 {chartMode === "bar" ? (
-                  <BarChart data={chartData} barGap={4}>
+                  <BarChart data={displayData} barGap={4}>
                     <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2d2d2d" : "#f0f0f0"} />
                     <XAxis
                       dataKey="label"
@@ -403,7 +408,7 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                     ))}
                   </BarChart>
                 ) : (
-                  <LineChart data={chartData}>
+                  <LineChart data={displayData}>
                     <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#2d2d2d" : "#f0f0f0"} />
                     <XAxis
                       dataKey="label"
@@ -456,6 +461,11 @@ export function VisualizationView({ result }: VisualizationViewProps) {
                   </LineChart>
                 )}
               </ResponsiveContainer>
+            )}
+            {isTruncated && (
+              <p className="text-xs text-muted-foreground text-center mt-3 pt-3 border-t border-border">
+                Exibindo os {CHART_DISPLAY_LIMIT} primeiros de {totalItems} registros — veja a tabela completa abaixo
+              </p>
             )}
           </CardContent>
         </Card>
