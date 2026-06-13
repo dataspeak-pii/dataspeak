@@ -24,6 +24,7 @@ from seed_config import (
     DATA_FIM,
     DATA_INICIO,
     DB_PATH,
+    ESPECIFICACOES_MATERIAL,
     FAKER_LOCALE,
     MANDT_PADRAO,
     PLANTAS,
@@ -254,7 +255,11 @@ def seed_mara(conn: sqlite3.Connection, vol: int) -> list[dict]:
             "MTART": mtart,
             "MATKL": zfill(random.randint(1, 10), 3),
             "MEINS": random.choices(MEINS_OPCOES, weights=MEINS_PESOS)[0],
-            "MAKTX": random.choice(SUBST_PT),
+            "MAKTX": (
+                f"{random.choice(SUBST_PT)} {random.choice(ESPECIFICACOES_MATERIAL)}"
+                if random.random() < 0.70
+                else random.choice(SUBST_PT)
+            ),
             "BRGEW": brgew,
             "NTGEW": round(brgew * random.uniform(0.85, 0.99), 3),
             "GEWEI": "KG",
