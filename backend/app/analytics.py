@@ -6,6 +6,8 @@ Sem LLM, sem banco. Python puro sobre lista de dicts.
 from __future__ import annotations
 from typing import Any
 
+import logging
+logger = logging.getLogger(__name__)
 
 # Palavras que sugerem coluna temporal → gráfico de linha
 _TIME_KEYWORDS = {"dat", "per", "mes", "ano", "year", "month", "data", "periodo", "date"}
@@ -154,6 +156,9 @@ def compute_analytics(
     Retorna dict com kpis, chart_type, chart_data.
     """
     if not results or not columns:
+        logger.warning(
+            "analytics.skipped - no results or columns available"
+        )
         return {"kpis": [], "chart_type": None, "chart_data": {}}
 
     numeric_cols = [c for c in columns if _col_is_numeric(results, c)]

@@ -186,18 +186,18 @@ async def query(req: QueryRequest):
             max_rows_scanned=settings.max_rows_scanned,
             timeout_seconds=settings.query_timeout_seconds,
         )
-        
-    except SqlExecutionError as e:
-    execution_error = f"{e.code}: {e.message}"
 
-    logger.warning(
-        "query.execution_failed",
-        extra={
-            "request_id": ctx.request_id,
-            "error_code": e.code,
-            "error_message": e.message,
-        },
-    )
+    except SqlExecutionError as e:
+        execution_error = f"{e.code}: {e.message}"
+
+        logger.warning(
+            "query.execution_failed",
+            extra={
+                "request_id": ctx.request_id,
+                "error_code": e.code,
+                "error_message": e.message,
+            },
+        )
 
     duration_ms = int((time.monotonic() - start) * 1000)
 
