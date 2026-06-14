@@ -168,3 +168,9 @@ backend/data/*.db
 backend/data/*.db-journal
 backend/data/*.db-wal
 backend/data/*.db-shm
+# Scripts de diagnostico/teste local
+backend/check_integrity.py
+backend/test_explain.py
+backend/test_api.py
+backend/check_fields.py
+backend/check_retrieval.py
