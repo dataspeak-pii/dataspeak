@@ -28,7 +28,7 @@ import {
   type Session,
 } from "../../src/auth";
 import { getTenantFromEmail, type Tenant } from "../../src/tenants";
-import type { AnalysisResult, QueryHistoryItem, QueryStatus } from "../../src/types";
+import type { AnalysisResult, ChartDataPoint, QueryHistoryItem, QueryStatus } from "../../src/types";
 import React from "react";
 
 type ScreenView = "home" | "login" | "register" | "forgot" | "account";
@@ -1354,6 +1354,8 @@ function AnalysisResultView({
         <View style={[styles.resultCard, { backgroundColor: theme.pillBackground, borderColor: theme.border }]}>
           <Text style={[styles.resultTitle, { color: theme.text }]}>Dados retornados</Text>
 
+          <MobileChart result={result} theme={theme} />
+
           <View style={styles.kpiGrid}>
             {result.kpis.slice(0, 4).map((kpi) => (
               <MiniInfoCard key={kpi.id} label={kpi.label} value={`${kpi.value}${kpi.unit ? ` ${kpi.unit}` : ""}`} theme={theme} />
@@ -1438,6 +1440,237 @@ function ResultTabButton({
     </Pressable>
   );
 }
+
+const CHART_COLORS = [
+  "#C25A14", "#0F4E5C", "#D4940A", "#4E8A18", "#2C64AA",
+  "#6244AA", "#AA3C7A", "#9A3020", "#7A8A14", "#1C8A52",
+];
+
+function fmtVal(v: number): string {
+  if (v >= 1_000_000) return (v / 1_000_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "M";
+  if (v >= 1_000) return (v / 1_000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "K";
+  return v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+}
+
+function LineSegment({ x1, y1, x2, y2, color }: { x1: number; y1: number; x2: number; y2: number; color: string }) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  return (
+    <View style={{
+      position: "absolute",
+      left: (x1 + x2) / 2 - length / 2,
+      top: (y1 + y2) / 2 - 1.25,
+      width: length,
+      height: 2.5,
+      backgroundColor: color,
+      transform: [{ rotate: `${angle}deg` }],
+    }} />
+  );
+}
+
+function MobileChart({ result, theme }: { result: AnalysisResult; theme: typeof darkTheme }) {
+  const [mode, setMode] = useState<"bar" | "line" | "pie">("bar");
+  const CHART_LIMIT = 10;
+  const CHART_H = 160;
+  const POINT_SPACING = 64;
+
+  const rawData = Array.isArray(result.chartData) ? result.chartData : [];
+  const allChartData: ChartDataPoint[] = rawData.length > 0
+    ? rawData
+    : (() => {
+        const { columns, rows } = result.table;
+        if (!rows.length) return [];
+        const numericCols = columns.filter((col) => rows.some((r) => typeof r[col] === "number"));
+        const labelCol = columns.find((col) => !numericCols.includes(col));
+        if (!labelCol || !numericCols.length) return [];
+        return rows.map((row) => {
+          const point: ChartDataPoint = { label: String(row[labelCol] ?? "") };
+          numericCols.forEach((col) => { point[col] = row[col] !== null ? (row[col] as string | number) : undefined; });
+          return point;
+        });
+      })();
+
+  const chartData = allChartData.slice(0, CHART_LIMIT);
+
+  const seriesKeys = chartData.length
+    ? Object.keys(chartData[0]).filter((k) => k !== "label" && k !== "originalLabel")
+    : [];
+
+  const seriesSum = (key: string) => allChartData.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+  const sums = seriesKeys.map((k) => seriesSum(k));
+  const maxSumVal = sums.length ? Math.max(...sums) : 0;
+  const minSumVal = sums.length ? Math.min(...sums) : 0;
+  const incompatible = sums.length > 1 && minSumVal > 0 && maxSumVal / minSumVal > 100;
+  const visibleKeys = incompatible ? [seriesKeys[sums.indexOf(maxSumVal)]] : seriesKeys;
+
+  const allValues = chartData.flatMap((d) => visibleKeys.map((k) => Number(d[k] ?? 0)));
+  const maxValue = Math.max(...allValues, 1);
+
+  const BAR_WIDTH = Math.max(32, Math.min(52, Math.floor(260 / chartData.length)));
+
+  if (!chartData.length || !visibleKeys.length) {
+    return (
+      <View style={[chartStyles.emptyBox, { borderColor: theme.border, backgroundColor: theme.inputBackground }]}>
+        <Feather name="bar-chart-2" size={28} color={theme.muted} />
+        <Text style={[chartStyles.emptyText, { color: theme.muted }]}>Sem dados para visualização gráfica.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[chartStyles.wrapper, { borderColor: theme.border, backgroundColor: theme.inputBackground }]}>
+      {/* Header */}
+      <View style={chartStyles.header}>
+        <Text style={[chartStyles.chartTitle, { color: theme.text }]}>Visualização gráfica</Text>
+        <View style={[chartStyles.modeRow, { borderColor: theme.border, backgroundColor: theme.pillBackground }]}>
+          {(["bar", "line", "pie"] as const).map((m) => (
+            <Pressable
+              key={m}
+              onPress={() => setMode(m)}
+              style={[chartStyles.modeBtn, mode === m && { backgroundColor: theme.background }]}
+            >
+              <Feather
+                name={m === "bar" ? "bar-chart-2" : m === "line" ? "trending-up" : "pie-chart"}
+                size={15}
+                color={mode === m ? theme.primary : theme.muted}
+              />
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* Bar chart */}
+      {mode === "bar" && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 4, height: CHART_H + 44, paddingVertical: 8 }}>
+            {chartData.map((point, pi) => {
+              const label = String(point.label ?? "");
+              const truncated = label.length > 8 ? label.slice(0, 7) + "…" : label;
+              return (
+                <View key={pi} style={{ alignItems: "center", width: BAR_WIDTH * visibleKeys.length + (visibleKeys.length - 1) * 3 + 8 }}>
+                  <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 3, height: CHART_H + 20 }}>
+                    {visibleKeys.map((key, ki) => {
+                      const value = Number(point[key] ?? 0);
+                      const barH = Math.max(4, (value / maxValue) * CHART_H);
+                      return (
+                        <View key={key} style={{ alignItems: "center", justifyContent: "flex-end", height: CHART_H + 20 }}>
+                          <Text style={{ fontSize: 9, fontWeight: "700", color: theme.muted, marginBottom: 3 }} numberOfLines={1}>
+                            {fmtVal(value)}
+                          </Text>
+                          <View style={{ height: barH, width: BAR_WIDTH, backgroundColor: CHART_COLORS[ki % CHART_COLORS.length], borderRadius: 4 }} />
+                        </View>
+                      );
+                    })}
+                  </View>
+                  <Text style={{ fontSize: 10, color: theme.muted, marginTop: 6, textAlign: "center" }} numberOfLines={1}>
+                    {truncated}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
+
+      {/* Line chart */}
+      {mode === "line" && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ width: chartData.length * POINT_SPACING, height: CHART_H + 44, position: "relative" }}>
+            {visibleKeys.map((key, ki) => {
+              const color = CHART_COLORS[ki % CHART_COLORS.length];
+              return chartData.map((point, pi) => {
+                const value = Number(point[key] ?? 0);
+                const cx = pi * POINT_SPACING + POINT_SPACING / 2;
+                const cy = CHART_H * (1 - value / maxValue);
+                const next = chartData[pi + 1];
+                const nx = (pi + 1) * POINT_SPACING + POINT_SPACING / 2;
+                const ny = next ? CHART_H * (1 - Number(next[key] ?? 0) / maxValue) : null;
+                return (
+                  <React.Fragment key={`${ki}-${pi}`}>
+                    {ny !== null && <LineSegment x1={cx} y1={cy} x2={nx} y2={ny} color={color} />}
+                    <View style={{ position: "absolute", left: cx - 5, top: cy - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: color, borderWidth: 2, borderColor: theme.inputBackground }} />
+                  </React.Fragment>
+                );
+              });
+            })}
+            {chartData.map((point, pi) => {
+              const cx = pi * POINT_SPACING + POINT_SPACING / 2;
+              const label = String(point.label ?? "");
+              const truncated = label.length > 6 ? label.slice(0, 5) + "…" : label;
+              return (
+                <Text key={`lbl-${pi}`} style={{ position: "absolute", left: cx - 28, top: CHART_H + 12, width: 56, fontSize: 10, color: theme.muted, textAlign: "center" }} numberOfLines={1}>
+                  {truncated}
+                </Text>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
+
+      {/* Pie chart — horizontal percentage bars */}
+      {mode === "pie" && (() => {
+        const key = visibleKeys[0];
+        const total = chartData.reduce((sum, d) => sum + Number(d[key] ?? 0), 0);
+        return (
+          <View style={{ gap: 10, paddingTop: 8 }}>
+            {chartData.map((point, i) => {
+              const value = Number(point[key] ?? 0);
+              const pct = total > 0 ? value / total : 0;
+              const label = String(point.label ?? "");
+              const color = CHART_COLORS[i % CHART_COLORS.length];
+              return (
+                <View key={i}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1, marginRight: 8 }}>
+                      <View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: color, flexShrink: 0 }} />
+                      <Text numberOfLines={1} style={{ flex: 1, fontSize: 12, color: theme.text }}>{label}</Text>
+                    </View>
+                    <Text style={{ fontSize: 12, fontWeight: "800", color: theme.text }}>{(pct * 100).toFixed(1)}%</Text>
+                  </View>
+                  <View style={{ height: 7, backgroundColor: theme.border, borderRadius: 4, overflow: "hidden" }}>
+                    <View style={{ width: `${(pct * 100).toFixed(1)}%` as `${number}%`, height: 7, backgroundColor: color, borderRadius: 4 }} />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        );
+      })()}
+
+      {/* Legend (bar e line) */}
+      {mode !== "pie" && (
+        <View style={chartStyles.legend}>
+          {visibleKeys.map((key, i) => (
+            <View key={key} style={chartStyles.legendItem}>
+              <View style={[chartStyles.legendDot, { backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }]} />
+              <Text style={[chartStyles.legendText, { color: theme.muted }]} numberOfLines={1}>{key}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {incompatible && <Text style={[chartStyles.omitNote, { color: theme.muted }]}>Séries com escalas muito diferentes foram omitidas.</Text>}
+      {allChartData.length > CHART_LIMIT && <Text style={[chartStyles.omitNote, { color: theme.muted }]}>Exibindo {CHART_LIMIT} de {allChartData.length} registros.</Text>}
+    </View>
+  );
+}
+
+const chartStyles = StyleSheet.create({
+  wrapper: { borderWidth: 1, borderRadius: 18, padding: 14, marginBottom: 16 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
+  chartTitle: { fontSize: 13, fontWeight: "800" },
+  modeRow: { flexDirection: "row", borderWidth: 1, borderRadius: 10, padding: 2, gap: 2 },
+  modeBtn: { padding: 6, borderRadius: 8 },
+  legend: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: "rgba(128,128,128,0.15)" },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  legendDot: { width: 10, height: 10, borderRadius: 3 },
+  legendText: { fontSize: 11, maxWidth: 120 },
+  emptyBox: { borderWidth: 1, borderRadius: 18, padding: 24, alignItems: "center", gap: 10, marginBottom: 16 },
+  emptyText: { fontSize: 13, textAlign: "center" },
+  omitNote: { fontSize: 11, marginTop: 6, textAlign: "center" },
+});
 
 function MiniInfoCard({
   label,
