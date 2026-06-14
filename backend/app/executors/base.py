@@ -46,6 +46,11 @@ class SqlTimeoutError(SqlExecutionError):
     code = "timeout"
 
 
+class SqlSchemaError(SqlExecutionError):
+    """SQL referencia tabela ou coluna inexistente no schema do banco."""
+    code = "invalid_schema"
+
+
 # -------------------- Interface --------------------
 
 class QueryExecutor(Protocol):

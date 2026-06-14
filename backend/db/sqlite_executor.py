@@ -25,6 +25,7 @@ from app.executors.base import (
     QueryExecutor,
     SqlExecutionError,
     SqlForbiddenError,
+    SqlSchemaError,
     SqlSyntaxError,
     SqlTimeoutError,
 )
@@ -154,6 +155,19 @@ class SqliteExecutor:
 
         # Chama o handler a cada ~1000 operações
         conn.set_progress_handler(progress_handler, 1000)
+
+        # Validação determinística de schema via EXPLAIN.
+        # Faz o SQLite parsear e validar todas as colunas/tabelas referenciadas
+        # sem ler dados. Defesa contra alucinação de schema pelo LLM.
+        try:
+            conn.execute(f"EXPLAIN {sql}").fetchall()
+        except sqlite3.OperationalError as e:
+            msg = str(e).lower()
+            if "no such column" in msg or "no such table" in msg:
+                raise SqlSchemaError(
+                    f"SQL referencia coluna ou tabela inexistente: {e}"
+                ) from e
+            # Outros OperationalError caem no fluxo normal abaixo
 
         try:
             cursor = conn.execute(sql)

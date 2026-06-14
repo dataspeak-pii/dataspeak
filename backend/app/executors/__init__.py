@@ -10,6 +10,7 @@ from .base import (
     QueryExecutor,
     SqlExecutionError,
     SqlForbiddenError,
+    SqlSchemaError,
     SqlSyntaxError,
     SqlTimeoutError,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "QueryExecutor",
     "SqlExecutionError",
     "SqlForbiddenError",
+    "SqlSchemaError",
     "SqlSyntaxError",
     "SqlTimeoutError",
 ]
