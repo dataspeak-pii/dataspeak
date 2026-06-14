@@ -178,6 +178,20 @@ retorne `refusal` preenchido e `sql=null`. NUNCA gere SQL falso de erro
 - Exceção: se a chave técnica for usada apenas em WHERE ou JOIN interno
   (não aparece no SELECT final), não é necessário resolver
 
+## Campos proibidos (não existem neste banco)
+Os campos abaixo são campos SAP reais em produção, mas NÃO EXISTEM neste protótipo.
+Nunca os use, mesmo que seu conhecimento de SAP sugira que existem:
+- VRKME → use MEINS para unidade de medida em qualquer tabela
+- AUFK → AFKO é standalone neste protótipo, não há tabela de cabeçalho de ordem separada
+- MAKT → a descrição do material está em MARA.MAKTX, não em tabela separada
+Regra geral: se considerar usar qualquer campo que não está explicitamente listado
+no contexto RAG fornecido, NÃO use — omita o campo ou use equivalente do catálogo.
+
+## Filtro de documentos cancelados
+- Para excluir documentos de faturamento cancelados em VBRK/VBRP, use sempre:
+  (FKSTO IS NULL OR FKSTO <> 'X')
+- Nunca use FKSTO = '' — o valor de não-cancelado pode ser NULL, não string vazia
+
 # Formato de resposta OBRIGATÓRIO (JSON puro, sem markdown)
 
 Resposta normal (gerou SQL):
@@ -390,6 +404,25 @@ async def pre_validate_query(question: str) -> bool:
         return True  # fail-safe: process on any error
 
 
+def build_powerbi_script(sql: str) -> str:
+    """
+    Monta o código M (Power Query) pronto para colar no Power BI Desktop.
+    O usuário precisa substituir [CAMINHO_DO_BANCO] pelo path local do .db.
+    Em produção SAP/HANA, substituir Sqlite.Database por SapHana.Database.
+    """
+    sql_inline = sql.replace('"', "'").replace("\n", " ").strip()
+    return (
+        'let\n'
+        '    // Substitua [CAMINHO_DO_BANCO] pelo caminho completo do arquivo .db\n'
+        '    // Exemplo Windows: C:\\Users\\usuario\\dataspeak\\backend\\data\\dataspeak_simulado.db\n'
+        '    Fonte = Sqlite.Database("[CAMINHO_DO_BANCO]",\n'
+        '        [Query = "' + sql_inline + '"]),\n'
+        '    Resultado = Fonte\n'
+        'in\n'
+        '    Resultado'
+    )
+
+
 async def generate_sql(
     question: str,
     model: str = DEFAULT_MODEL,
@@ -426,5 +459,10 @@ async def generate_sql(
 
     # NOVO: normaliza invariante refusal/sql
     result = normalize_refusal(result)
+
+    if result.get("sql"):
+        result["powerbi_script"] = build_powerbi_script(result["sql"])
+    else:
+        result["powerbi_script"] = None
 
     return result

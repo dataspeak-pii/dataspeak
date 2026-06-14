@@ -97,6 +97,8 @@ class QueryResponse(BaseModel):
     truncated: bool = False
     execution_error: Optional[str] = None
     
+    powerbi_script: Optional[str] = None
+
     kpis: list[dict] = []
     chart_type: Optional[str] = None
     chart_data: dict = {}
