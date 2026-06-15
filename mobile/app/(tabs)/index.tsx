@@ -1483,7 +1483,13 @@ function MobileChart({ result, theme }: { result: AnalysisResult; theme: typeof 
         const { columns, rows } = result.table;
         if (!rows.length) return [];
         const numericCols = columns.filter((col) => rows.some((r) => typeof r[col] === "number"));
-        const labelCol = columns.find((col) => !numericCols.includes(col));
+        const NAME_COL_RE_LOCAL = /name|nome|maktx|ktext|stext|bezei|vtext|bezeich|descr|desc|razao|fantasia|empresa|parceiro|social|titular|cliente_n|fornecedor_n|partner_n/i;
+        const METRIC_COL_RE_LOCAL = /count|contagem|sum|soma|avg|media|min|max|total|qty|qtd|qtde|valor|amount|percent|pct|volume|receita|custo|saldo|preco|price|revenue|cost/i;
+        const nonNumericCols = columns.filter((col) => !numericCols.includes(col));
+        const labelCol =
+          nonNumericCols.find((col) => NAME_COL_RE_LOCAL.test(col)) ??
+          nonNumericCols.find((col) => !METRIC_COL_RE_LOCAL.test(col)) ??
+          nonNumericCols[0];
         if (!labelCol || !numericCols.length) return [];
         return rows.map((row) => {
           const point: ChartDataPoint = { label: String(row[labelCol] ?? "") };

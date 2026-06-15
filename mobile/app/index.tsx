@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 // Para trocar a logo: altere o require abaixo
