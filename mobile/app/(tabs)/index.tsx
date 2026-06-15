@@ -79,7 +79,7 @@ export default function HomeScreen() {
 
   const themeProgress = useRef(new Animated.Value(1)).current;
   const cursorOpacity = useRef(new Animated.Value(1)).current;
-  const drawerTranslate = useRef(new Animated.Value(-320)).current;
+  const drawerTranslate = useRef(new Animated.Value(-500)).current;
 
   const currentTheme = isDark ? darkTheme : lightTheme;
   const isLoading = status === "loading";
@@ -103,7 +103,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     Animated.timing(drawerTranslate, {
-      toValue: isHistoryOpen ? 0 : -320,
+      toValue: isHistoryOpen ? 0 : -500,
       duration: 260,
       useNativeDriver: true,
     }).start();
@@ -1216,15 +1216,15 @@ function HistoryDrawer({
   onSelect: (item: QueryHistoryItem) => void;
 }) {
   const backdropOpacity = drawerTranslate.interpolate({
-    inputRange: [-320, 0],
+    inputRange: [-500, 0],
     outputRange: [0, 0.48],
     extrapolate: "clamp",
   });
 
   return (
     <View
-      pointerEvents={isOpen ? "box-none" : "none"}
-      style={styles.historyOverlay}
+  pointerEvents={isOpen ? "box-none" : "none"}
+  style={[styles.historyOverlay, { display: isOpen ? "flex" : "none" }]}
     >
       <Animated.View style={[styles.historyBackdrop, { opacity: backdropOpacity }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
@@ -1951,10 +1951,10 @@ const styles = StyleSheet.create({
   historyDrawer: {
     width: "82%",
     height: "100%",
-    borderRightWidth: 1,
     paddingTop: 58,
     paddingHorizontal: 18,
     paddingBottom: 28,
+    overflow: "hidden",
   },
 
   historyHeader: {
